@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
+	<classpathentry kind="lib" path="D:/FractalStudio/lib/lwjgl.jar" sourcepath="D:/FractalStudio/lib/lwjgl-source-2.8.4.zip">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/D:/FractalStudio/lib/lwjgl-docs-2.8.4.zip!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="D:/FractalStudio/lib/lwjgl_util.jar" sourcepath="D:/FractalStudio/lib/lwjgl-source-2.8.4.zip">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/D:/FractalStudio/lib/lwjgl-docs-2.8.4.zip!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="D:/FractalStudio/lib/lzma.jar"/>
+	<classpathentry kind="lib" path="D:/FractalStudio/lib/slick.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/JCollada"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
