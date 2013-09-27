@@ -1,4 +1,6 @@
-package org.fractalstudio.engine.gui;
+package org.fractalstudio.engine.gui.impl;
+
+import org.fractalstudio.engine.gui.Component;
 
 public class TextureInspector extends Component {
 

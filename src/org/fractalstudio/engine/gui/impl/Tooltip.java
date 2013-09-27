@@ -1,4 +1,4 @@
-package org.fractalstudio.engine.gui;
+package org.fractalstudio.engine.gui.impl;
 
 import static org.lwjgl.opengl.GL11.GL_QUADS;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
@@ -12,6 +12,7 @@ import static org.lwjgl.opengl.GL11.glColor4f;
 import java.awt.Font;
 
 import org.fractalstudio.engine.Application;
+import org.fractalstudio.engine.gui.Component;
 import org.lwjgl.opengl.GL11;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.UnicodeFont;

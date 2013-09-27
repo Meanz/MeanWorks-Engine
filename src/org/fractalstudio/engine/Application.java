@@ -2,7 +2,7 @@ package org.fractalstudio.engine;
 
 import org.fractalstudio.engine.asset.AssetManager;
 import org.fractalstudio.engine.gui.InputHandler;
-import org.fractalstudio.engine.gui.PerformanceGraph;
+import org.fractalstudio.engine.gui.impl.PerformanceGraph;
 import org.fractalstudio.render.opengl.Renderer;
 import org.fractalstudio.render.opengl.Window;
 import org.lwjgl.opengl.Display;

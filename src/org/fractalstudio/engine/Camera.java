@@ -80,11 +80,27 @@ public class Camera {
 		projectionViewMatrix = new Matrix4f();
 		cameraTranslationMatrix = new Matrix4f();
 	}
-	
+
+	/**
+	 * Get the window ray
+	 * 
+	 * @return
+	 */
+	public Ray getWindowRay() {
+		float factor = (float) Math.cos(Math.toRadians(getPitch()));
+		Vector3f forward = new Vector3f();
+		forward.x = (float) Math.sin(Math.toRadians(getYaw())) * factor;
+		forward.y = (float) Math.sin(Math.toRadians(-getPitch()));
+		forward.z = (float) -Math.cos(Math.toRadians(getYaw())) * factor;
+		forward.normalise();
+		return new Ray(new Vector3f(getPosition().x, getPosition().y,
+				getPosition().z), forward);
+	}
+
 	public Matrix4f getProjectionViewMatrix() {
 		return projectionMatrix;
 	}
-	
+
 	public Matrix4f getModelMatrix() {
 		return viewMatrix;
 	}

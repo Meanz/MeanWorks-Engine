@@ -16,6 +16,7 @@ import org.fractalstudio.engine.Application;
 import org.fractalstudio.engine.EngineLogger;
 import org.fractalstudio.engine.gui.event.EventType;
 import org.fractalstudio.engine.gui.event.MouseEvent;
+import org.fractalstudio.render.opengl.ImmediateRenderer;
 
 public class GuiHandler implements KeyListener, MouseListener {
 
@@ -61,7 +62,7 @@ public class GuiHandler implements KeyListener, MouseListener {
 	 */
 	public GuiHandler(Application application) {
 		this.application = application;
-		fontRenderer = new FontRenderer();
+		fontRenderer = new FontRenderer("./data/fonts/arial.ttf", 14);
 	}
 
 	/**
@@ -134,8 +135,10 @@ public class GuiHandler implements KeyListener, MouseListener {
 	 * The render function for the gui handler
 	 */
 	public void render() {
-		fontRenderer.ortho2d(application.getWindow().getWidth(), application
-				.getWindow().getHeight());
+
+		ImmediateRenderer.setupOrtho(0, application.getWindow().getWidth(), 0,
+				application.getWindow().getHeight());
+
 		glLoadIdentity();
 		glDisable(GL_DEPTH_TEST);
 		{
@@ -166,9 +169,14 @@ public class GuiHandler implements KeyListener, MouseListener {
 														.getPosition().z + ")",
 										10, 40);
 
-						fontRenderer.drawString("Memory usage: "
-								+ ((Runtime.getRuntime().totalMemory() - Runtime
-										.getRuntime().freeMemory()) / 1000 / 1000) + "mb", 10, 55);
+						fontRenderer
+								.drawString(
+										"Memory usage: "
+												+ ((Runtime.getRuntime()
+														.totalMemory() - Runtime
+														.getRuntime()
+														.freeMemory()) / 1000 / 1000)
+												+ "mb", 10, 55);
 
 					}
 				}

@@ -3,7 +3,7 @@
 in vec2 _texCoord;
 in vec3 _normal;
 
-out vec3 out_diffuse;
+out vec4 out_diffuse;
 
 //Uniforms
 uniform sampler2D tColorMap;
@@ -15,5 +15,7 @@ void main()
 	float diffuse = clamp(dot(lightDirection, normalize(_normal)), 0.1, 1.0);
 	vec4 outColor = vec4((tColor.xyz * diffuse) + (tColor.xyz * vec3(0.4f, 0.4f, 0.4f)), 1.0);
 	
-	out_diffuse = outColor.xyz;
+	outColor.a = tColor.a;
+	
+	out_diffuse = outColor;
 }

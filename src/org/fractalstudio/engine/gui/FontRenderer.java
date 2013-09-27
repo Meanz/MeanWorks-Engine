@@ -1,77 +1,78 @@
 package org.fractalstudio.engine.gui;
 
-import org.lwjgl.util.glu.GLU;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.font.FontRenderContext;
+import java.awt.geom.AffineTransform;
+
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.UnicodeFont;
 import org.newdawn.slick.font.effects.ColorEffect;
-import static org.lwjgl.opengl.GL11.*;
 
 public class FontRenderer {
 
 	/**
-	 * 2D Text Rendering
+	 * 
 	 */
-	private UnicodeFont defaultFont;
+	public static FontRenderer arial14;
 
 	/**
-	 * The instance
+	 * 2D Text Rendering
 	 */
-	private static FontRenderer fontRenderer;
+	private UnicodeFont unicodeFont;
 
-	public FontRenderer() {
-		fontRenderer = this;
+	public FontRenderer(String fontFile, int size) {
+
 		/**
-		 * Load our font
+		 * Load default font
 		 */
-		try {
-			defaultFont = new UnicodeFont("./data/fonts/arial.ttf", 14, false,
-					false);
-			defaultFont.addAsciiGlyphs(); // Add Glyphs
-			defaultFont.addGlyphs(400, 600); // Add Glyphs
-			defaultFont.getEffects().add(new ColorEffect(java.awt.Color.white)); // Add
-			// Effects
-			defaultFont.loadGlyphs();
-		} catch (SlickException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} // Load Glyphs
+		if (arial14 == null) {
+			try {
+				unicodeFont = new UnicodeFont("./data/fonts/arial.ttf", 14,
+						false, false);
+				unicodeFont.addAsciiGlyphs(); // Add Glyphs
+				unicodeFont.addGlyphs(400, 600); // Add Glyphs
+				unicodeFont.getEffects().add(new ColorEffect(Color.white)); // Add
+				// Effects
+				unicodeFont.loadGlyphs();
+
+				arial14 = this;
+			} catch (SlickException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} // Load Glyphs
+		}
 	}
 
-	public void ortho2d(int width, int height) {
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		glOrtho(0, width, height, 0, 0.0f, 100);
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
+	/**
+	 * Set the color of this font
+	 * 
+	 * @param color
+	 */
+	public void setColor(Color color) {
+		unicodeFont.getEffects().add(new ColorEffect(color));
 	}
 
-	public void gluPersp3D(int width, int height) {
-		/**
-		 * Basic opengl settings
-		 */
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		// glFrustum(-1.0, 1.0, -1.0, 1.0, 1.0f, 100);
-		GLU.gluPerspective(60.0f, width / height, 0.1f, 1000.0f);
-		glMatrixMode(GL_MODELVIEW);
+	/**
+	 * Get the width of this string
+	 * 
+	 * @param text
+	 * @return
+	 */
+	public int getStringWidth(String text) {
+		return unicodeFont.getWidth(text);
 	}
 
-	public void persp3d() {
-		/**
-		 * Setup a perspective projection
-		 */
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		// glFrustum(0, getFrame().getWidth(), getFrame().getHeight(), 0, 0.1f,
-		// 1000.0f);
-		// l, r, b, t, znear, zfar
-		glFrustum(-1.0, 1.0, -1.0, 1.0, 1.0f, 1000.0f);
-		glMatrixMode(GL_MODELVIEW);
-	}
-
-	public static void drawString(String s, int x, int y) {
+	/**
+	 * Draw the given string
+	 * 
+	 * @param s
+	 * @param x
+	 * @param y
+	 */
+	public void drawString(String s, int x, int y) {
 		if (s == null)
 			return;
-		fontRenderer.defaultFont.drawString((float) x, (float) y, s);
+		unicodeFont.drawString((float) x, (float) y, s);
 	}
 }

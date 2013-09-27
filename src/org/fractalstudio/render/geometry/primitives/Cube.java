@@ -1,9 +1,6 @@
 package org.fractalstudio.render.geometry.primitives;
 
 import org.fractalstudio.render.geometry.Geometry;
-import org.fractalstudio.render.geometry.Mesh;
-import org.fractalstudio.render.geometry.MeshData;
-import org.lwjgl.opengl.GL11;
 
 public class Cube extends Geometry {
 
@@ -157,14 +154,8 @@ public class Cube extends Geometry {
 		addTexCoord(0, 0);
 		addVertex(minx, miny, minz); // V5
 
-		// Upload the cube
-		MeshData meshData = new MeshData();
-		meshData.putPositions(positions);
-		meshData.putNormals(normals);
-		meshData.putTexCoords(texCoords);
-		Mesh mesh = new Mesh();
-		mesh.makeDisplayList(meshData);
-		addMesh("cubeMesh", mesh);
+		//
+		System.err.println("Can't use cube, it's broken :D");
 	}
 
 	public void addVertex(float x, float y, float z) {

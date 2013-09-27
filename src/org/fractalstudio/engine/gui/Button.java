@@ -23,10 +23,7 @@ public class Button extends Component {
 	 * @return
 	 */
 	public static int getStringWidth(String text) {
-		if (text == null) {
-			return 15;
-		}
-		return text.length() * 8 + 5;
+		return FontRenderer.arial14.getStringWidth(text);
 	}
 
 	/*
@@ -51,7 +48,8 @@ public class Button extends Component {
 	 * @param y
 	 */
 	public Button(String text, int x, int y) {
-		super("Button_" + Component.getNextId(), x, y, getStringWidth(text), 35);
+		super("Button_" + Component.getNextId(), x, y,
+				getStringWidth(text) + 20, 35);
 		this.text = text;
 
 		if (buttonFont == null) {
@@ -71,7 +69,16 @@ public class Button extends Component {
 		}
 	}
 
+	/**
+	 * Set the text of the button
+	 * @param text
+	 */
 	public void setText(String text) {
+		if (text == null) {
+			text = "";
+		}
+		// Update width
+		setSize(getStringWidth(text) + 20, getHeight());
 		this.text = text;
 	}
 
@@ -104,9 +111,7 @@ public class Button extends Component {
 	}
 
 	// Called whenever the button is clicked
-	public void onButtonClick() {
-
-	}
+	public void onButtonClick() {}
 
 	/*
 	 * (non-Javadoc)
@@ -120,10 +125,8 @@ public class Button extends Component {
 		{
 			// Make border
 			glColor3f(0.7f, 0.7f, 0.7f);
-			glVertex2f(getX(), getY() + getHeight());
-			glVertex2f(getX() + getWidth(), getY() + getHeight());
-			glVertex2f(getX() + getWidth(), getY());
-			glVertex2f(getX(), getY());
+			drawQuad(getX(), getY(), getWidth(), getHeight());
+
 
 			// Make inner button
 			if (gray) {
@@ -131,10 +134,7 @@ public class Button extends Component {
 			} else {
 				glColor3f(1.0f, 1.0f, 1.0f);
 			}
-			glVertex2f(getX() + 2, getY() + getHeight() - 2);
-			glVertex2f(getX() + getWidth() - 2, getY() + getHeight() - 2);
-			glVertex2f(getX() + getWidth() - 2, getY() + 2);
-			glVertex2f(getX() + 2, getY() + 2);
+			drawQuad(getX() + 2, getY() + 2, getWidth() - 4, getHeight() - 4);
 		}
 		glEnd();
 

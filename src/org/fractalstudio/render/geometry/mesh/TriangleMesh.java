@@ -1,8 +1,9 @@
-package org.fractalstudio.render.geometry;
+package org.fractalstudio.render.geometry.mesh;
 
 import java.util.LinkedList;
 
 import org.fractalstudio.engine.EngineConfig;
+import org.fractalstudio.render.geometry.Triangle;
 import org.fractalstudio.render.opengl.DisplayList;
 import org.lwjgl.opengl.GL11;
 
@@ -38,7 +39,6 @@ public class TriangleMesh extends Mesh {
 	/**
 	 * Overriden function that compiles the data to the graphics card
 	 */
-	@Override
 	public void prepareMesh() {
 
 		if (triangles.size() == 0) {
@@ -88,8 +88,8 @@ public class TriangleMesh extends Mesh {
 
 		// Are we using display lists or not?
 		// EngineConfig.usingModernOpenGL
-		makeDisplayList(meshData);
-
+		//makeDisplayList(meshData);
+		System.err.println("@deprecated TriangleMesh");
 		clearTriangles();
 	}
 }

@@ -9,13 +9,17 @@ import static org.lwjgl.opengl.GL11.glColor4f;
 import static org.lwjgl.opengl.GL11.glDisable;
 import static org.lwjgl.opengl.GL11.glEnable;
 
+import java.io.File;
+
 import org.fractalstudio.engine.GameApplication;
 import org.fractalstudio.engine.gui.Button;
 import org.fractalstudio.engine.gui.GuiHandler;
-import org.fractalstudio.engine.gui.PerformanceGraph;
-import org.fractalstudio.engine.gui.Tooltip;
+import org.fractalstudio.engine.gui.impl.PerformanceGraph;
+import org.fractalstudio.engine.gui.impl.Tooltip;
 import org.fractalstudio.engine.math.Ray;
 import org.fractalstudio.engine.model.ColladaImporter;
+import org.fractalstudio.engine.model.MWMLoader;
+import org.fractalstudio.engine.model.daetofe.DaeToFeConverter;
 import org.fractalstudio.render.geometry.Geometry;
 import org.fractalstudio.render.geometry.Vertex;
 import org.fractalstudio.render.opengl.ImmediateRenderer;
@@ -29,6 +33,7 @@ import org.fractalstudio.testgame.world.World;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 
 public class TestGame extends GameApplication {
@@ -66,8 +71,8 @@ public class TestGame extends GameApplication {
 	/*
 	 * 
 	 */
-	private ShaderProgram geometryShader;	
-	
+	private ShaderProgram geometryShader;
+
 	/*
 	 * 
 	 */
@@ -76,13 +81,13 @@ public class TestGame extends GameApplication {
 	/*
 	 * 
 	 */
-	private Texture geometryTexture;	
-	
+	private Texture geometryTexture;
+
 	/*
 	 * 
 	 */
 	private boolean flying = true;
-	
+
 	/*
 	 * 
 	 */
@@ -95,6 +100,30 @@ public class TestGame extends GameApplication {
 	 */
 	@Override
 	public void setup() {
+
+		try {
+			String osName = System.getProperty("os.name").toLowerCase();
+			boolean isMacOs = osName.startsWith("mac os x");
+			if (isMacOs) {
+				System.setProperty("java.library.path",
+						System.getProperty("java.library.path") + ";"
+								+ new File("native/macosx").getAbsolutePath());
+				System.setProperty("org.lwjgl.librarypath", new File(
+						"native/macosx").getAbsolutePath());
+			} else {
+				System.setProperty("java.library.path",
+						System.getProperty("java.library.path")
+								+ ";"
+								+ new File("native/windows/").getAbsolutePath()
+										.replaceAll("\\/", "\\"));
+				System.setProperty("org.lwjgl.librarypath",
+						new File("native/windows/").getAbsolutePath()
+								.replaceAll("\\/", "\\"));
+			}
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+
 		setWindow(Window.createWindow(1200, 800));
 	}
 
@@ -117,7 +146,7 @@ public class TestGame extends GameApplication {
 		world = new World();
 
 		player = new Player();
-		player.translate(0.0f, 150, 0.0f);
+		player.translate(2.27f, 115.0f, 16.5f);
 
 		guiHandler = new GuiHandler(this);
 		getInputHandler().addKeyListener(guiHandler);
@@ -162,29 +191,15 @@ public class TestGame extends GameApplication {
 		// Load the water shader
 		waterShader = getAssetManager().loadShader("./data/shaders/water");
 		waterTexture = getAssetManager().loadTexture("./data/images/water.png");
-		
-		// Let's try to load a model
-		geometry = ColladaImporter.loadModel("./data/models/Zoey.dae");
-		geometryShader = getAssetManager().loadShader("./data/shaders/colorShader");
-		geometryTexture = getAssetManager().loadTexture("./data/models/wurm/bodybag.png");
-	}
 
-	/**
-	 * Get the window ray
-	 * 
-	 * @return
-	 */
-	public Ray getWindowRay() {
-		float factor = (float) Math.cos(Math.toRadians(getCamera().getPitch()));
-		Vector3f forward = new Vector3f();
-		forward.x = (float) Math.sin(Math.toRadians(getCamera().getYaw()))
-				* factor;
-		forward.y = (float) Math.sin(Math.toRadians(-getCamera().getPitch()));
-		forward.z = (float) -Math.cos(Math.toRadians(getCamera().getYaw()))
-				* factor;
-		forward.normalise();
-		return new Ray(new Vector3f(getCamera().getPosition().x, getCamera()
-				.getPosition().y, getCamera().getPosition().z), forward);
+		// Let's try to load a model
+		geometry = MWMLoader
+				.loadModel("./data/models/stickman/stickman.mwm");
+		
+		geometryShader = getAssetManager().loadShader(
+				"./data/shaders/colorShader");
+		geometryTexture = getAssetManager().loadTexture(
+				"./data/models/pinetex.png");
 	}
 
 	/*
@@ -231,7 +246,7 @@ public class TestGame extends GameApplication {
 			// Ray trace the ground
 			currentRay = getCamera().getPickRay(Mouse.getX(), Mouse.getY());
 			// Find out where we hit the ground
-			selectedTile = world.pickRay(currentRay, 20);
+			// selectedTile = world.pickRay(currentRay, 20);
 
 			Tooltip.setTooltip(selectedTile != null ? selectedTile
 					.getTileType().getName() : null);
@@ -306,18 +321,24 @@ public class TestGame extends GameApplication {
 
 		// Draw the world
 		world.render();
-		
+
 		glEnable(GL11.GL_TEXTURE_2D);
+
+		Matrix4f modelMatrix = new Matrix4f();
+		modelMatrix.translate(new Vector3f(15.0f, world.getInterpolatedHeight(
+				15, 15), 15.0f));
+
 		geometryTexture.bind();
 		geometryShader.use();
 		geometryShader.setProjectionViewMatrix(getCamera()
 				.getProjectionViewMatrix());
-		geometryShader.setModelMatrix(getCamera().getModelMatrix());
+		geometryShader.setModelMatrix(Matrix4f.mul(
+				getCamera().getModelMatrix(), modelMatrix, null));
 		geometryShader.setTextureLocation("tColorMap", 0);
 		geometry.render();
-		
+
 		geometryShader.useNone();
-		
+
 		glDisable(GL_CULL_FACE);
 
 		// Draw the selected tile

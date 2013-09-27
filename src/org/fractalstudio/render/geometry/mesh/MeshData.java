@@ -1,6 +1,8 @@
-package org.fractalstudio.render.geometry;
+package org.fractalstudio.render.geometry.mesh;
 
 import org.fractalstudio.engine.EngineLogger;
+import org.fractalstudio.render.geometry.Triangle;
+import org.fractalstudio.render.geometry.Vertex;
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
 

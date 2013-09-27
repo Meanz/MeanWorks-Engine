@@ -2,7 +2,6 @@ package org.fractalstudio.engine.model;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.util.Collection;
 
 import org.fractalstudio.engine.EngineLogger;
 import org.fractalstudio.jcollada.ColladaDocument;
@@ -11,8 +10,9 @@ import org.fractalstudio.jcollada.dataflow.DataSource;
 import org.fractalstudio.jcollada.dataflow.datatype.FloatArray;
 import org.fractalstudio.jcollada.geometry.primitives.TrianglesArray;
 import org.fractalstudio.render.geometry.Geometry;
-import org.fractalstudio.render.geometry.Mesh;
-import org.fractalstudio.render.geometry.Mesh.BufferEntry;
+import org.fractalstudio.render.geometry.mesh.Mesh;
+import org.fractalstudio.render.geometry.mesh.MeshRenderer;
+import org.fractalstudio.render.geometry.mesh.MeshRenderer.BufferEntry;
 import org.fractalstudio.render.opengl.VertexBuffer;
 import org.fractalstudio.render.opengl.VertexBuffer.BufferType;
 import org.fractalstudio.render.opengl.VertexBuffer.BufferUsage;
@@ -115,7 +115,9 @@ public class ColladaImporter {
 		indices.flip();
 
 		// Create and compile the vertex buffers
+		MeshRenderer meshRenderer = new MeshRenderer();
 		Mesh _mesh = new Mesh();
+		_mesh.setMeshRenderer(meshRenderer);
 
 		VertexBuffer vbPositions = new VertexBuffer(BufferType.ARRAY_BUFFER,
 				BufferUsage.STATIC_DRAW);
@@ -126,27 +128,27 @@ public class ColladaImporter {
 		VertexBuffer vbIndices = new VertexBuffer(BufferType.INDEX_BUFFER,
 				BufferUsage.DYNAMIC_DRAW);
 
-		BufferEntry bePositions = _mesh.addVertexBuffer(vbPositions);
-		BufferEntry beNormals = _mesh.addVertexBuffer(vbNormals);
-		BufferEntry beTexCoords = _mesh.addVertexBuffer(vbTexCoords);
+		BufferEntry bePositions = meshRenderer.addVertexBuffer(vbPositions);
+		BufferEntry beNormals = meshRenderer.addVertexBuffer(vbNormals);
+		BufferEntry beTexCoords = meshRenderer.addVertexBuffer(vbTexCoords);
 
 		vbIndices.bufferData(indices);
-		_mesh.setIndexBuffer(vbIndices);
-		_mesh.setNumIndices(triangles.getP().length);
+		meshRenderer.setIndexBuffer(vbIndices);
+		meshRenderer.setNumIndices(triangles.getP().length);
 
 		vbPositions.bufferData(positions);
-		bePositions.addAttribute(0, 3, GL11.GL_FLOAT, false, 0, 0);
+		bePositions.addAttribute(0, 3, GL11.GL_FLOAT, false, 3 * 4, 0);
 
 		if (vbNormals != null) {
 			vbNormals.bufferData(normals);
-			beNormals.addAttribute(1, 3, GL11.GL_FLOAT, false, 0, 0);
+			beNormals.addAttribute(1, 3, GL11.GL_FLOAT, false, 3 * 4, 0);
 		}
 		if (vbTexCoords != null) {
 			vbTexCoords.bufferData(texCoords);
-			beTexCoords.addAttribute(2, 2, GL11.GL_FLOAT, false, 0, 0);
+			beTexCoords.addAttribute(2, 2, GL11.GL_FLOAT, false, 3 * 4, 0);
 		}
 
-		_mesh.compile();
+		meshRenderer.compile();
 
 		return _mesh;
 	}

@@ -4,7 +4,7 @@ import java.util.LinkedList;
 
 import org.fractalstudio.engine.Application;
 import org.fractalstudio.engine.EngineLogger;
-import org.fractalstudio.engine.gui.PerformanceGraph;
+import org.fractalstudio.engine.gui.impl.PerformanceGraph;
 
 public class WorldLoader implements Runnable {
 

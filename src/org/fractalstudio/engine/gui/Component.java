@@ -1,5 +1,7 @@
 package org.fractalstudio.engine.gui;
 
+import static org.lwjgl.opengl.GL11.glVertex2f;
+
 import java.util.LinkedList;
 
 import org.fractalstudio.engine.gui.event.ActionEvent;
@@ -192,4 +194,15 @@ public abstract class Component {
 	 * Render the component
 	 */
 	public abstract void render();
+	
+	
+	/**
+	 * Helper functions
+	 */
+	public void drawQuad(float _x, float _y, float _width, float _height) {
+		glVertex2f(_x, _y + _height);
+		glVertex2f(_x + _width, _y + _height);
+		glVertex2f(_x + _width, _y);
+		glVertex2f(_x, _y);
+	}
 }

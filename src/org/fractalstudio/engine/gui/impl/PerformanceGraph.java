@@ -1,7 +1,9 @@
-package org.fractalstudio.engine.gui;
+package org.fractalstudio.engine.gui.impl;
 
 import java.util.LinkedList;
 
+import org.fractalstudio.engine.gui.Component;
+import org.fractalstudio.engine.gui.FontRenderer;
 import org.lwjgl.opengl.GL11;
 
 public class PerformanceGraph extends Component {
@@ -65,8 +67,8 @@ public class PerformanceGraph extends Component {
 			heightValues.clear();
 		}
 
-		FontRenderer.drawString("Highestval 1: " + highestVal1, 10, 410);
-		FontRenderer.drawString("Highestval 2: " + highestVal2, 10, 425);
+		FontRenderer.arial14.drawString("Highestval 1: " + highestVal1, 10, 410);
+		FontRenderer.arial14.drawString("Highestval 2: " + highestVal2, 10, 425);
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		GL11.glBegin(GL11.GL_LINES);
 		{

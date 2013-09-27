@@ -2,12 +2,13 @@ package org.fractalstudio.testgame.world;
 
 import java.nio.FloatBuffer;
 
-import org.fractalstudio.engine.gui.PerformanceGraph;
+import org.fractalstudio.engine.gui.impl.PerformanceGraph;
 import org.fractalstudio.engine.math.VectorMath;
 import org.fractalstudio.render.geometry.Geometry;
-import org.fractalstudio.render.geometry.Mesh;
-import org.fractalstudio.render.geometry.Mesh.BufferEntry;
 import org.fractalstudio.render.geometry.Vertex;
+import org.fractalstudio.render.geometry.mesh.Mesh;
+import org.fractalstudio.render.geometry.mesh.MeshRenderer;
+import org.fractalstudio.render.geometry.mesh.MeshRenderer.BufferEntry;
 import org.fractalstudio.render.opengl.VertexBuffer;
 import org.fractalstudio.render.opengl.VertexBuffer.BufferType;
 import org.fractalstudio.render.opengl.VertexBuffer.BufferUsage;
@@ -418,25 +419,32 @@ public class Region {
 				int numTris = REGION_WIDTH * REGION_HEIGHT * 2;
 				int numVertices = numTris * 3;
 
+				MeshRenderer meshRenderer = new MeshRenderer();
+
 				regionMesh = new Mesh();
-				regionMesh.setNumVertices(numVertices);
-				
+				meshRenderer.setNumVertices(numVertices);
+
 				VertexBuffer vbData = new VertexBuffer(BufferType.ARRAY_BUFFER,
 						BufferUsage.STATIC_DRAW);
-				
+
 				vbData.bind();
 				vbData.bufferData(dataBuffer);
-				
-				//Some vars we need to know
-				int stride = 13 * 4; //13 floats
-				BufferEntry entry = regionMesh.addVertexBuffer(vbData);
-				entry.addAttribute(0, 3, GL11.GL_FLOAT, false, stride, 0); //positions
-				entry.addAttribute(1, 3, GL11.GL_FLOAT, false, stride, 12); //normals
-				entry.addAttribute(2, 3, GL11.GL_FLOAT, false, stride, 24); //tex coords
-				entry.addAttribute(3, 4, GL11.GL_FLOAT, false, stride, 36); //tile transition coords
-				
-				regionMesh.compile();
-				
+
+				// Some vars we need to know
+				int stride = 13 * 4; // 13 floats
+				BufferEntry entry = meshRenderer.addVertexBuffer(vbData);
+				entry.addAttribute(0, 3, GL11.GL_FLOAT, false, stride, 0); // positions
+				entry.addAttribute(1, 3, GL11.GL_FLOAT, false, stride, 12); // normals
+				entry.addAttribute(2, 3, GL11.GL_FLOAT, false, stride, 24); // tex
+																			// coords
+				entry.addAttribute(3, 4, GL11.GL_FLOAT, false, stride, 36); // tile
+																			// transition
+																			// coords
+
+				meshRenderer.compile();
+
+				regionMesh.setMeshRenderer(meshRenderer);
+
 				regionGeometry.addMesh("region_" + regionX + "_" + regionY,
 						regionMesh);
 				needsUpdate = false;
