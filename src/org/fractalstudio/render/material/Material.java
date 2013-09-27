@@ -9,6 +9,11 @@ import org.fractalstudio.render.opengl.shader.ShaderProgram;
 public class Material {
 
 	/*
+	 * The default material
+	 */
+	public static Material DEFAULT_MATERIAL;
+
+	/*
 	 * The program for this material
 	 */
 	private ShaderProgram shaderProgram = null;
@@ -29,6 +34,15 @@ public class Material {
 	public Material(String name, ShaderProgram shaderProgram) {
 		this.name = name;
 		this.shaderProgram = shaderProgram;
+	}
+
+	/**
+	 * Get the shader program of this material
+	 * 
+	 * @return
+	 */
+	public ShaderProgram getShaderProgram() {
+		return shaderProgram;
 	}
 
 	/**
@@ -69,6 +83,5 @@ public class Material {
 						+ " was not found in shader.");
 			}
 		}
-
 	}
 }

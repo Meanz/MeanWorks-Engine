@@ -6,7 +6,7 @@ import org.fractalstudio.engine.Application;
 import org.fractalstudio.engine.EngineLogger;
 import org.fractalstudio.engine.math.Ray;
 import org.fractalstudio.engine.math.VectorMath;
-import org.fractalstudio.render.opengl.shader.ShaderProgram;
+import org.fractalstudio.render.material.Material;
 import org.fractalstudio.render.texture.Texture;
 import org.fractalstudio.render.texture.TextureArray;
 import org.fractalstudio.render.texture.TextureLoader;
@@ -50,7 +50,7 @@ public class World {
 	/*
 	 * 
 	 */
-	private ShaderProgram regionShader;
+	private Material material;
 
 	/*
 	 * 
@@ -91,8 +91,8 @@ public class World {
 		/*
 		 * Load the region shader
 		 */
-		regionShader = Application.getApplication().getAssetManager()
-				.loadShader(("./data/shaders/terrain"));
+		material = new Material("worldMaterial", Application.getApplication()
+				.getAssetManager().loadShader(("./data/shaders/terrain")));
 
 	}
 
@@ -363,16 +363,17 @@ public class World {
 	 */
 	public void render() {
 
-		regionShader.use();
+		material.apply();
 
 		// Bind the tile atlas
 		getTileAtlas().bind2DArray();
 		// Render all active regions
-		regionShader.setTextureLocation("tColorMap", 0);
-		regionShader.setProjectionViewMatrix(Application.getApplication()
-				.getCamera().getProjectionViewMatrix());
-		regionShader.setModelMatrix(Application.getApplication().getCamera()
-				.getModelMatrix());
+		material.getShaderProgram().setTextureLocation("tColorMap", 0);
+		material.getShaderProgram().setProjectionViewMatrix(
+				Application.getApplication().getCamera()
+						.getProjectionViewMatrix());
+		material.getShaderProgram().setModelMatrix(
+				Application.getApplication().getCamera().getModelMatrix());
 
 		if (regionList != null) {
 			int off = 0;
@@ -391,6 +392,6 @@ public class World {
 
 		getTileAtlas().unbind2DArray();
 
-		regionShader.useNone();
+		material.getShaderProgram().useNone();
 	}
 }

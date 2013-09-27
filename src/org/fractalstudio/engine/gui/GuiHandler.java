@@ -14,9 +14,8 @@ import java.util.HashMap;
 
 import org.fractalstudio.engine.Application;
 import org.fractalstudio.engine.EngineLogger;
-import org.fractalstudio.engine.gui.event.EventType;
-import org.fractalstudio.engine.gui.event.MouseEvent;
 import org.fractalstudio.render.opengl.ImmediateRenderer;
+import org.lwjgl.input.Mouse;
 
 public class GuiHandler implements KeyListener, MouseListener {
 
@@ -150,7 +149,7 @@ public class GuiHandler implements KeyListener, MouseListener {
 					glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 					{
 						for (Component component : components.values()) {
-							component.render();
+							component.fireRender();
 						}
 						fontRenderer.drawString("Tech Demo v0.2 Alpha [DEBUG]",
 								10, 10);
@@ -213,23 +212,31 @@ public class GuiHandler implements KeyListener, MouseListener {
 	 */
 	@Override
 	public void mousePressed(int key, int x, int y) {
+
 		if (mouseFocus != null) {
-			mouseFocus.actionPerformed(this, new MouseEvent(
-					EventType.MOUSE_PRESSED, key, x, y, application
-							.getInputHandler().getDX(), application
-							.getInputHandler().getDY()));
-			return;
-		}
-		for (Component component : components.values()) {
-			if (isInsideComponent(component, x, y)) {
-				component.actionPerformed(this, new MouseEvent(
-						EventType.MOUSE_PRESSED, key, x, y, application
-								.getInputHandler().getDX(), application
-								.getInputHandler().getDY()));
-				consumedInput = true;
-				break;
+			if (mouseFocus.fireMouseDown(key, x, y)) {
+				return;
 			}
 		}
+
+		for (int i = components.values().size() - 1; i >= 0; i--) {
+			if (((Component) components.values().toArray()[i]).fireMouseDown(
+					key, x, y)) {
+				return;
+			}
+		}
+
+		/*
+		 * if (mouseFocus != null) { mouseFocus.actionPerformed(this, new
+		 * MouseEvent( EventType.MOUSE_PRESSED, key, x, y, application
+		 * .getInputHandler().getDX(), application .getInputHandler().getDY()));
+		 * return; } for (Component component : components.values()) { if
+		 * (isInsideComponent(component, x, y)) {
+		 * component.actionPerformed(this, new MouseEvent(
+		 * EventType.MOUSE_PRESSED, key, x, y, application
+		 * .getInputHandler().getDX(), application .getInputHandler().getDY()));
+		 * consumedInput = true; break; } }
+		 */
 	}
 
 	/*
@@ -241,20 +248,15 @@ public class GuiHandler implements KeyListener, MouseListener {
 	@Override
 	public void mouseReleased(int key, int x, int y) {
 		if (mouseFocus != null) {
-			mouseFocus.actionPerformed(this, new MouseEvent(
-					EventType.MOUSE_RELEASED, key, x, y, application
-							.getInputHandler().getDX(), application
-							.getInputHandler().getDY()));
-			return;
+			if (mouseFocus.fireMouseUp(key, x, y)) {
+				return;
+			}
 		}
-		for (Component component : components.values()) {
-			if (isInsideComponent(component, x, y)) {
-				component.actionPerformed(this, new MouseEvent(
-						EventType.MOUSE_RELEASED, key, x, y, application
-								.getInputHandler().getDX(), application
-								.getInputHandler().getDY()));
-				consumedInput = true;
-				break;
+
+		for (int i = components.values().size() - 1; i >= 0; i--) {
+			if (((Component) components.values().toArray()[i]).fireMouseUp(key,
+					x, y)) {
+				return;
 			}
 		}
 	}
@@ -266,22 +268,20 @@ public class GuiHandler implements KeyListener, MouseListener {
 	 */
 	@Override
 	public void mouseMoved(int dx, int dy) {
+
+		// TODO: Revise the method of getting mouse coordinates
+		// TODO: Revise this method, uses a lot of processing.
+
 		if (mouseFocus != null) {
-			mouseFocus.actionPerformed(this, new MouseEvent(
-					EventType.MOUSE_MOVED, -1, application.getInputHandler()
-							.getMouseX(), application.getInputHandler()
-							.getMouseY(), dx, dy));
-			return;
+			if (mouseFocus.fireMouseMove(Component.getMouseX(), Component.getMouseY(), dx, dy)) {
+				return;
+			}
 		}
-		for (Component component : components.values()) {
-			if (isInsideComponent(component, application.getInputHandler()
-					.getMouseX(), application.getInputHandler().getMouseY())) {
-				component.actionPerformed(this, new MouseEvent(
-						EventType.MOUSE_MOVED, -1, application
-								.getInputHandler().getMouseX(), application
-								.getInputHandler().getMouseY(), dx, dy));
-				consumedInput = true;
-				break;
+
+		for (int i = components.values().size() - 1; i >= 0; i--) {
+			if (((Component) components.values().toArray()[i]).fireMouseMove(
+					Mouse.getX(), Mouse.getY(), dx, dy)) {
+				return;
 			}
 		}
 	}

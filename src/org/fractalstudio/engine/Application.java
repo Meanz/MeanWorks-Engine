@@ -3,8 +3,10 @@ package org.fractalstudio.engine;
 import org.fractalstudio.engine.asset.AssetManager;
 import org.fractalstudio.engine.gui.InputHandler;
 import org.fractalstudio.engine.gui.impl.PerformanceGraph;
+import org.fractalstudio.render.material.Material;
 import org.fractalstudio.render.opengl.Renderer;
 import org.fractalstudio.render.opengl.Window;
+import org.fractalstudio.render.opengl.shader.ShaderHelper;
 import org.lwjgl.opengl.Display;
 
 public abstract class Application {
@@ -200,6 +202,12 @@ public abstract class Application {
 		inputHandler = new InputHandler();
 		assetManager = new AssetManager();
 
+		/*
+		 * Setup the default material
+		 */
+		Material.DEFAULT_MATERIAL = new Material("DEFAULT_MATERIAL",
+				ShaderHelper.createDefaultShader());
+		
 		/*
 		 * Preload
 		 */

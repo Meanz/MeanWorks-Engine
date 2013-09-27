@@ -15,11 +15,10 @@ import org.fractalstudio.engine.GameApplication;
 import org.fractalstudio.engine.gui.Button;
 import org.fractalstudio.engine.gui.GuiHandler;
 import org.fractalstudio.engine.gui.impl.PerformanceGraph;
+import org.fractalstudio.engine.gui.impl.RadialMenu;
 import org.fractalstudio.engine.gui.impl.Tooltip;
 import org.fractalstudio.engine.math.Ray;
-import org.fractalstudio.engine.model.ColladaImporter;
 import org.fractalstudio.engine.model.MWMLoader;
-import org.fractalstudio.engine.model.daetofe.DaeToFeConverter;
 import org.fractalstudio.render.geometry.Geometry;
 import org.fractalstudio.render.geometry.Vertex;
 import org.fractalstudio.render.opengl.ImmediateRenderer;
@@ -155,6 +154,8 @@ public class TestGame extends GameApplication {
 		/*
 		 * Setup Gui
 		 */
+		guiHandler.addComponent(new RadialMenu() {
+		});
 		guiHandler.addComponent(new Button("Wireframe", 10, 100) {
 
 			private boolean wireframe = false;
@@ -193,9 +194,8 @@ public class TestGame extends GameApplication {
 		waterTexture = getAssetManager().loadTexture("./data/images/water.png");
 
 		// Let's try to load a model
-		geometry = MWMLoader
-				.loadModel("./data/models/stickman/stickman.mwm");
-		
+		geometry = MWMLoader.loadModel("./data/models/stickman/stickman.mwm");
+
 		geometryShader = getAssetManager().loadShader(
 				"./data/shaders/colorShader");
 		geometryTexture = getAssetManager().loadTexture(
@@ -343,46 +343,7 @@ public class TestGame extends GameApplication {
 
 		// Draw the selected tile
 		if (selectedTile != null) {
-			float p1H = world.getTileHeight(
-					(int) selectedTile.getTilePosition().x + 1,
-					(int) selectedTile.getTilePosition().y) + 0.01f;
-			float p2H = world.getTileHeight(
-					(int) selectedTile.getTilePosition().x,
-					(int) selectedTile.getTilePosition().y) + 0.01f;
-			float p3H = world.getTileHeight(
-					(int) selectedTile.getTilePosition().x,
-					(int) selectedTile.getTilePosition().y + 1) + 0.01f;
-			float p4H = world.getTileHeight(
-					(int) selectedTile.getTilePosition().x + 1,
-					(int) selectedTile.getTilePosition().y + 1) + 0.01f;
-
-			// p4----p3
-			// |_____|
-			// |_____|
-			// p1----p2
-			Vertex p1 = new Vertex(new Vector3f(
-					(float) (int) selectedTile.getTilePosition().x
-							+ Region.TILE_WIDTH, p1H,
-					(float) (int) selectedTile.getTilePosition().y));
-			Vertex p2 = new Vertex(new Vector3f(
-					(float) (int) selectedTile.getTilePosition().x, p2H,
-					(float) (int) selectedTile.getTilePosition().y));
-			Vertex p3 = new Vertex(new Vector3f(
-					(float) (int) selectedTile.getTilePosition().x, p3H,
-					(float) (int) selectedTile.getTilePosition().y
-							+ Region.TILE_LENGTH));
-			Vertex p4 = new Vertex(new Vector3f(
-					(float) (int) selectedTile.getTilePosition().x
-							+ Region.TILE_WIDTH, p4H,
-					(float) (float) (int) selectedTile.getTilePosition().y
-							+ Region.TILE_LENGTH));
-
-			glColor4f(1.0f, 1.0f, 1.0f, 0.4f);
-
-			Texture.disable();
-			ImmediateRenderer.enableBlending();
-			ImmediateRenderer.drawPlane(p1, p2, p3, p4);
-			ImmediateRenderer.disableBlending();
+			drawSelectedTile();
 		}
 
 		// Draw a water thing
@@ -407,6 +368,47 @@ public class TestGame extends GameApplication {
 
 		// Draw the gui
 		guiHandler.render();
+	}
+
+	public void drawSelectedTile() {
+		float p1H = world.getTileHeight(
+				(int) selectedTile.getTilePosition().x + 1,
+				(int) selectedTile.getTilePosition().y) + 0.01f;
+		float p2H = world.getTileHeight((int) selectedTile.getTilePosition().x,
+				(int) selectedTile.getTilePosition().y) + 0.01f;
+		float p3H = world.getTileHeight((int) selectedTile.getTilePosition().x,
+				(int) selectedTile.getTilePosition().y + 1) + 0.01f;
+		float p4H = world.getTileHeight(
+				(int) selectedTile.getTilePosition().x + 1,
+				(int) selectedTile.getTilePosition().y + 1) + 0.01f;
+
+		// p4----p3
+		// |_____|
+		// |_____|
+		// p1----p2
+		Vertex p1 = new Vertex(new Vector3f(
+				(float) (int) selectedTile.getTilePosition().x
+						+ Region.TILE_WIDTH, p1H,
+				(float) (int) selectedTile.getTilePosition().y));
+		Vertex p2 = new Vertex(new Vector3f(
+				(float) (int) selectedTile.getTilePosition().x, p2H,
+				(float) (int) selectedTile.getTilePosition().y));
+		Vertex p3 = new Vertex(new Vector3f(
+				(float) (int) selectedTile.getTilePosition().x, p3H,
+				(float) (int) selectedTile.getTilePosition().y
+						+ Region.TILE_LENGTH));
+		Vertex p4 = new Vertex(new Vector3f(
+				(float) (int) selectedTile.getTilePosition().x
+						+ Region.TILE_WIDTH, p4H,
+				(float) (float) (int) selectedTile.getTilePosition().y
+						+ Region.TILE_LENGTH));
+
+		glColor4f(1.0f, 1.0f, 1.0f, 0.4f);
+
+		Texture.disable();
+		ImmediateRenderer.enableBlending();
+		ImmediateRenderer.drawPlane(p1, p2, p3, p4);
+		ImmediateRenderer.disableBlending();
 	}
 
 	/**

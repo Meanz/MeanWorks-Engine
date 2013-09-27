@@ -4,7 +4,9 @@ import static org.lwjgl.opengl.GL11.glVertex2f;
 
 import java.util.LinkedList;
 
-import org.fractalstudio.engine.gui.event.ActionEvent;
+import org.fractalstudio.engine.Application;
+import org.lwjgl.input.Mouse;
+import org.lwjgl.opengl.GL11;
 
 public abstract class Component {
 
@@ -59,6 +61,42 @@ public abstract class Component {
 		this.width = width;
 		this.height = height;
 		this.inputLock = false;
+	}
+
+	/**
+	 * Get the mouse x coordinate
+	 * 
+	 * @return
+	 */
+	public final static int getMouseX() {
+		return Mouse.getX();
+	}
+
+	/**
+	 * Get the mouse y coordinate
+	 * 
+	 * @return
+	 */
+	public final static int getMouseY() {
+		return getWindowHeight() - Mouse.getY();
+	}
+
+	/**
+	 * Get the window width
+	 * 
+	 * @return
+	 */
+	public final static int getWindowWidth() {
+		return Application.getApplication().getWindow().getWidth();
+	}
+
+	/**
+	 * Get the window height
+	 * 
+	 * @return
+	 */
+	public final static int getWindowHeight() {
+		return Application.getApplication().getWindow().getHeight();
 	}
 
 	/**
@@ -181,24 +219,172 @@ public abstract class Component {
 		return height;
 	}
 
-	/**
-	 * Called when an action is performed on this component
-	 * 
-	 * @param actionEvent
+	/*
+	 * New input system yet again
 	 */
-	public void actionPerformed(GuiHandler guiHandler, ActionEvent actionEvent) {
 
+	/**
+	 * Called when this component get's a mouse pressed event
+	 * 
+	 * @param button
+	 * @param mouseX
+	 * @param mouseY
+	 */
+	public boolean onMouseDown(int button, int mouseX, int mouseY) {
+		return false;
+	}
+
+	/**
+	 * Called when this component get's a mouse released event
+	 * 
+	 * @param button
+	 * @param mouseX
+	 * @param mouseY
+	 */
+	public boolean onMouseUp(int button, int mouseX, int mouseY) {
+		return false;
+	}
+
+	/**
+	 * Called when this component get's a mouse moved event
+	 * 
+	 * @param mouseX
+	 * @param mouseY
+	 * @param mouseDeltaX
+	 * @param mouseDeltaY
+	 */
+	public boolean onMouseMove(int mouseX, int mouseY, int mouseDeltaX,
+			int mouseDeltaY) {
+		return false;
+	}
+
+	/**
+	 * Check whether the given point is inside this components bounds
+	 * 
+	 * @param _x
+	 * @param _y
+	 * @return
+	 */
+	public final boolean isInside(int _x, int _y) {
+		if (_x >= x && _x <= x + width && _y >= y && _y <= y + height) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Called when a mouse button is released
+	 * 
+	 * @param button
+	 * @param mouseX
+	 * @param mouseY
+	 * @return
+	 */
+	public final boolean fireMouseUp(int button, int mouseX, int mouseY) {
+		// If the mouse is inside the bounds of this component pass the action
+		// on
+		// Or if this component has input lock also pass it on
+		if (!isInside(mouseX, mouseY) && !hasInputLock()) {
+			return false;
+		}
+
+		/*
+		 * Start from the bottom and up
+		 */
+		for (int i = components.size() - 1; i >= 0; i--) {
+			if (components.get(i).fireMouseUp(button, mouseX, mouseY)) {
+				return true;
+			}
+		}
+
+		return onMouseUp(button, mouseX, mouseY);
+	}
+
+	/**
+	 * Called when the mouse is moved
+	 * 
+	 * @param button
+	 * @param mouseX
+	 * @param mouseY
+	 * @return
+	 */
+	public final boolean fireMouseMove(int mouseX, int mouseY, int mouseDeltaX,
+			int mouseDeltaY) {
+		// If the mouse is inside the bounds of this component pass the action
+		// on
+		// Or if this component has input lock also pass it on
+		if (!isInside(mouseX, mouseY) && !hasInputLock()) {
+			return false;
+		}
+
+		/*
+		 * Start from the bottom and up
+		 */
+		for (int i = components.size() - 1; i >= 0; i--) {
+			if (components.get(i).fireMouseMove(mouseX, mouseY, mouseDeltaX,
+					mouseDeltaY)) {
+				return true;
+			}
+		}
+
+		return onMouseMove(mouseX, mouseY, mouseDeltaX, mouseDeltaY);
+	}
+
+	/**
+	 * Called when a mouse button is pressed
+	 * 
+	 * @param button
+	 * @param mouseX
+	 * @param mouseY
+	 * @return
+	 */
+	public final boolean fireMouseDown(int button, int mouseX, int mouseY) {
+		// If the mouse is inside the bounds of this component pass the action
+		// on
+		// Or if this component has input lock also pass it on
+		if (!isInside(mouseX, mouseY) && !hasInputLock()) {
+			return false;
+		}
+
+		/*
+		 * Start from the bottom and up
+		 */
+		for (int i = components.size() - 1; i >= 0; i--) {
+			if (components.get(i).fireMouseDown(button, mouseX, mouseY)) {
+				return true;
+			}
+		}
+
+		return onMouseDown(button, mouseX, mouseY);
+	}
+
+	/**
+	 * Fire the render command
+	 */
+	public final void fireRender() {
+		for (Component component : components) {
+			component.render();
+		}
+		render();
 	}
 
 	/**
 	 * Render the component
 	 */
 	public abstract void render();
-	
-	
+
 	/**
 	 * Helper functions
 	 */
+	public void drawLine(int x1, int y1, int x2, int y2) {
+		GL11.glBegin(GL11.GL_LINES);
+		{
+			glVertex2f(x1, y1);
+			glVertex2f(x2, y2);
+		}
+		GL11.glEnd();
+	}
+	
 	public void drawQuad(float _x, float _y, float _width, float _height) {
 		glVertex2f(_x, _y + _height);
 		glVertex2f(_x + _width, _y + _height);

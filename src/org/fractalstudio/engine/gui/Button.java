@@ -6,11 +6,7 @@ import static org.lwjgl.opengl.GL11.glBegin;
 import static org.lwjgl.opengl.GL11.glColor3f;
 import static org.lwjgl.opengl.GL11.glDisable;
 import static org.lwjgl.opengl.GL11.glEnd;
-import static org.lwjgl.opengl.GL11.glVertex2f;
 
-import org.fractalstudio.engine.gui.event.ActionEvent;
-import org.fractalstudio.engine.gui.event.EventType;
-import org.fractalstudio.engine.gui.event.MouseEvent;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.UnicodeFont;
 import org.newdawn.slick.font.effects.ColorEffect;
@@ -84,30 +80,25 @@ public class Button extends Component {
 
 	/*
 	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.fractalstudio.engine.gui.Component#actionPerformed(org.fractalstudio
-	 * .engine.gui.GuiHandler, org.fractalstudio.engine.gui.event.ActionEvent)
+	 * @see org.fractalstudio.engine.gui.Component#onMouseDown(int, int, int)
 	 */
 	@Override
-	public void actionPerformed(GuiHandler guiHandler, ActionEvent actionEvent) {
-
-		if (actionEvent.getEventType() == EventType.MOUSE_PRESSED) {
-			MouseEvent mouseEvent = actionEvent.asMouseEvent();
-			if (mouseEvent.getKey() == MouseEvent.LMB) {
-				guiHandler.mouseLock(this);
-				gray = true;
-			}
-
-		} else if (actionEvent.getEventType() == EventType.MOUSE_RELEASED) {
-			MouseEvent mouseEvent = actionEvent.asMouseEvent();
-			if (mouseEvent.getKey() == MouseEvent.LMB) {
-				onButtonClick();
-				guiHandler.mouseRelease(this);
-				gray = false;
-			}
-		}
-
+	public final boolean onMouseDown(int button, int mouseX, int mouseY) {
+		activateInputLock();
+		gray = true;
+		return true;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.fractalstudio.engine.gui.Component#onMouseUp(int, int, int)
+	 */
+	@Override
+	public final boolean onMouseUp(int button, int mouseX, int mouseY) {
+		onButtonClick();
+		deactivateInputLock();
+		gray = false;
+		return true;
 	}
 
 	// Called whenever the button is clicked

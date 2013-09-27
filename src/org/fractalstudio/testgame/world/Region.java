@@ -442,7 +442,8 @@ public class Region {
 																			// coords
 
 				meshRenderer.compile();
-
+ 
+				regionMesh.setMaterial(null); //Temporary solution
 				regionMesh.setMeshRenderer(meshRenderer);
 
 				regionGeometry.addMesh("region_" + regionX + "_" + regionY,
