@@ -43,7 +43,15 @@ public abstract class Component {
 	/*
 	 * 
 	 */
+	private boolean visible;
+	/*
+	 * 
+	 */
 	private LinkedList<Component> components = new LinkedList<>();
+	/*
+	 * 
+	 */
+	private boolean hovered;
 
 	/**
 	 * Construct a new component
@@ -61,6 +69,44 @@ public abstract class Component {
 		this.width = width;
 		this.height = height;
 		this.inputLock = false;
+		this.visible = true;
+		this.hovered = false;
+	}
+
+	/**
+	 * Check whether this component is hovered or not
+	 * 
+	 * @return
+	 */
+	public boolean isHovered() {
+		return hovered;
+	}
+
+	/**
+	 * Get whether this component is visible or not
+	 * 
+	 * @return
+	 */
+	public boolean isVisible() {
+		return visible;
+	}
+
+	/**
+	 * Set whether this component is visible or not
+	 * 
+	 * @param visible
+	 */
+	public void setVisible(boolean visible) {
+		this.visible = visible;
+	}
+
+	/**
+	 * Get the components of this component
+	 * 
+	 * @return
+	 */
+	public LinkedList<Component> getComponents() {
+		return components;
 	}
 
 	/**
@@ -224,6 +270,26 @@ public abstract class Component {
 	 */
 
 	/**
+	 * Called when this component is hovered
+	 * 
+	 * @param x
+	 * @param y
+	 */
+	public void onMouseEnter(int x, int y) {
+
+	}
+
+	/**
+	 * Called when this component is unhovered
+	 * 
+	 * @param x
+	 * @param y
+	 */
+	public void onMouseExit(int x, int y) {
+
+	}
+
+	/**
 	 * Called when this component get's a mouse pressed event
 	 * 
 	 * @param button
@@ -310,11 +376,21 @@ public abstract class Component {
 	 */
 	public final boolean fireMouseMove(int mouseX, int mouseY, int mouseDeltaX,
 			int mouseDeltaY) {
+
 		// If the mouse is inside the bounds of this component pass the action
 		// on
 		// Or if this component has input lock also pass it on
-		if (!isInside(mouseX, mouseY) && !hasInputLock()) {
-			return false;
+		if (!isInside(mouseX, mouseY)) {
+			if (isHovered()) {
+				hovered = false;
+			}
+			if (!hasInputLock()) {
+				return false;
+			}
+		} else {
+			if (!isHovered()) {
+				hovered = true;
+			}
 		}
 
 		/*
@@ -362,6 +438,9 @@ public abstract class Component {
 	 * Fire the render command
 	 */
 	public final void fireRender() {
+		if (!isVisible()) {
+			return;
+		}
 		for (Component component : components) {
 			component.render();
 		}
@@ -384,8 +463,8 @@ public abstract class Component {
 		}
 		GL11.glEnd();
 	}
-	
-	public void drawQuad(float _x, float _y, float _width, float _height) {
+
+	public static void drawQuad(float _x, float _y, float _width, float _height) {
 		glVertex2f(_x, _y + _height);
 		glVertex2f(_x + _width, _y + _height);
 		glVertex2f(_x + _width, _y);

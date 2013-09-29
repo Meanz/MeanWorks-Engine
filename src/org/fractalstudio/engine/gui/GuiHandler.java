@@ -280,7 +280,7 @@ public class GuiHandler implements KeyListener, MouseListener {
 
 		for (int i = components.values().size() - 1; i >= 0; i--) {
 			if (((Component) components.values().toArray()[i]).fireMouseMove(
-					Mouse.getX(), Mouse.getY(), dx, dy)) {
+					Component.getMouseX(), Component.getMouseY(), dx, dy)) {
 				return;
 			}
 		}

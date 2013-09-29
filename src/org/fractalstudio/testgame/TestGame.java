@@ -15,8 +15,9 @@ import org.fractalstudio.engine.GameApplication;
 import org.fractalstudio.engine.gui.Button;
 import org.fractalstudio.engine.gui.GuiHandler;
 import org.fractalstudio.engine.gui.impl.PerformanceGraph;
-import org.fractalstudio.engine.gui.impl.RadialMenu;
 import org.fractalstudio.engine.gui.impl.Tooltip;
+import org.fractalstudio.engine.gui.impl.radialmenu.RadialButton;
+import org.fractalstudio.engine.gui.impl.radialmenu.RadialMenu;
 import org.fractalstudio.engine.math.Ray;
 import org.fractalstudio.engine.model.MWMLoader;
 import org.fractalstudio.render.geometry.Geometry;
@@ -154,9 +155,12 @@ public class TestGame extends GameApplication {
 		/*
 		 * Setup Gui
 		 */
-		guiHandler.addComponent(new RadialMenu() {
-		});
-		guiHandler.addComponent(new Button("Wireframe", 10, 100) {
+		RadialMenu radialMenu = new RadialMenu() {
+		};
+		guiHandler.addComponent(radialMenu);
+		radialMenu.addButton(new RadialButton("Test Button 1"));
+		radialMenu.addButton(new RadialButton("Test Button 2"));
+		guiHandler.addComponent(new Button("Wireframe", 10, 100, 110, 35) {
 
 			private boolean wireframe = false;
 
@@ -170,7 +174,7 @@ public class TestGame extends GameApplication {
 			}
 		});
 
-		guiHandler.addComponent(new Button("Fly", 10, 140) {
+		guiHandler.addComponent(new Button("Fly", 10, 140, 110, 35) {
 
 			@Override
 			public void onButtonClick() {

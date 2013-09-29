@@ -1,11 +1,15 @@
-package org.fractalstudio.engine.gui.impl;
+package org.fractalstudio.engine.gui.impl.radialmenu;
 
 import static org.lwjgl.opengl.GL11.GL_QUADS;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 import static org.lwjgl.opengl.GL11.glBegin;
+import static org.lwjgl.opengl.GL11.glColor4f;
 import static org.lwjgl.opengl.GL11.glDisable;
 import static org.lwjgl.opengl.GL11.glEnd;
 
+import java.util.LinkedList;
+
+import org.fractalstudio.engine.gui.Button;
 import org.fractalstudio.engine.gui.Component;
 import org.lwjgl.opengl.GL11;
 
@@ -45,6 +49,16 @@ public class RadialMenu extends Component {
 	public RadialMenu() {
 		// Name, x, y, width, height
 		super("radialMenu", 0, 0, getWindowWidth(), getWindowHeight());
+		setVisible(false);
+	}
+
+	/**
+	 * Add a button to this radial menu
+	 * 
+	 * @param button
+	 */
+	public void addButton(RadialButton button) {
+		add(button);
 	}
 
 	/*
@@ -59,6 +73,7 @@ public class RadialMenu extends Component {
 			showMenu = true;
 			menuOpenX = mouseX;
 			menuOpenY = mouseY;
+			setVisible(true);
 			return true;
 		}
 		return false;
@@ -74,6 +89,7 @@ public class RadialMenu extends Component {
 		if (button == 2) {
 			deactivateInputLock();
 			showMenu = false;
+			setVisible(false);
 			return true;
 		}
 		return false;
@@ -89,7 +105,7 @@ public class RadialMenu extends Component {
 			glDisable(GL_TEXTURE_2D);
 			glBegin(GL_QUADS);
 			{
-				GL11.glColor3f(0.5f, 0.5f, 0.5f);
+				glColor4f(0.6f, 0.6f, 0.6f, 0.8f);
 				drawQuad(menuOpenX - 20, menuOpenY - 20, 40, 40);
 			}
 			glEnd();
@@ -97,6 +113,26 @@ public class RadialMenu extends Component {
 			// Draw a line
 			GL11.glColor3f(1.0f, 0.0f, 0.0f);
 			drawLine(menuOpenX, menuOpenY, getMouseX(), getMouseY());
+
+			glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+			
+			//Get sub components
+			int menuX = menuOpenX - 140;
+			int menuY = menuOpenY - 80;
+			for(Component component : this.getComponents()) {
+				
+				if(component instanceof RadialButton) {
+					
+					RadialButton button = (RadialButton)component;
+					
+					button.setPosition(menuX, menuY);
+					
+					menuX -= 20;
+					menuY += 50;
+					
+				}
+				
+			}
 		}
 
 	}
