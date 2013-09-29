@@ -1,9 +1,15 @@
 package org.fractalstudio.render.geometry.mesh;
 
+import java.nio.FloatBuffer;
+
 import org.fractalstudio.render.material.Material;
 
 public class Mesh {
-
+	
+	private FloatBuffer positions;
+	private FloatBuffer normals;
+	private FloatBuffer texCoords;
+	
 	/*
 	 * The renderer for this mesh
 	 */

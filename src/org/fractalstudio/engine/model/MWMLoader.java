@@ -5,8 +5,13 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.LinkedList;
 
 import org.fractalstudio.render.geometry.Geometry;
+import org.fractalstudio.render.geometry.animation.Animation;
+import org.fractalstudio.render.geometry.animation.AnimationNode;
+import org.fractalstudio.render.geometry.animation.AnimationNode.QuatKey;
+import org.fractalstudio.render.geometry.animation.AnimationNode.Vec3Key;
 import org.fractalstudio.render.geometry.mesh.Mesh;
 import org.fractalstudio.render.geometry.mesh.MeshRenderer;
 import org.fractalstudio.render.geometry.mesh.MeshRenderer.BufferEntry;
@@ -70,7 +75,10 @@ public class MWMLoader {
 
 			bb.order(ByteOrder.nativeOrder());
 
-			int meshId = 0; //To keep track of meshes
+			LinkedList<Mesh> meshes = new LinkedList<>();
+			LinkedList<Animation> animations = new LinkedList<>();
+
+			int meshId = 0; // To keep track of meshes
 			int version = bb.getInt();
 			System.err.println("[Model version: " + version + " size: "
 					+ bb.remaining() + "]");
@@ -96,21 +104,21 @@ public class MWMLoader {
 								+ hasVertices + "" + " hasNormals="
 								+ hasNormals + "" + " hasUVs=" + hasUVs + ""
 								+ " texture=" + textureFile + "]");
-						
+
 						boolean hasBoneData = bb.getInt() == 1 ? true : false;
-						
-						if(hasBoneData) {
+
+						if (hasBoneData) {
 							int numBonesPerVertex = bb.getInt();
-							
-							for(int i=0; i < numVertices; i++) {
-								
-								for(int j=0; j < numBonesPerVertex; j++) {
-									
+
+							for (int i = 0; i < numVertices; i++) {
+
+								for (int j = 0; j < numBonesPerVertex; j++) {
+
 									int id = bb.getInt();
 									float weight = bb.getFloat();
-									
+
 								}
-								
+
 							}
 						}
 
@@ -180,20 +188,24 @@ public class MWMLoader {
 						bePositions.addAttribute(0, 3, GL11.GL_FLOAT, false,
 								3 * 4, 0);
 
-						BufferEntry beNormals = meshRenderer.addVertexBuffer(vbNormals);
+						BufferEntry beNormals = meshRenderer
+								.addVertexBuffer(vbNormals);
 						beNormals.addAttribute(1, 3, GL11.GL_FLOAT, false,
 								3 * 4, 0);
 
 						BufferEntry beUVs = meshRenderer.addVertexBuffer(vbUVs);
-						beUVs.addAttribute(2, 2, GL11.GL_FLOAT, false,
-								2 * 4, 0);
+						beUVs.addAttribute(2, 2, GL11.GL_FLOAT, false, 2 * 4, 0);
 
 						meshRenderer.setIndexBuffer(vbIndices);
 						meshRenderer.setNumIndices(numIndices);
 
 						meshRenderer.compile();
-						geometry.addMesh("mesh_" + meshName + "_" + meshId, mesh);
-						System.err.println("Added mesh: " + ("mesh_" + meshName + "_" + meshId));
+						geometry.addMesh("mesh_" + meshName + "_" + meshId,
+								mesh);
+						System.err.println("Added mesh: "
+								+ ("mesh_" + meshName + "_" + meshId));
+						
+						meshes.add(mesh);
 						break;
 
 					// Read skeleton
@@ -222,6 +234,9 @@ public class MWMLoader {
 						double duration = bb.getDouble();
 						double ticksPerSecond = bb.getDouble();
 
+						Animation animation = new Animation(animationName,
+								numAnimationNodes, duration, ticksPerSecond);
+
 						System.err.println("[Animation name=" + animationName
 								+ " numNodes=" + numAnimationNodes
 								+ " duration=" + duration + " ticksPerSecond="
@@ -234,6 +249,10 @@ public class MWMLoader {
 							int numRotationKeys = bb.getInt();
 							int numScalingKeys = bb.getInt();
 
+							AnimationNode node = new AnimationNode(nodeName,
+									numPositionKeys, numRotationKeys,
+									numScalingKeys);
+
 							System.err.println("\t[AnimationNode name="
 									+ nodeName + " numPositionKeys="
 									+ numPositionKeys + " numRotationKeys="
@@ -245,6 +264,8 @@ public class MWMLoader {
 								float x = bb.getFloat();
 								float y = bb.getFloat();
 								float z = bb.getFloat();
+								node.setPositionKey(j, new Vec3Key(x, y, z,
+										time));
 							}
 
 							for (int j = 0; j < numRotationKeys; j++) {
@@ -253,6 +274,8 @@ public class MWMLoader {
 								float y = bb.getFloat();
 								float z = bb.getFloat();
 								float w = bb.getFloat();
+								node.setRotationKey(j, new QuatKey(x, y, z, w,
+										time));
 							}
 
 							for (int j = 0; j < numScalingKeys; j++) {
@@ -260,9 +283,14 @@ public class MWMLoader {
 								float x = bb.getFloat();
 								float y = bb.getFloat();
 								float z = bb.getFloat();
+								node.setScalingKey(j,
+										new Vec3Key(x, y, z, time));
 							}
+
+							animation.setAnimationNode(i, node);
 						}
 
+						animations.add(animation);
 						break;
 
 					default:
