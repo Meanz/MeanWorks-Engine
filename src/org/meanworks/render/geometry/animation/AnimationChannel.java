@@ -3,7 +3,6 @@ package org.meanworks.render.geometry.animation;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
-import org.meanworks.engine.Application;
 import org.meanworks.render.geometry.animation.AnimationNode.QuatKey;
 import org.meanworks.render.geometry.animation.AnimationNode.Vec3Key;
 
@@ -52,6 +51,16 @@ public class AnimationChannel {
 	 */
 	private Vector3f[] nodePositions;
 
+	/*
+	 * 
+	 */
+	private LoopMode loopMode;
+
+	/*
+	 * Whether this animation has finished or not
+	 */
+	private boolean finished;
+
 	/**
 	 * Construct a new animation channel
 	 * 
@@ -62,11 +71,43 @@ public class AnimationChannel {
 		this.animation = animation;
 		this.currentTime = 0.0d;
 		this.speedModifier = 1.0d;
+		this.loopMode = LoopMode.LM_DONT_LOOP;
+		this.finished = false;
 
 		nodePositions = new Vector3f[animation.getNodes().length];
 		for (int i = 0; i < nodePositions.length; i++) {
 			nodePositions[i] = new Vector3f(0.0f, 0.0f, 0.0f);
 		}
+	}
+
+	/**
+	 * Check whether this animation is finished or not
+	 * 
+	 * @return
+	 */
+	public boolean isFinished() {
+		return finished;
+	}
+
+	/**
+	 * Get the loop mode of this animation channel
+	 * 
+	 * @return
+	 */
+	public LoopMode getLoopMode() {
+		return loopMode;
+	}
+
+	/**
+	 * Set the loop mode of this animation channel
+	 * 
+	 * @param loopMode
+	 */
+	public void setLoopMode(LoopMode loopMode) {
+		if (loopMode == null) {
+			return;
+		}
+		this.loopMode = loopMode;
 	}
 
 	/**
@@ -102,19 +143,19 @@ public class AnimationChannel {
 					* speedModifier;
 
 			if (currentTime > animation.getDuration()) {
-				currentTime = currentTime % animation.getDuration();
-				// Animation has finished
-				/*
-				 * if(pAnimationInstance->mLoopMode == LoopMode::LM_DONT_LOOP) {
-				 * stopList.push_back(m_vAnimationChannels[i]); continue; } else
-				 * if(pAnimationInstance->mLoopMode == LoopMode::LM_LOOP) {
-				 * //Nothing to do here :) } else
-				 * if(pAnimationInstance->mLoopMode == LoopMode::LM_CYCLE) {
-				 * //We do not support backwards animations yet.. //TODO: Fix
-				 * them. //pAnimationInstance->mPlayMode =
-				 * (pAnimationInstance->mPlayMode == PlayMode::PM_FORWARD ?
-				 * PlayMode::PM_BACKWARD : PlayMode::PM_FORWARD); }
-				 */
+
+				if (loopMode == LoopMode.LM_DONT_LOOP) {
+					finished = true;
+					return;
+				} else if (loopMode == LoopMode.LM_LOOP) {
+					currentTime = currentTime % animation.getDuration();
+				} else if (loopMode == LoopMode.LM_CYCLE) {
+					// NOT YET IMPLEMENTED
+					return;
+				} else {
+					// Shouldn't be possible, so this else clause is not needed
+					// at all.
+				}
 			}
 		}
 	}

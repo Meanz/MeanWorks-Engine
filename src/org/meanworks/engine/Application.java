@@ -4,6 +4,7 @@ import org.lwjgl.opengl.Display;
 import org.meanworks.engine.asset.AssetManager;
 import org.meanworks.engine.gui.InputHandler;
 import org.meanworks.engine.gui.impl.PerformanceGraph;
+import org.meanworks.engine.scene.SceneGraph;
 import org.meanworks.render.material.Material;
 import org.meanworks.render.opengl.Renderer;
 import org.meanworks.render.opengl.Window;
@@ -55,6 +56,11 @@ public abstract class Application {
 	private AssetManager assetManager = null;
 
 	/*
+	 * The scene graph for this application
+	 */
+	private SceneGraph scene;
+
+	/*
 	 * Statistics
 	 */
 	private int fps = 0;
@@ -72,6 +78,15 @@ public abstract class Application {
 	 * Application settings
 	 */
 	private int targetUps = 50; // Number of updates per second
+
+	/**
+	 * Get the scene graph of this application
+	 * 
+	 * @return
+	 */
+	public SceneGraph getScene() {
+		return scene;
+	}
 
 	/**
 	 * Get the frame time for the last frame
@@ -214,6 +229,7 @@ public abstract class Application {
 		 */
 		inputHandler = new InputHandler();
 		assetManager = new AssetManager();
+		scene = new SceneGraph();
 
 		/*
 		 * Setup the default material
@@ -274,6 +290,7 @@ public abstract class Application {
 				inputHandler.update();
 
 				update(); // Call the update function
+				scene.update();
 
 				next_game_tick += SKIP_TICKS;
 
@@ -286,10 +303,12 @@ public abstract class Application {
 			 */
 
 			render(); // Call the render function
+			scene.render();
+
 			fpsc++;
 
 			window.update();
-			
+
 			long renderEnd = System.nanoTime();
 			long deltaRender = renderEnd - renderStart;
 			frameTime = (double) (deltaRender * Math.pow(10, -9));

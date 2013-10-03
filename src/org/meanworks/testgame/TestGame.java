@@ -14,7 +14,6 @@ import java.io.File;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 import org.meanworks.engine.GameApplication;
 import org.meanworks.engine.gui.Button;
@@ -27,7 +26,8 @@ import org.meanworks.engine.math.Ray;
 import org.meanworks.engine.model.MWMLoader;
 import org.meanworks.render.geometry.AnimatedModel;
 import org.meanworks.render.geometry.Vertex;
-import org.meanworks.render.material.Material;
+import org.meanworks.render.geometry.animation.AnimationChannel;
+import org.meanworks.render.geometry.animation.LoopMode;
 import org.meanworks.render.opengl.ImmediateRenderer;
 import org.meanworks.render.opengl.Window;
 import org.meanworks.render.opengl.shader.ShaderProgram;
@@ -72,27 +72,12 @@ public class TestGame extends GameApplication {
 	/*
 	 * 
 	 */
-	private ShaderProgram geometryShader;
-
-	/*
-	 * 
-	 */
 	private Texture waterTexture;
 
 	/*
 	 * 
 	 */
-	private Texture geometryTexture;
-
-	/*
-	 * 
-	 */
 	private boolean flying = true;
-
-	/*
-	 * 
-	 */
-	private AnimatedModel geometry;
 
 	/*
 	 * (non-Javadoc)
@@ -140,15 +125,13 @@ public class TestGame extends GameApplication {
 		 * Setup basic controls
 		 */
 
-		getCamera().yaw(90);
-		// getCamera().pitch(45);
-		getCamera().translate(-1.0f, 5.0f, -1.0f);
+		getCamera().yaw(-25);
+		getCamera().pitch(30);
+		getCamera().translate(0.0f, 0.0f, 0.0f);
 
 		world = new World();
 
 		player = new Player();
-		player.translate(-36f, 0.5f, -0.79f);
-
 		guiHandler = new GuiHandler(this);
 		getInputHandler().addKeyListener(guiHandler);
 		getInputHandler().addMouseListener(guiHandler);
@@ -175,7 +158,7 @@ public class TestGame extends GameApplication {
 			}
 		});
 
-		guiHandler.addComponent(new Button("Fly", 10, 140, 110, 35) {
+		guiHandler.addComponent(new Button("Stop Flying", 10, 140, 110, 35) {
 
 			@Override
 			public void onButtonClick() {
@@ -198,21 +181,7 @@ public class TestGame extends GameApplication {
 		waterShader = getAssetManager().loadShader("./data/shaders/water");
 		waterTexture = getAssetManager().loadTexture("./data/images/water.png");
 
-		// Let's try to load a model
-		geometry = MWMLoader
-				.loadAnimatedModel("./data/models/Sinbad/sinbad_mesh.mwm");
-
-		geometry.createChannel(geometry.getAnimation("SliceVertical"));
-		geometry.createChannel(geometry.getAnimation("RunBase"));
-		//geometry.createChannel(0);
-		
-		Material material = new Material("sinbadMat", getAssetManager()
-				.loadShader("./data/shaders/simple_skinning"));
-
-		geometryShader = getAssetManager().loadShader(
-				"./data/shaders/colorShader");
-		geometryTexture = getAssetManager().loadTexture(
-				"./data/models/Sinbad/sinbad_body.jpg");
+		getScene().getRootNode().addChild(player);
 	}
 
 	/*
@@ -225,17 +194,18 @@ public class TestGame extends GameApplication {
 		// Update the gui handler
 		guiHandler.update();
 
-		// Update the world
-		world.update((int) (player.getPosition().x / Region.REGION_WIDTH),
-				(int) (player.getPosition().z / Region.REGION_HEIGHT));
-
 		// Make the camera follow the player's position
-		getCamera().setPosition(player.getPosition());
+		getCamera().setPosition(player.getTransform().getPosition());
+
+		// Update the world
+		world.update((int) (getCamera().getPosition().x / Region.REGION_WIDTH),
+				(int) (getCamera().getPosition().z / Region.REGION_HEIGHT));
 
 		// Set the camera height to the terrain height
 		if (!flying) {
 			// TODO: Add jumping and such
-			player.translate(0.0f, -player.getPosition().y + 2.0f, 0.0f);
+			player.getTransform().translate(0.0f,
+					-player.getTransform().getPosition().y + 2.0f, 0.0f);
 			getCamera().translate(
 					0.0f,
 					(float) world.getInterpolatedHeight(getCamera()
@@ -259,7 +229,7 @@ public class TestGame extends GameApplication {
 			// Ray trace the ground
 			currentRay = getCamera().getPickRay(Mouse.getX(), Mouse.getY());
 			// Find out where we hit the ground
-			// selectedTile = world.pickRay(currentRay, 20);
+			selectedTile = world.pickRay(currentRay, 20);
 
 			Tooltip.setTooltip(selectedTile != null ? selectedTile
 					.getTileType().getName() : null);
@@ -270,7 +240,7 @@ public class TestGame extends GameApplication {
 				moveSpeed = 1.0f;
 			}
 			if (Keyboard.isKeyDown(Keyboard.KEY_W)) {
-				player.translate(
+				player.getTransform().translate(
 						moveSpeed
 								* (float) Math.sin(Math.toRadians(getCamera()
 										.getYaw())),
@@ -280,7 +250,7 @@ public class TestGame extends GameApplication {
 										.getYaw())));
 			}
 			if (Keyboard.isKeyDown(Keyboard.KEY_D)) {
-				player.translate(
+				player.getTransform().translate(
 						moveSpeed
 								* (float) Math.sin(Math.toRadians(getCamera()
 										.getYaw() + 90)),
@@ -290,7 +260,7 @@ public class TestGame extends GameApplication {
 										.getYaw() + 90)));
 			}
 			if (Keyboard.isKeyDown(Keyboard.KEY_A)) {
-				player.translate(
+				player.getTransform().translate(
 						moveSpeed
 								* (float) Math.sin(Math.toRadians(getCamera()
 										.getYaw() - 90)),
@@ -300,7 +270,7 @@ public class TestGame extends GameApplication {
 										.getYaw() - 90)));
 			}
 			if (Keyboard.isKeyDown(Keyboard.KEY_S)) {
-				player.translate(
+				player.getTransform().translate(
 						-moveSpeed
 								* (float) Math.sin(Math.toRadians(getCamera()
 										.getYaw())),
@@ -310,10 +280,10 @@ public class TestGame extends GameApplication {
 										.getYaw())));
 			}
 			if (Keyboard.isKeyDown(Keyboard.KEY_E)) {
-				player.translate(0.0f, -0.5f * moveSpeed, 0.0f);
+				player.getTransform().translate(0.0f, -0.5f * moveSpeed, 0.0f);
 			}
 			if (Keyboard.isKeyDown(Keyboard.KEY_Q)) {
-				player.translate(0.0f, 0.5f * moveSpeed, 0.0f);
+				player.getTransform().translate(0.0f, 0.5f * moveSpeed, 0.0f);
 			}
 		}
 	}
@@ -336,14 +306,6 @@ public class TestGame extends GameApplication {
 		world.render();
 
 		glEnable(GL11.GL_TEXTURE_2D);
-
-		Matrix4f modelMatrix = new Matrix4f();
-		modelMatrix.translate(new Vector3f(15.0f, world.getInterpolatedHeight(
-				15, 15), 15.0f));
-
-		geometryTexture.bind();
-		geometry.render();
-
 		glDisable(GL_CULL_FACE);
 
 		// Draw the selected tile
@@ -373,6 +335,8 @@ public class TestGame extends GameApplication {
 
 		// Draw the gui
 		guiHandler.render();
+
+		glEnable(GL_CULL_FACE);
 	}
 
 	public void drawSelectedTile() {

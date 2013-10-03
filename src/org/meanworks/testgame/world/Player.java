@@ -1,56 +1,35 @@
 package org.meanworks.testgame.world;
 
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.util.vector.Vector2f;
-import org.lwjgl.util.vector.Vector3f;
+import org.meanworks.engine.model.MWMLoader;
+import org.meanworks.engine.scene.Node;
+import org.meanworks.render.geometry.AnimatedModel;
+import org.meanworks.render.geometry.animation.AnimationChannel;
+import org.meanworks.render.geometry.animation.LoopMode;
 
-public class Player {
+public class Player extends Node {
 
 	/**
-	 * The position of the player
+	 * 
 	 */
-	private Vector3f position;
+	private AnimatedModel playerModel;
 
 	/**
 	 * 
 	 */
 	public Player() {
-		//position = new Vector3f(4794.0f, 1.8f, 4956.0f);
-		position = new Vector3f();
-	}
+		// Let's try to load a model
+		playerModel = MWMLoader
+				.loadAnimatedModel("./data/models/Sinbad/sinbad_mesh.mwm");
 
-	/**
-	 * Get the position of the player
-	 * 
-	 * @return
-	 */
-	public Vector3f getPosition() {
-		return position;
-	}
-
-	/**
-	 * Set the position of the player
-	 * 
-	 * @param x
-	 * @param y
-	 * @param z
-	 */
-	public void setPosition(float x, float y, float z) {
-		position.x = x;
-		position.y = y;
-		position.z = z;
-	}
-
-	/**
-	 * Translate the player position
-	 * @param x
-	 * @param y
-	 * @param z
-	 */
-	public void translate(float x, float y, float z) {
-		position.x += x;
-		position.y += y;
-		position.z += z;
+		playerModel.createChannel(playerModel.getAnimation("SliceVertical"));
+		AnimationChannel ac = playerModel.createChannel(playerModel
+				.getAnimation("RunBase"));
+		ac.setLoopMode(LoopMode.LM_LOOP);
+		// geometry.createChannel(0);
+		playerModel.getTransform().setPosition(0.5f, 0.9f, 0.5f);
+		playerModel.getTransform().setScale(0.2f, 0.2f, 0.2f);
+		
+		addChild(playerModel);
 	}
 
 	/**

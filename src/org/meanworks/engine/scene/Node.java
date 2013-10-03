@@ -1,5 +1,8 @@
 package org.meanworks.engine.scene;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import org.meanworks.engine.math.Transform;
 
 /**
@@ -23,6 +26,16 @@ import org.meanworks.engine.math.Transform;
 public abstract class Node {
 
 	/*
+	 * The parent node of this node
+	 */
+	private Node parent;
+
+	/*
+	 * The children of this node
+	 */
+	private LinkedList<Node> children = new LinkedList<>();
+
+	/*
 	 * The transform of this node
 	 */
 	private Transform transform;
@@ -35,6 +48,44 @@ public abstract class Node {
 	}
 
 	/**
+	 * Get the children of this node
+	 * 
+	 * @return
+	 */
+	public List<Node> getChildren() {
+		return children;
+	}
+
+	/**
+	 * Add a child to this node
+	 * 
+	 * @param child
+	 */
+	public void addChild(Node child) {
+		if (child != null) {
+			children.add(child);
+		}
+	}
+
+	/**
+	 * Get the parent node of this node
+	 * 
+	 * @return
+	 */
+	public Node getParent() {
+		return parent;
+	}
+
+	/**
+	 * Set the parent node of this node
+	 * 
+	 * @param parent
+	 */
+	public void setParent(Node parent) {
+		this.parent = parent;
+	}
+
+	/**
 	 * Get the transform of this node
 	 * 
 	 * @return
@@ -42,12 +93,24 @@ public abstract class Node {
 	public Transform getTransform() {
 		return transform;
 	}
-	
+
 	/**
 	 * Debug function for drawing node
 	 */
 	public void drawNodeBox() {
-		
+
 	}
+
+	/**
+	 * Update this node
+	 */
+	public void update() {
+	};
+
+	/**
+	 * Render this node
+	 */
+	public void render() {
+	};
 
 }

@@ -78,7 +78,7 @@ public class AnimatedModel extends Model {
 	 * Whether to render the skeleton or not
 	 */
 	private boolean renderSkeleton;
-	
+
 	/*
 	 * 
 	 */
@@ -152,10 +152,10 @@ public class AnimatedModel extends Model {
 	 */
 	public void calculateSkinningMatrices() {
 
-		if(transformMatrices == null || skinningMatrices == null) {
+		if (transformMatrices == null || skinningMatrices == null) {
 			return;
 		}
-		
+
 		for (int i = 0; i < skeleton.getBones().length; i++) {
 			transformMatrices[i] = skeleton.getBones()[i]
 					.calculateGlobalTransform();
@@ -168,7 +168,8 @@ public class AnimatedModel extends Model {
 		for (int i = 0; i < skinningMatrices.length; i++) {
 			Matrix4f temp = Matrix4f.mul(globalInvTransform,
 					transformMatrices[i], null);
-			Matrix4f.mul(temp, skeleton.getBones()[i].getOffsetMatrix(), skinningMatrices[i]);
+			Matrix4f.mul(temp, skeleton.getBones()[i].getOffsetMatrix(),
+					skinningMatrices[i]);
 		}
 
 	}
@@ -189,11 +190,11 @@ public class AnimatedModel extends Model {
 	 */
 	public void setSkeleton(Skeleton skeleton) {
 		this.skeleton = skeleton;
-		
+
 		skinningMatrices = new Matrix4f[skeleton.getBones().length];
 		transformMatrices = new Matrix4f[skeleton.getBones().length];
-		
-		for(int i=0; i < skinningMatrices.length; i++) {
+
+		for (int i = 0; i < skinningMatrices.length; i++) {
 			skinningMatrices[i] = new Matrix4f();
 		}
 	}
@@ -242,6 +243,10 @@ public class AnimatedModel extends Model {
 		 * Update animation
 		 */
 		for (AnimationChannel channel : channels) {
+			if (channel.isFinished()) {
+				// Remove this channel
+				continue;
+			}
 			channel.setSpeed(1.0d);
 			channel.addTime(Application.getApplication().getFrameTime());
 			channel.update();

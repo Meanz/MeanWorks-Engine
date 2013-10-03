@@ -83,6 +83,7 @@ public class Geometry extends Node implements Renderable {
 	 *            The camera instance so the material can get to know the
 	 *            uniform variables
 	 */
+	@Override
 	public void render() {
 		if (material != null) {
 
