@@ -1,5 +1,6 @@
 package org.meanworks.engine;
 
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
 import org.lwjgl.util.vector.Matrix4f;
@@ -105,7 +106,6 @@ public class Camera {
 		return projectionViewMatrix;
 	}
 
-	
 	/**
 	 * 
 	 * @return
@@ -347,5 +347,45 @@ public class Camera {
 				/ absLength, dirVec.z / absLength);
 
 		return new Ray(new Vector3f(eye.x, eye.y, eye.z), rayDirection);
+	}
+
+	public void update() {
+		float moveSpeed = 0.2f;
+		if (Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
+			Application.getApplication().stop();
+		}
+		if (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) {
+			moveSpeed = 1.0f;
+		}
+		if (Keyboard.isKeyDown(Keyboard.KEY_W)) {
+			translate(moveSpeed * (float) Math.sin(Math.toRadians(getYaw())),
+					0.0f,
+					-moveSpeed * (float) Math.cos(Math.toRadians(getYaw())));
+		}
+		if (Keyboard.isKeyDown(Keyboard.KEY_D)) {
+			translate(
+					moveSpeed * (float) Math.sin(Math.toRadians(getYaw() + 90)),
+					0.0f,
+					-moveSpeed
+							* (float) Math.cos(Math.toRadians(getYaw() + 90)));
+		}
+		if (Keyboard.isKeyDown(Keyboard.KEY_A)) {
+			translate(
+					moveSpeed * (float) Math.sin(Math.toRadians(getYaw() - 90)),
+					0.0f,
+					-moveSpeed
+							* (float) Math.cos(Math.toRadians(getYaw() - 90)));
+		}
+		if (Keyboard.isKeyDown(Keyboard.KEY_S)) {
+			translate(-moveSpeed * (float) Math.sin(Math.toRadians(getYaw())),
+					0.0f,
+					moveSpeed * (float) Math.cos(Math.toRadians(getYaw())));
+		}
+		if (Keyboard.isKeyDown(Keyboard.KEY_E)) {
+			translate(0.0f, -0.5f * moveSpeed, 0.0f);
+		}
+		if (Keyboard.isKeyDown(Keyboard.KEY_Q)) {
+			translate(0.0f, 0.5f * moveSpeed, 0.0f);
+		}
 	}
 }

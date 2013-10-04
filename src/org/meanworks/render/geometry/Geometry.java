@@ -92,7 +92,7 @@ public class Geometry extends Node implements Renderable {
 			 */
 			material.setProperty("mProjectionView", Application
 					.getApplication().getCamera().getProjectionViewMatrix());
-			material.setProperty("mModelMatrix", getTransform().getTransformMatrix());
+			material.setProperty("mModelMatrix", getTransformMatrix());
 
 			/*
 			 * Apply material

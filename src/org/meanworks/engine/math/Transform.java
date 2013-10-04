@@ -144,7 +144,6 @@ public class Transform {
 	 */
 	public void calculateTransformMatrix() {
 		transformMatrix.setIdentity();
-
 		transformMatrix.translate(position);
 		transformMatrix.scale(scale);
 	}

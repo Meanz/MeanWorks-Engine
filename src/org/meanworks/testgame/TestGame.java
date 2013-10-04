@@ -15,6 +15,7 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector3f;
+import org.meanworks.engine.Application;
 import org.meanworks.engine.GameApplication;
 import org.meanworks.engine.gui.Button;
 import org.meanworks.engine.gui.GuiHandler;
@@ -79,6 +80,22 @@ public class TestGame extends GameApplication {
 	 */
 	private boolean flying = true;
 
+	/**
+	 * 
+	 * @return
+	 */
+	public static TestGame getGame() {
+		return (TestGame) Application.getApplication();
+	}
+
+	/**
+	 * 
+	 * @return
+	 */
+	public static World getWorld() {
+		return getGame().world;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -86,7 +103,6 @@ public class TestGame extends GameApplication {
 	 */
 	@Override
 	public void setup() {
-
 		try {
 			String osName = System.getProperty("os.name").toLowerCase();
 			boolean isMacOs = osName.startsWith("mac os x");
@@ -109,7 +125,6 @@ public class TestGame extends GameApplication {
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
-
 		setWindow(Window.createWindow(1200, 800));
 	}
 
@@ -122,16 +137,8 @@ public class TestGame extends GameApplication {
 	public void preload() {
 
 		/*
-		 * Setup basic controls
+		 * Create the gui handler
 		 */
-
-		getCamera().yaw(-25);
-		getCamera().pitch(30);
-		getCamera().translate(0.0f, 0.0f, 0.0f);
-
-		world = new World();
-
-		player = new Player();
 		guiHandler = new GuiHandler(this);
 		getInputHandler().addKeyListener(guiHandler);
 		getInputHandler().addMouseListener(guiHandler);
@@ -177,11 +184,31 @@ public class TestGame extends GameApplication {
 		guiHandler.addComponent(new Tooltip() {
 		});
 
-		// Load the water shader
+		/*
+		 * Setup basic controls
+		 */
+		getCamera().yaw(-25);
+		getCamera().pitch(30);
+		getCamera().translate(315f, 134f, 224f);
+
+		/*
+		 * Create out world
+		 */
+		world = new World();
+
+		/*
+		 * Create our player
+		 */
+		player = new Player();
+		player.getTransform().setPosition(315,
+				world.getInterpolatedHeight(315, 213), 213);
+		getScene().getRootNode().addChild(player);
+
+		/*
+		 * Load our water
+		 */
 		waterShader = getAssetManager().loadShader("./data/shaders/water");
 		waterTexture = getAssetManager().loadTexture("./data/images/water.png");
-
-		getScene().getRootNode().addChild(player);
 	}
 
 	/*
@@ -194,8 +221,8 @@ public class TestGame extends GameApplication {
 		// Update the gui handler
 		guiHandler.update();
 
-		// Make the camera follow the player's position
-		getCamera().setPosition(player.getTransform().getPosition());
+		// Update the camera
+		getCamera().update();
 
 		// Update the world
 		world.update((int) (getCamera().getPosition().x / Region.REGION_WIDTH),
@@ -204,8 +231,6 @@ public class TestGame extends GameApplication {
 		// Set the camera height to the terrain height
 		if (!flying) {
 			// TODO: Add jumping and such
-			player.getTransform().translate(0.0f,
-					-player.getTransform().getPosition().y + 2.0f, 0.0f);
 			getCamera().translate(
 					0.0f,
 					(float) world.getInterpolatedHeight(getCamera()
@@ -233,58 +258,6 @@ public class TestGame extends GameApplication {
 
 			Tooltip.setTooltip(selectedTile != null ? selectedTile
 					.getTileType().getName() : null);
-			if (Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
-				this.stop();
-			}
-			if (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) {
-				moveSpeed = 1.0f;
-			}
-			if (Keyboard.isKeyDown(Keyboard.KEY_W)) {
-				player.getTransform().translate(
-						moveSpeed
-								* (float) Math.sin(Math.toRadians(getCamera()
-										.getYaw())),
-						0.0f,
-						-moveSpeed
-								* (float) Math.cos(Math.toRadians(getCamera()
-										.getYaw())));
-			}
-			if (Keyboard.isKeyDown(Keyboard.KEY_D)) {
-				player.getTransform().translate(
-						moveSpeed
-								* (float) Math.sin(Math.toRadians(getCamera()
-										.getYaw() + 90)),
-						0.0f,
-						-moveSpeed
-								* (float) Math.cos(Math.toRadians(getCamera()
-										.getYaw() + 90)));
-			}
-			if (Keyboard.isKeyDown(Keyboard.KEY_A)) {
-				player.getTransform().translate(
-						moveSpeed
-								* (float) Math.sin(Math.toRadians(getCamera()
-										.getYaw() - 90)),
-						0.0f,
-						-moveSpeed
-								* (float) Math.cos(Math.toRadians(getCamera()
-										.getYaw() - 90)));
-			}
-			if (Keyboard.isKeyDown(Keyboard.KEY_S)) {
-				player.getTransform().translate(
-						-moveSpeed
-								* (float) Math.sin(Math.toRadians(getCamera()
-										.getYaw())),
-						0.0f,
-						moveSpeed
-								* (float) Math.cos(Math.toRadians(getCamera()
-										.getYaw())));
-			}
-			if (Keyboard.isKeyDown(Keyboard.KEY_E)) {
-				player.getTransform().translate(0.0f, -0.5f * moveSpeed, 0.0f);
-			}
-			if (Keyboard.isKeyDown(Keyboard.KEY_Q)) {
-				player.getTransform().translate(0.0f, 0.5f * moveSpeed, 0.0f);
-			}
 		}
 	}
 
@@ -339,6 +312,9 @@ public class TestGame extends GameApplication {
 		glEnable(GL_CULL_FACE);
 	}
 
+	/**
+	 * Draw the selected tile
+	 */
 	public void drawSelectedTile() {
 		float p1H = world.getTileHeight(
 				(int) selectedTile.getTilePosition().x + 1,

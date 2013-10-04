@@ -2,7 +2,9 @@ package org.meanworks.engine.scene;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Stack;
 
+import org.lwjgl.util.vector.Matrix4f;
 import org.meanworks.engine.math.Transform;
 
 /**
@@ -36,6 +38,11 @@ public abstract class Node {
 	private LinkedList<Node> children = new LinkedList<>();
 
 	/*
+	 * 
+	 */
+	private NodeInheritance nodeInheritance;
+
+	/*
 	 * The transform of this node
 	 */
 	private Transform transform;
@@ -45,6 +52,7 @@ public abstract class Node {
 	 */
 	public Node() {
 		transform = new Transform();
+		nodeInheritance = NodeInheritance.INHERIT_NONE;
 	}
 
 	/**
@@ -63,6 +71,7 @@ public abstract class Node {
 	 */
 	public void addChild(Node child) {
 		if (child != null) {
+			child.setParent(this);
 			children.add(child);
 		}
 	}
@@ -95,6 +104,31 @@ public abstract class Node {
 	}
 
 	/**
+	 * Get the transform matrix of this node
+	 */
+	public Matrix4f getTransformMatrix() {
+		Matrix4f transformMatrix = new Matrix4f();
+		if (nodeInheritance != NodeInheritance.INHERIT_NONE) {
+			Node _parent = parent;
+			Stack<Matrix4f> parentStack = new Stack<>();
+			while (_parent != null) {
+				parentStack.push(_parent.getTransform().getTransformMatrix());
+				_parent = _parent.getParent();
+			}
+			// The root is now at the top of the stack
+			if (!parentStack.isEmpty()) {
+				while (!parentStack.isEmpty()) {
+					transformMatrix = Matrix4f.mul(transformMatrix,
+							parentStack.pop(), null);
+				}
+			}
+		}
+		transformMatrix = Matrix4f.mul(transformMatrix,
+				transform.getTransformMatrix(), null);
+		return transformMatrix;
+	}
+
+	/**
 	 * Debug function for drawing node
 	 */
 	public void drawNodeBox() {
@@ -102,9 +136,33 @@ public abstract class Node {
 	}
 
 	/**
+	 * Update method called from the Application
+	 */
+	public final void doUpdate() {
+
+		/*
+		 * Update transform if needed
+		 */
+
+		/*
+		 * Send the update request to the class that extends this node
+		 */
+		update();
+	}
+
+	/**
+	 * Render method called from the Application
+	 */
+	public final void doRender() {
+
+		render();
+	}
+
+	/**
 	 * Update this node
 	 */
 	public void update() {
+
 	};
 
 	/**

@@ -14,6 +14,9 @@ import org.meanworks.render.texture.TextureLoader;
 
 public class World {
 
+	/*
+	 * The view distance of this world
+	 */
 	public final static int VIEW_DISTANCE = 5;
 
 	/*

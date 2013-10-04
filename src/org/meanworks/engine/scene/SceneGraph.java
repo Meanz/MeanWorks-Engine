@@ -47,7 +47,7 @@ public class SceneGraph {
 	 * @param node
 	 */
 	public void doUpdate(Node node) {
-		node.update();
+		node.doUpdate();
 		for (Node child : node.getChildren()) {
 			doUpdate(child);
 		}
@@ -59,7 +59,7 @@ public class SceneGraph {
 	 * @param node
 	 */
 	private void doRender(Node node) {
-		node.render();
+		node.doRender();
 		for (Node child : node.getChildren()) {
 			doRender(child);
 		}
