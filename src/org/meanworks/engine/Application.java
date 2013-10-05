@@ -235,7 +235,7 @@ public abstract class Application {
 		 * Setup the default material
 		 */
 		Material.DEFAULT_MATERIAL = new Material("DEFAULT_MATERIAL",
-				ShaderHelper.createDefaultShader());
+				getAssetManager().loadShader("./data/shaders/colorShader"));
 
 		/*
 		 * Preload

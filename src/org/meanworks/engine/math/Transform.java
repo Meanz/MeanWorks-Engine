@@ -135,6 +135,20 @@ public class Transform {
 	 * @param z
 	 * @param w
 	 */
+	public void rotate(float x, float y, float z) {
+		rotation.x += x;
+		rotation.y += y;
+		rotation.z += z;
+		needsUpdate = true;
+	}
+
+	/**
+	 * 
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @param w
+	 */
 	public void rotate(float x, float y, float z, float w) {
 		// Err
 	}
@@ -145,6 +159,11 @@ public class Transform {
 	public void calculateTransformMatrix() {
 		transformMatrix.setIdentity();
 		transformMatrix.translate(position);
+		//Perform expensive rotation operations
+		transformMatrix.rotate((float)Math.toRadians(rotation.x), new Vector3f(1.0f, 0.0f, 0.0f));
+		transformMatrix.rotate((float)Math.toRadians(rotation.y), new Vector3f(0.0f, 1.0f, 0.0f));
+		transformMatrix.rotate((float)Math.toRadians(rotation.z), new Vector3f(0.0f, 0.0f, 1.0f));
+		//Scale
 		transformMatrix.scale(scale);
 	}
 

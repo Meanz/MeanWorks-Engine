@@ -113,7 +113,7 @@ public class MeshRenderer {
 	 */
 	public void addIndex(IntBuffer buffer, int numIndices) {
 		VertexBuffer vbIndices = new VertexBuffer(BufferType.INDEX_BUFFER,
-				BufferUsage.DYNAMIC_DRAW);
+				BufferUsage.STATIC_DRAW);
 		vbIndices.bufferData(buffer);
 		setIndexBuffer(vbIndices);
 		setNumIndices(numIndices);

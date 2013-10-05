@@ -116,7 +116,6 @@ public class MWMLoader {
 
 			bb.order(ByteOrder.nativeOrder());
 
-			LinkedList<Mesh> meshes = new LinkedList<>();
 			LinkedList<Animation> animations = new LinkedList<>();
 			Skeleton skeleton = null;
 
@@ -144,19 +143,21 @@ public class MWMLoader {
 						String textureFile = getString(bb);
 
 						boolean hasBoneData = bb.getInt() == 1 ? true : false;
-						
+
 						System.err.println("[Mesh " + "numVertices="
 								+ numVertices + "" + " hasVertices="
 								+ hasVertices + "" + " hasNormals="
 								+ hasNormals + "" + " hasUVs=" + hasUVs + ""
 								+ " texture=" + textureFile + ""
-										+ " hasBoneData=" + hasBoneData + "]");
+								+ " hasBoneData=" + hasBoneData + "]");
 
-						VertexBoneInformation[] vbi = new VertexBoneInformation[numVertices];
+						VertexBoneInformation[] vbi = null;
 
 						if (hasBoneData) {
+							vbi = new VertexBoneInformation[numVertices];
 							numBonesPerVertex = bb.getInt();
-							System.err.println("NUM BONES PER VERTEX: " + numBonesPerVertex);
+							System.err.println("NUM BONES PER VERTEX: "
+									+ numBonesPerVertex);
 
 							for (int i = 0; i < numVertices; i++) {
 
@@ -255,14 +256,20 @@ public class MWMLoader {
 						System.err.println("Added mesh: "
 								+ ("mesh_" + meshName + "_" + meshId));
 
-						meshes.add(mesh);
-						
-						if(!textureFile.equals("null")) {
-							//Find the root dir
+						if (!textureFile.equals("null")) {
+							// Find the root dir
+							System.err.println("Loaded texture " + textureFile);
 							File modelFile = new File(fileName);
-							mesh.setMeshTexture(Application.getApplication().getAssetManager().loadTexture(modelFile.getParentFile().toString() + "/" + textureFile));
+							mesh.setMeshTexture(Application
+									.getApplication()
+									.getAssetManager()
+									.loadTexture(
+											modelFile.getParentFile()
+													.toString()
+													+ "/"
+													+ textureFile));
 						}
- 						break;
+						break;
 
 					// Read skeleton
 					case 11:

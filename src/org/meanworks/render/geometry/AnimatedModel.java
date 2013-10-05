@@ -6,6 +6,7 @@ import static org.lwjgl.opengl.GL11.glEnd;
 import static org.lwjgl.opengl.GL11.glVertex3f;
 
 import java.util.LinkedList;
+import java.util.List;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Matrix4f;
@@ -16,7 +17,6 @@ import org.meanworks.engine.EngineLogger;
 import org.meanworks.render.geometry.animation.Animation;
 import org.meanworks.render.geometry.animation.AnimationChannel;
 import org.meanworks.render.geometry.animation.Skeleton;
-import org.meanworks.render.geometry.mesh.Mesh;
 import org.meanworks.render.material.Material;
 
 /**
@@ -94,6 +94,22 @@ public class AnimatedModel extends Model {
 				.getApplication().getAssetManager()
 				.loadShader("./data/shaders/simple_skinning")));
 
+	}
+
+	/**
+	 * Stops all animations
+	 */
+	public void clearChannels() {
+		channels.clear();
+	}
+
+	/**
+	 * Get the active animation channels
+	 * 
+	 * @return
+	 */
+	public List<AnimationChannel> getActiveChannels() {
+		return channels;
 	}
 
 	/**

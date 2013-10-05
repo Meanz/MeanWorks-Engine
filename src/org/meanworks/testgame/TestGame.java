@@ -11,7 +11,6 @@ import static org.lwjgl.opengl.GL11.glEnable;
 
 import java.io.File;
 
-import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector3f;
@@ -25,7 +24,7 @@ import org.meanworks.engine.gui.impl.radialmenu.RadialButton;
 import org.meanworks.engine.gui.impl.radialmenu.RadialMenu;
 import org.meanworks.engine.math.Ray;
 import org.meanworks.engine.model.MWMLoader;
-import org.meanworks.render.geometry.AnimatedModel;
+import org.meanworks.render.geometry.Geometry;
 import org.meanworks.render.geometry.Vertex;
 import org.meanworks.render.geometry.animation.AnimationChannel;
 import org.meanworks.render.geometry.animation.LoopMode;
@@ -79,6 +78,11 @@ public class TestGame extends GameApplication {
 	 * 
 	 */
 	private boolean flying = true;
+
+	/*
+	 * 
+	 */
+	private Geometry kostjaModel = null;
 
 	/**
 	 * 
@@ -188,7 +192,7 @@ public class TestGame extends GameApplication {
 		 * Setup basic controls
 		 */
 		getCamera().yaw(-25);
-		getCamera().pitch(30);
+		getCamera().pitch(45);
 		getCamera().translate(315f, 134f, 224f);
 
 		/*
@@ -204,11 +208,18 @@ public class TestGame extends GameApplication {
 				world.getInterpolatedHeight(315, 213), 213);
 		getScene().getRootNode().addChild(player);
 
+		// Let's try to load a model
+		kostjaModel = MWMLoader.loadModel("./data/models/kostja.mwm");
+		kostjaModel.getTransform().setPosition(315, 135, 213);
+		kostjaModel.getTransform().setScale(0.2f, 0.2f, 0.2f);
+		getScene().getRootNode().addChild(kostjaModel);
+
 		/*
 		 * Load our water
 		 */
 		waterShader = getAssetManager().loadShader("./data/shaders/water");
 		waterTexture = getAssetManager().loadTexture("./data/images/water.png");
+
 	}
 
 	/*
@@ -237,18 +248,8 @@ public class TestGame extends GameApplication {
 							.getPosition().x, getCamera().getPosition().z),
 					0.0f);
 		}
-		// Update the player
-		player.update();
 
 		if (!guiHandler.didConsumeInput()) {
-			if (Mouse.isButtonDown(1)) { // RMB
-				float mouseRatio = 0.2f;
-
-				float yincr = getInputHandler().getDX() * mouseRatio;
-				float pincr = -getInputHandler().getDY() * mouseRatio;
-				getCamera().yaw(yincr);
-				getCamera().pitch(-pincr);
-			}
 
 			float moveSpeed = 0.1f;
 			// Ray trace the ground
@@ -258,6 +259,24 @@ public class TestGame extends GameApplication {
 
 			Tooltip.setTooltip(selectedTile != null ? selectedTile
 					.getTileType().getName() : null);
+
+			if (Mouse.isButtonDown(1)) { // RMB
+				float mouseRatio = 0.2f;
+
+				float yincr = getInputHandler().getDX() * mouseRatio;
+				float pincr = -getInputHandler().getDY() * mouseRatio;
+				getCamera().yaw(yincr);
+			} else if (Mouse.isButtonDown(0)) {
+
+				// We want to find out the exact coordinate of where we clicked
+				// But for now let's just take the tile
+				if (selectedTile != null) {
+					System.err.println("Moving to point "
+							+ selectedTile.getTilePosition().toString());
+					player.moveTowards(selectedTile.getTilePosition().x,
+							selectedTile.getTilePosition().y);
+				}
+			}
 		}
 	}
 

@@ -3,7 +3,9 @@ package org.meanworks.render.geometry;
 import java.util.Collection;
 import java.util.HashMap;
 
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.Renderable;
+import org.lwjgl.util.vector.Vector4f;
 import org.meanworks.engine.Application;
 import org.meanworks.engine.scene.Node;
 import org.meanworks.render.geometry.mesh.Mesh;
@@ -87,6 +89,13 @@ public class Geometry extends Node implements Renderable {
 	public void render() {
 		if (material != null) {
 
+			getMaterial().setProperty("vAmbientColor",
+					new Vector4f(0.5f, 0.5f, 0.5f, 1.0f));
+			getMaterial().setProperty("vDiffuseColor",
+					new Vector4f(1.0f, 1.0f, 1.0f, 1.0f));
+			getMaterial().setProperty("fSpecularIntensity", 30.0f);
+			getMaterial().setProperty("tColorMap", 0);
+			
 			/*
 			 * Update viewing matrices
 			 */

@@ -73,6 +73,7 @@ public abstract class Node {
 		if (child != null) {
 			child.setParent(this);
 			children.add(child);
+			System.err.println("Children Size: " + children.size());
 		}
 	}
 
