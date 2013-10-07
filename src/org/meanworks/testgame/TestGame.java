@@ -207,6 +207,8 @@ public class TestGame extends GameApplication {
 		player.getTransform().setPosition(315,
 				world.getInterpolatedHeight(315, 213), 213);
 		getScene().getRootNode().addChild(player);
+		
+		getCamera().follow(player);
 
 		// Let's try to load a model
 		kostjaModel = MWMLoader.loadModel("./data/models/kostja.mwm");
@@ -233,6 +235,10 @@ public class TestGame extends GameApplication {
 		guiHandler.update();
 
 		// Update the camera
+
+		/*
+		 * Make the camera follow the player third person wise
+		 */
 		getCamera().update();
 
 		// Update the world
@@ -260,21 +266,15 @@ public class TestGame extends GameApplication {
 			Tooltip.setTooltip(selectedTile != null ? selectedTile
 					.getTileType().getName() : null);
 
-			if (Mouse.isButtonDown(1)) { // RMB
-				float mouseRatio = 0.2f;
-
-				float yincr = getInputHandler().getDX() * mouseRatio;
-				float pincr = -getInputHandler().getDY() * mouseRatio;
-				getCamera().yaw(yincr);
-			} else if (Mouse.isButtonDown(0)) {
+			if (Mouse.isButtonDown(0)) {
 
 				// We want to find out the exact coordinate of where we clicked
 				// But for now let's just take the tile
 				if (selectedTile != null) {
-					System.err.println("Moving to point "
-							+ selectedTile.getTilePosition().toString());
-					player.moveTowards(selectedTile.getTilePosition().x,
-							selectedTile.getTilePosition().y);
+					//System.err.println("Moving to point "
+					//		+ selectedTile.getTilePosition().toString());
+					//player.moveTowards(selectedTile.getTilePosition().x,
+					//		selectedTile.getTilePosition().y);
 				}
 			}
 		}

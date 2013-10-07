@@ -1,6 +1,7 @@
 package org.meanworks.engine;
 
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
 import org.lwjgl.util.vector.Matrix4f;
@@ -8,6 +9,7 @@ import org.lwjgl.util.vector.Vector3f;
 import org.meanworks.engine.math.MatrixHelper;
 import org.meanworks.engine.math.Ray;
 import org.meanworks.engine.math.VectorMath;
+import org.meanworks.engine.scene.Node;
 
 public class Camera {
 
@@ -58,6 +60,14 @@ public class Camera {
 	 * 
 	 */
 	private static Vector3f upVector = new Vector3f(0.0f, 1.0f, 0.0f);
+	/*
+	 * 
+	 */
+	private boolean isFlying = false;
+	/*
+	 * 
+	 */
+	private Node followTarget;
 
 	/**
 	 * Construct a new camera
@@ -76,10 +86,28 @@ public class Camera {
 		this.cameraLookAt = new Vector3f(1.0f, 1.0f, 1.0f);
 		this.rotation = new Vector3f(0.0f, 0.0f, 0.0f);
 
-		projectionMatrix = perspective(fovY, aspect, 0.0f, 1000.0f);
+		projectionMatrix = perspective(fovY, aspect, 0.0f, 1000.0f, new Matrix4f());
 		viewMatrix = new Matrix4f();
 		projectionViewMatrix = new Matrix4f();
 		cameraTranslationMatrix = new Matrix4f();
+	}
+
+	/**
+	 * Make the camera follow the given node
+	 * 
+	 * @param target
+	 */
+	public void follow(Node target) {
+		this.followTarget = target;
+	}
+
+	/**
+	 * Check whether we are flying or not
+	 * 
+	 * @return
+	 */
+	public boolean isFlying() {
+		return isFlying;
 	}
 
 	/**
@@ -215,14 +243,31 @@ public class Camera {
 		 * dest) MatrixHelper.setupMatrices(projectionMatrix, viewMatrix);
 		 */
 
-		projectionMatrix = perspective(fovY, aspect, 1.0f, 1000.0f);
+		perspective(fovY, aspect, 1.0f, 1000.0f, projectionMatrix);
 		// viewMatrix = lookAt(cameraPosition, forward(cameraPosition,
 		// rotation));
-		viewMatrix.setIdentity();
-		viewMatrix.rotate((float) Math.toRadians(rotation.x), xVector);
-		viewMatrix.rotate((float) Math.toRadians(rotation.y), upVector);
-		viewMatrix.translate(cameraPosition.negate(null), viewMatrix);
 
+		if (isFlying()) {
+			viewMatrix.setIdentity();
+			viewMatrix.rotate((float) Math.toRadians(rotation.x), xVector);
+			viewMatrix.rotate((float) Math.toRadians(rotation.y), upVector);
+			viewMatrix.translate(cameraPosition.negate(null), viewMatrix);
+		} else if (followTarget != null) {
+			/*
+			 * viewMatrix = lookAt(cameraPosition, followTarget.getTransform()
+			 * .getPosition());
+			 */
+			viewMatrix.setIdentity();
+			viewMatrix.rotate((float) Math.toRadians(rotation.x), xVector);
+			viewMatrix.rotate((float) Math.toRadians(rotation.y + 180), upVector);
+			viewMatrix.translate(cameraPosition.negate(null), viewMatrix);
+		} else {
+			viewMatrix.setIdentity();
+
+			viewMatrix.rotate((float) Math.toRadians(rotation.x), xVector);
+			viewMatrix.rotate((float) Math.toRadians(rotation.y), upVector);
+			viewMatrix.translate(cameraPosition.negate(null), viewMatrix);
+		}
 		// Translation
 		MatrixHelper.setupMatrices(projectionMatrix, viewMatrix);
 
@@ -273,20 +318,19 @@ public class Camera {
 	 * Temporary function for setting up the projection matrix
 	 */
 	private Matrix4f perspective(float fovY, float aspect, float nearPlane,
-			float farPlane) {
-		Matrix4f persp = new Matrix4f();
+			float farPlane, Matrix4f storeIn) {
 		GL11.glMatrixMode(GL11.GL_PROJECTION);
 		{
 			GL11.glPushMatrix();
 			{
 				GL11.glLoadIdentity();
 				GLU.gluPerspective(fovY, aspect, nearPlane, farPlane);
-				MatrixHelper.getMatrix(GL11.GL_PROJECTION_MATRIX, persp);
+				MatrixHelper.getMatrix(GL11.GL_PROJECTION_MATRIX, storeIn);
 			}
 			GL11.glPopMatrix();
 		}
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);
-		return persp;
+		return storeIn;
 	}
 
 	/**
@@ -327,9 +371,9 @@ public class Camera {
 		// Create a forward vector
 		float factor = (float) Math.cos(Math.toRadians(rotation.x));
 		Vector3f forward = new Vector3f();
-		forward.x = (float) Math.sin(Math.toRadians(rotation.y)) * factor;
+		forward.x = (float) Math.sin(Math.toRadians(rotation.y + 180.0f)) * factor;
 		forward.y = (float) Math.sin(Math.toRadians(-rotation.x));
-		forward.z = (float) -Math.cos(Math.toRadians(rotation.y)) * factor;
+		forward.z = (float) -Math.cos(Math.toRadians(rotation.y + 180.0f)) * factor;
 		VectorMath.mulLocal(forward, 100);
 		Vector3f center = new Vector3f(cameraPosition.x + forward.x,
 				cameraPosition.y + forward.y, cameraPosition.z + forward.z);
@@ -349,43 +393,123 @@ public class Camera {
 		return new Ray(new Vector3f(eye.x, eye.y, eye.z), rayDirection);
 	}
 
+	public void thirdPersonCamera() {
+		//
+		if (Mouse.isButtonDown(1)) { // RMB
+			float mouseRatio = 0.2f;
+
+			float yincr = Application.getApplication().getInputHandler()
+					.getDX()
+					* mouseRatio;
+			float pincr = -Application.getApplication().getInputHandler()
+					.getDY()
+					* mouseRatio;
+			yaw(yincr);
+			// pitch(pincr);
+		}
+
+		// Set our position to the players position
+		this.setPosition(followTarget.getTransform().getPosition());
+
+		// The distance from the camera
+		float distance = 10;
+
+		// Find the yaw of our camera
+		float yaw = (float) Math.toRadians(getYaw());
+		float pitch = (float) Math.toRadians(getPitch());
+
+		float factor = (float) Math.cos(Math.toRadians(rotation.x));
+		Vector3f forward = new Vector3f();
+		forward.x = (float) Math.sin(Math.toRadians(rotation.y)) * factor;
+		forward.y = (float) Math.sin(Math.toRadians(-rotation.x));
+		forward.z = (float) -Math.cos(Math.toRadians(rotation.y)) * factor;
+
+		translate((float) forward.x * distance, (float) forward.y * distance,
+				(float) forward.z * distance);
+	}
+
 	public void update() {
 		float moveSpeed = 0.2f;
 		if (Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
 			Application.getApplication().stop();
 		}
-		if (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) {
-			moveSpeed = 1.0f;
-		}
-		if (Keyboard.isKeyDown(Keyboard.KEY_W)) {
-			translate(moveSpeed * (float) Math.sin(Math.toRadians(getYaw())),
-					0.0f,
-					-moveSpeed * (float) Math.cos(Math.toRadians(getYaw())));
-		}
-		if (Keyboard.isKeyDown(Keyboard.KEY_D)) {
-			translate(
-					moveSpeed * (float) Math.sin(Math.toRadians(getYaw() + 90)),
-					0.0f,
-					-moveSpeed
-							* (float) Math.cos(Math.toRadians(getYaw() + 90)));
-		}
-		if (Keyboard.isKeyDown(Keyboard.KEY_A)) {
-			translate(
-					moveSpeed * (float) Math.sin(Math.toRadians(getYaw() - 90)),
-					0.0f,
-					-moveSpeed
-							* (float) Math.cos(Math.toRadians(getYaw() - 90)));
-		}
-		if (Keyboard.isKeyDown(Keyboard.KEY_S)) {
-			translate(-moveSpeed * (float) Math.sin(Math.toRadians(getYaw())),
-					0.0f,
-					moveSpeed * (float) Math.cos(Math.toRadians(getYaw())));
-		}
-		if (Keyboard.isKeyDown(Keyboard.KEY_E)) {
-			translate(0.0f, -0.5f * moveSpeed, 0.0f);
-		}
-		if (Keyboard.isKeyDown(Keyboard.KEY_Q)) {
-			translate(0.0f, 0.5f * moveSpeed, 0.0f);
+
+		if (followTarget != null) {
+
+			if (Mouse.isButtonDown(1)) { // RMB
+				float mouseRatio = 0.2f;
+
+				float yincr = Application.getApplication().getInputHandler()
+						.getDX()
+						* mouseRatio;
+				float pincr = Application.getApplication().getInputHandler()
+						.getDY()
+						* mouseRatio;
+				yaw(yincr);
+				pitch(pincr);
+			}
+
+			// Set our position to the players position
+			this.setPosition(followTarget.getTransform().getPosition());
+			
+			this.translate(0.0f, 2.5f, 0.0f);
+
+		} else if (isFlying()) {
+			if (Mouse.isButtonDown(1)) { // RMB
+				float mouseRatio = 0.2f;
+
+				float yincr = Application.getApplication().getInputHandler()
+						.getDX()
+						* mouseRatio;
+				float pincr = -Application.getApplication().getInputHandler()
+						.getDY()
+						* mouseRatio;
+				yaw(yincr);
+				pitch(pincr);
+			}
+
+			if (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) {
+				moveSpeed = 1.0f;
+			}
+			if (Keyboard.isKeyDown(Keyboard.KEY_W)) {
+				translate(
+						moveSpeed * (float) Math.sin(Math.toRadians(getYaw())),
+						0.0f,
+						-moveSpeed * (float) Math.cos(Math.toRadians(getYaw())));
+			}
+			if (Keyboard.isKeyDown(Keyboard.KEY_D)) {
+				translate(
+						moveSpeed
+								* (float) Math.sin(Math
+										.toRadians(getYaw() + 90)),
+						0.0f,
+						-moveSpeed
+								* (float) Math.cos(Math
+										.toRadians(getYaw() + 90)));
+			}
+			if (Keyboard.isKeyDown(Keyboard.KEY_A)) {
+				translate(
+						moveSpeed
+								* (float) Math.sin(Math
+										.toRadians(getYaw() - 90)),
+						0.0f,
+						-moveSpeed
+								* (float) Math.cos(Math
+										.toRadians(getYaw() - 90)));
+			}
+			if (Keyboard.isKeyDown(Keyboard.KEY_S)) {
+				translate(
+						-moveSpeed * (float) Math.sin(Math.toRadians(getYaw())),
+						0.0f,
+						moveSpeed * (float) Math.cos(Math.toRadians(getYaw())));
+			}
+			if (Keyboard.isKeyDown(Keyboard.KEY_E)) {
+				translate(0.0f, -0.5f * moveSpeed, 0.0f);
+			}
+			if (Keyboard.isKeyDown(Keyboard.KEY_Q)) {
+				translate(0.0f, 0.5f * moveSpeed, 0.0f);
+			}
+		} else {
 		}
 	}
 }

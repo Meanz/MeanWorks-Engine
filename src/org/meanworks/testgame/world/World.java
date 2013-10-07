@@ -1,6 +1,6 @@
 package org.meanworks.testgame.world;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 
 import org.lwjgl.util.vector.Vector3f;
 import org.meanworks.engine.Application;
@@ -17,7 +17,7 @@ public class World {
 	/*
 	 * The view distance of this world
 	 */
-	public final static int VIEW_DISTANCE = 5;
+	public final static int VIEW_DISTANCE = 2;
 
 	/*
 	 * The world cursors position
@@ -27,7 +27,7 @@ public class World {
 
 	// to be able to
 	// load further
-	private LinkedList<Region> loadedRegions = new LinkedList<>();
+	private ArrayList<Region> loadedRegions = new ArrayList<>();
 
 	//
 	private boolean isListUpdateNeeded = true;
@@ -255,6 +255,7 @@ public class World {
 						intersectionPoint)) {
 					// System.err.println("Found tile1 at [" + x + ", " + z
 					// + "] \n");
+					//System.err.println("Intersection point: " + intersectionPoint.toString());
 					return new Vector3f(x, 0.0f, z);
 				}
 				if (VectorMath.intersectsTriangle(ray, t2_p1, t2_p2, t2_p3,

@@ -68,16 +68,53 @@ public class AnimationChannel {
 	 */
 	public AnimationChannel(Skeleton skeleton, Animation animation) {
 		this.skeleton = skeleton;
+		playAnimation(animation, LoopMode.LM_DONT_LOOP);
+	}
+
+	/**
+	 * Construct a new animation channel
+	 * 
+	 * @param animation
+	 */
+	public AnimationChannel(Skeleton skeleton) {
+		this.skeleton = skeleton;
+		this.finished = true;
+	}
+
+	/**
+	 * Get the active animation
+	 * 
+	 * @return
+	 */
+	public Animation getAnimation() {
+		return animation;
+	}
+
+	/**
+	 * Plays the given animation
+	 * 
+	 * @param animation
+	 */
+	public void playAnimation(Animation animation, LoopMode loopMode) {
 		this.animation = animation;
+		this.loopMode = loopMode;
 		this.currentTime = 0.0d;
 		this.speedModifier = 1.0d;
-		this.loopMode = LoopMode.LM_DONT_LOOP;
 		this.finished = false;
 
 		nodePositions = new Vector3f[animation.getNodes().length];
 		for (int i = 0; i < nodePositions.length; i++) {
 			nodePositions[i] = new Vector3f(0.0f, 0.0f, 0.0f);
 		}
+	}
+
+	/**
+	 * Plays the given animation with the default loop mode
+	 * 
+	 * @param animation
+	 */
+	public void playAnimation(Animation animation) {
+		playAnimation(animation, LoopMode.LM_DONT_LOOP);
 	}
 
 	/**
@@ -137,6 +174,9 @@ public class AnimationChannel {
 	 * @param time
 	 */
 	public void addTime(double time) {
+		if (animation == null || isFinished()) {
+			return;
+		}
 		if (animation.getDuration() > 0.0) {
 			// Calculate the current frame time
 			currentTime += (time * animation.getTicksPerSecond())
@@ -205,6 +245,10 @@ public class AnimationChannel {
 	 * Update this channel
 	 */
 	public void update() {
+
+		if (animation == null || isFinished()) {
+			return;
+		}
 
 		for (int i = 0; i < animation.getNodes().length; i++) {
 

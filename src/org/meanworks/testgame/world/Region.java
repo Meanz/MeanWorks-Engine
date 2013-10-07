@@ -12,6 +12,7 @@ import org.meanworks.engine.math.VectorMath;
 import org.meanworks.render.geometry.Geometry;
 import org.meanworks.render.geometry.Vertex;
 import org.meanworks.render.geometry.mesh.Mesh;
+import org.meanworks.render.geometry.mesh.MeshBuffer;
 import org.meanworks.render.geometry.mesh.MeshRenderer;
 import org.meanworks.render.geometry.mesh.MeshRenderer.BufferEntry;
 import org.meanworks.render.opengl.VertexBuffer;
@@ -52,7 +53,7 @@ public class Region {
 	/*
 	 * The data buffer
 	 */
-	private FloatBuffer dataBuffer;
+	private MeshBuffer buffer;
 
 	/*
 	 * The world reference
@@ -226,19 +227,74 @@ public class Region {
 		return new Vector3f(endX / 7.0f, endY / 7.0f, endZ / 7.0f);
 	}
 
+	public Vector4f getTileTransition(int _x, int _y) {
+		Vector4f tileTransitions = new Vector4f(0.0f, 0.0f, 0.0f, 0.0f);
+		Tile thisTile = world.getTile(_x, _y);
+		// Check for top transition
+		Tile tile = world.getTile(_x, _y + 1);
+		if (tile == null) {
+			tileTransitions.x = 0f;
+		} else {
+			if (tile.getTileType() != thisTile.getTileType()) {
+				tileTransitions.x = tile.getTileType().getTextureIndex() + 1f;
+			} else {
+				tileTransitions.x = 0f;
+			}
+		}
+		// Check for right transition
+		tile = world.getTile(_x - 1, _y);
+		if (tile == null) {
+			tileTransitions.y = 0f;
+		} else {
+			if (tile.getTileType() != thisTile.getTileType()) {
+				tileTransitions.y = tile.getTileType().getTextureIndex() + 1f;
+			} else {
+				tileTransitions.y = 0f;
+			}
+		}
+		// Check for bottom transition
+		tile = world.getTile(_x, _y - 1);
+		if (tile == null) {
+			tileTransitions.z = 0f;
+		} else {
+			if (tile.getTileType() != thisTile.getTileType()) {
+				tileTransitions.z = tile.getTileType().getTextureIndex() + 1f;
+			} else {
+				tileTransitions.z = 0f;
+			}
+		}
+		// Check for left transition
+		tile = world.getTile(_x + 1, _y);
+		if (tile == null) {
+			tileTransitions.w = 0f;
+		} else {
+			if (tile.getTileType() != thisTile.getTileType()) {
+				tileTransitions.w = tile.getTileType().getTextureIndex() + 1f;
+			} else {
+				tileTransitions.w = 0f;
+			}
+		}
+		return tileTransitions;
+	}
+
+	public void buildTerrain(int lodLevel) {
+	}
+
 	/**
 	 * Build the terrain
 	 */
 	public void buildTerrain() {
 		// Recompile
-		int numTris = REGION_WIDTH * REGION_HEIGHT * 2;
-		int numVertices = numTris * 3;
-		dataBuffer = BufferUtils.createFloatBuffer((numVertices * 2 * 3)
-				+ (numVertices * 3) + (numVertices * 4));
+		int numTiles = REGION_WIDTH * REGION_HEIGHT;
+		int FLOATS_IN_VEC = 3;
+		buffer = new MeshBuffer((numTiles * 4 * FLOATS_IN_VEC * 2)
+				+ (numTiles * 4 * FLOATS_IN_VEC) + (numTiles * 4 * 4),
+				(numTiles * 6));
 
 		/*
 		 * Build new vertices
 		 */
+		int index = 0;
 		for (int x = 0; x < REGION_WIDTH; x++) {
 			for (int y = 0; y < REGION_HEIGHT; y++) {
 
@@ -250,29 +306,13 @@ public class Region {
 				float p3H = (float) world.getWorldGen().getHeight(_x, _y + 1);
 				float p4H = (float) world.getWorldGen().getHeight(_x + 1,
 						_y + 1);
-
-				int numWTextures = 4;
-				int numHTextures = 4;
-
+				
 				int myTexId = tiles[x][y].getTileType().getTextureIndex();
+				float minTexX = 0.0f;
+				float maxTexX = 1.0f;
+				float minTexY = 0.0f;
+				float maxTexY = 1.0f;
 
-				float perWUnit = (1.0f / (float) numWTextures);
-				float perHUnit = (1.0f / (float) numHTextures);
-				float minTexX = perWUnit
-						* (myTexId - ((myTexId / numWTextures) * numWTextures));
-				float minTexY = perHUnit * (myTexId / numWTextures);
-				float maxTexX = minTexX + perWUnit;
-				float maxTexY = minTexY + perHUnit;
-
-				minTexX = 0.0f;
-				maxTexX = 1.0f;
-				minTexY = 0.0f;
-				maxTexY = 1.0f;
-
-				// p4----p3
-				// |_____|
-				// |_____|
-				// p1----p2
 				Vertex p1 = new Vertex(new Vector3f((float) _x + TILE_WIDTH,
 						p1H, (float) _y), calcNormal(_x + 1, _y), new Vector2f(
 						minTexX, maxTexY));
@@ -289,120 +329,49 @@ public class Region {
 						p4H, (float) (float) _y + TILE_LENGTH), calcNormal(
 						_x + 1, _y + 1), new Vector2f(minTexX, minTexY));
 
-				float val = myTexId;
+				Vector3f texp1 = new Vector3f(minTexX, maxTexY, myTexId);
+				Vector3f texp2 = new Vector3f(maxTexX, maxTexY, myTexId);
+				Vector3f texp3 = new Vector3f(maxTexX, minTexY, myTexId);
+				Vector3f texp4 = new Vector3f(minTexX, minTexY, myTexId);
 
-				Vector3f texp1 = new Vector3f(minTexX, maxTexY, val);
-				Vector3f texp2 = new Vector3f(maxTexX, maxTexY, val);
-				Vector3f texp3 = new Vector3f(maxTexX, minTexY, val);
-				Vector3f texp4 = new Vector3f(minTexX, minTexY, val);
+				Vector4f tileTransitions = getTileTransition(_x, _y);
 
-				Vector4f tileTransitions = new Vector4f(0.0f, 0.0f, 0.0f, 0.0f);
+				buffer.addVec3(p1.getPosition());
+				buffer.addVec3(p1.getNormal());
+				buffer.addVec3(texp1);
+				buffer.addVec4(tileTransitions);
 
-				// TRBL
+				index++;
 
-				Tile thisTile = world.getTile(_x, _y);
-				// Check for top transition
-				Tile tile = world.getTile(_x, _y + 1);
-				if (tile == null) {
-					tileTransitions.x = 0f;
-				} else {
-					if (tile.getTileType() != thisTile.getTileType()) {
-						tileTransitions.x = tile.getTileType()
-								.getTextureIndex() + 1f;
-					} else {
-						tileTransitions.x = 0f;
-					}
-				}
-				// Check for right transition
-				tile = world.getTile(_x - 1, _y);
-				if (tile == null) {
-					tileTransitions.y = 0f;
-				} else {
-					if (tile.getTileType() != thisTile.getTileType()) {
-						tileTransitions.y = tile.getTileType()
-								.getTextureIndex() + 1f;
-					} else {
-						tileTransitions.y = 0f;
-					}
-				}
-				// Check for bottom transition
-				tile = world.getTile(_x, _y - 1);
-				if (tile == null) {
-					tileTransitions.z = 0f;
-				} else {
-					if (tile.getTileType() != thisTile.getTileType()) {
-						tileTransitions.z = tile.getTileType()
-								.getTextureIndex() + 1f;
-					} else {
-						tileTransitions.z = 0f;
-					}
-				}
-				// Check for left transition
-				tile = world.getTile(_x + 1, _y);
-				if (tile == null) {
-					tileTransitions.w = 0f;
-				} else {
-					if (tile.getTileType() != thisTile.getTileType()) {
-						tileTransitions.w = tile.getTileType()
-								.getTextureIndex() + 1f;
-					} else {
-						tileTransitions.w = 0f;
-					}
-				}
+				buffer.addVec3(p2.getPosition());
+				buffer.addVec3(p2.getNormal());
+				buffer.addVec3(texp2);
+				buffer.addVec4(tileTransitions);
 
-				dataBuffer.put(p1.getPosition().x).put(p1.getPosition().y)
-						.put(p1.getPosition().z);
-				dataBuffer.put(p1.getNormal().x).put(p1.getNormal().y)
-						.put(p1.getNormal().z);
-				dataBuffer.put(texp1.x).put(texp1.y).put(texp1.z);
-				dataBuffer.put(tileTransitions.x).put(tileTransitions.y)
-						.put(tileTransitions.z).put(tileTransitions.w);
+				index++;
 
-				dataBuffer.put(p2.getPosition().x).put(p2.getPosition().y)
-						.put(p2.getPosition().z);
-				dataBuffer.put(p2.getNormal().x).put(p2.getNormal().y)
-						.put(p2.getNormal().z);
-				dataBuffer.put(texp2.x).put(texp2.y).put(texp2.z);
-				dataBuffer.put(tileTransitions.x).put(tileTransitions.y)
-						.put(tileTransitions.z).put(tileTransitions.w);
+				buffer.addVec3(p3.getPosition());
+				buffer.addVec3(p3.getNormal());
+				buffer.addVec3(texp3);
+				buffer.addVec4(tileTransitions);
 
-				dataBuffer.put(p4.getPosition().x).put(p4.getPosition().y)
-						.put(p4.getPosition().z);
-				dataBuffer.put(p4.getNormal().x).put(p4.getNormal().y)
-						.put(p4.getNormal().z);
-				dataBuffer.put(texp4.x).put(texp4.y).put(texp4.z);
-				dataBuffer.put(tileTransitions.x).put(tileTransitions.y)
-						.put(tileTransitions.z).put(tileTransitions.w);
+				index++;
 
-				dataBuffer.put(p2.getPosition().x).put(p2.getPosition().y)
-						.put(p2.getPosition().z);
-				dataBuffer.put(p2.getNormal().x).put(p2.getNormal().y)
-						.put(p2.getNormal().z);
-				dataBuffer.put(texp2.x).put(texp2.y).put(texp2.z);
-				dataBuffer.put(tileTransitions.x).put(tileTransitions.y)
-						.put(tileTransitions.z).put(tileTransitions.w);
+				buffer.addVec3(p4.getPosition());
+				buffer.addVec3(p4.getNormal());
+				buffer.addVec3(texp4);
+				buffer.addVec4(tileTransitions);
 
-				dataBuffer.put(p3.getPosition().x).put(p3.getPosition().y)
-						.put(p3.getPosition().z);
-				dataBuffer.put(p3.getNormal().x).put(p3.getNormal().y)
-						.put(p3.getNormal().z);
-				dataBuffer.put(texp3.x).put(texp3.y).put(texp3.z);
-				dataBuffer.put(tileTransitions.x).put(tileTransitions.y)
-						.put(tileTransitions.z).put(tileTransitions.w);
+				index++;
 
-				dataBuffer.put(p4.getPosition().x).put(p4.getPosition().y)
-						.put(p4.getPosition().z);
-				dataBuffer.put(p4.getNormal().x).put(p4.getNormal().y)
-						.put(p4.getNormal().z);
-				dataBuffer.put(texp4.x).put(texp4.y).put(texp4.z);
-				dataBuffer.put(tileTransitions.x).put(tileTransitions.y)
-						.put(tileTransitions.z).put(tileTransitions.w);
-
-				// Triangle t1 = new Triangle(p1, p2, p4);
-				// Triangle t2 = new Triangle(p2, p3, p4);
+				buffer.addIndex(index - 4);
+				buffer.addIndex(index - 3);
+				buffer.addIndex(index - 1);
+				buffer.addIndex(index - 3);
+				buffer.addIndex(index - 2);
+				buffer.addIndex(index - 1);
 			}
 		}
-		dataBuffer.flip();
 		built = true;
 	}
 
@@ -417,27 +386,24 @@ public class Region {
 					regionGeometry = new Geometry();
 					regionGeometry.setMaterial(null);
 				}
-				int numTris = REGION_WIDTH * REGION_HEIGHT * 2;
-				int numVertices = numTris * 3;
-
 				MeshRenderer meshRenderer = new MeshRenderer();
 
 				regionMesh = new Mesh();
-				meshRenderer.setNumVertices(numVertices);
+				meshRenderer.addIndex(buffer.getFlippedIntBuffer(),
+						buffer.getNumIndices());
 
 				VertexBuffer vbData = new VertexBuffer(BufferType.ARRAY_BUFFER,
 						BufferUsage.STATIC_DRAW);
 
 				vbData.bind();
-				vbData.bufferData(dataBuffer);
+				vbData.bufferData(buffer.getFlippedFloatBuffer());
 
 				// Some vars we need to know
 				int stride = 13 * 4; // 13 floats
 				BufferEntry entry = meshRenderer.addVertexBuffer(vbData);
 				entry.addAttribute(0, 3, GL11.GL_FLOAT, false, stride, 0); // positions
 				entry.addAttribute(1, 3, GL11.GL_FLOAT, false, stride, 12); // normals
-				entry.addAttribute(2, 3, GL11.GL_FLOAT, false, stride, 24); // tex
-																			// coords
+				entry.addAttribute(2, 3, GL11.GL_FLOAT, false, stride, 24); // texcoords
 				entry.addAttribute(3, 4, GL11.GL_FLOAT, false, stride, 36); // tile
 																			// transition
 																			// coords

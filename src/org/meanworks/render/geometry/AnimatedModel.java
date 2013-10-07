@@ -143,6 +143,26 @@ public class AnimatedModel extends Model {
 	}
 
 	/**
+	 * Creates a new empty animation channel
+	 * 
+	 * @return
+	 */
+	public AnimationChannel createChannel() {
+		AnimationChannel channel = new AnimationChannel(skeleton);
+		channels.add(channel);
+		return channel;
+	}
+
+	/**
+	 * Removes an animation channel from this model
+	 * 
+	 * @param channel
+	 */
+	public void removeChannel(AnimationChannel channel) {
+
+	}
+
+	/**
 	 * 
 	 * @return
 	 */
@@ -259,11 +279,6 @@ public class AnimatedModel extends Model {
 		 * Update animation
 		 */
 		for (AnimationChannel channel : channels) {
-			if (channel.isFinished()) {
-				// Remove this channel
-				continue;
-			}
-			channel.setSpeed(1.0d);
 			channel.addTime(Application.getApplication().getFrameTime());
 			channel.update();
 		}

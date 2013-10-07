@@ -59,6 +59,24 @@ public class Transform {
 	}
 
 	/**
+	 * Get the yaw of this transform in degrees
+	 * 
+	 * @return
+	 */
+	public float getYaw() {
+		return rotation.y;
+	}
+
+	/**
+	 * Get the pitch of this transform in degrees
+	 * 
+	 * @return
+	 */
+	public float getPitch() {
+		return rotation.x;
+	}
+
+	/**
 	 * Get the position of this transform
 	 * 
 	 * @return
@@ -129,6 +147,20 @@ public class Transform {
 	}
 
 	/**
+	 * Set the rotation of this transform
+	 * 
+	 * @param x
+	 * @param y
+	 * @param z
+	 */
+	public void setRotation(float x, float y, float z) {
+		rotation.x = x;
+		rotation.y = y;
+		rotation.z = z;
+		needsUpdate = true;
+	}
+
+	/**
 	 * 
 	 * @param x
 	 * @param y
@@ -159,11 +191,14 @@ public class Transform {
 	public void calculateTransformMatrix() {
 		transformMatrix.setIdentity();
 		transformMatrix.translate(position);
-		//Perform expensive rotation operations
-		transformMatrix.rotate((float)Math.toRadians(rotation.x), new Vector3f(1.0f, 0.0f, 0.0f));
-		transformMatrix.rotate((float)Math.toRadians(rotation.y), new Vector3f(0.0f, 1.0f, 0.0f));
-		transformMatrix.rotate((float)Math.toRadians(rotation.z), new Vector3f(0.0f, 0.0f, 1.0f));
-		//Scale
+		// Perform expensive rotation operations
+		transformMatrix.rotate((float) Math.toRadians(rotation.x),
+				new Vector3f(1.0f, 0.0f, 0.0f));
+		transformMatrix.rotate((float) Math.toRadians(rotation.y),
+				new Vector3f(0.0f, 1.0f, 0.0f));
+		transformMatrix.rotate((float) Math.toRadians(rotation.z),
+				new Vector3f(0.0f, 0.0f, 1.0f));
+		// Scale
 		transformMatrix.scale(scale);
 	}
 

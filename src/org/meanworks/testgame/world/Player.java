@@ -1,5 +1,6 @@
 package org.meanworks.testgame.world;
 
+import org.lwjgl.input.Keyboard;
 import org.lwjgl.util.vector.Vector2f;
 import org.meanworks.engine.Application;
 import org.meanworks.engine.model.MWMLoader;
@@ -12,11 +13,6 @@ import org.meanworks.testgame.TestGame;
 public class Player extends Node {
 
 	/*
-	 * The player model
-	 */
-	private AnimatedModel playerModel;
-
-	/*
 	 * Our move to target
 	 */
 	private Vector2f moveTarget;
@@ -25,80 +21,71 @@ public class Player extends Node {
 	 * 
 	 */
 	public Player() {
-		// Let's try to load a model
-		playerModel = MWMLoader
-				.loadAnimatedModel("./data/models/Sinbad/sinbad_mesh.mwm");
-
-		AnimationChannel ac = playerModel.createChannel(playerModel
-				.getAnimation("IdleBase"));
-		ac.setLoopMode(LoopMode.LM_LOOP);
-
-		ac = playerModel.createChannel(playerModel.getAnimation("IdleTop"));
-		ac.setLoopMode(LoopMode.LM_LOOP);
-
-		// geometry.createChannel(0);
-		playerModel.getTransform().setPosition(0.5f, 0.9f, 0.5f);
-		playerModel.getTransform().setScale(0.2f, 0.2f, 0.2f);
-
-		addChild(playerModel);
 	}
 
 	/**
-	 * Move towards the given position
+	 * Move the player
 	 * 
-	 * @param x
-	 * @param y
+	 * @param yawAngleDegrees
+	 * @param units
 	 */
-	public void moveTowards(float x, float y) {
-		playerModel.clearChannels();
-		AnimationChannel ac = playerModel.createChannel(playerModel
-				.getAnimation("RunBase"));
-		ac.setLoopMode(LoopMode.LM_LOOP);
-
-		moveTarget = new Vector2f(x, y);
+	public void move(float yawAngleDegrees, float units) {
+		getTransform().translate(
+				units * (float) Math.sin(Math.toRadians(yawAngleDegrees)),
+				0.0f,
+				-units * (float) Math.cos(Math.toRadians(yawAngleDegrees)));
 	}
 
-	float temp = 0.0f;
-	
 	/**
 	 * Update the player
 	 */
 	public void update() {
+		this.getTransform().setRotation(0.0f,
+				Application.getApplication().getCamera().getYaw(), 0.0f);
+		/*
+		 * if (moveTarget != null) { float moveSpeed = 0.05f; float deltaX =
+		 * moveTarget.x - getTransform().getPosition().x; float deltaZ =
+		 * moveTarget.y - getTransform().getPosition().z; float angle = (float)
+		 * Math.atan2(deltaZ, deltaX);
+		 * 
+		 * float x = (float) Math.cos(angle) * moveSpeed; float y = (float)
+		 * Math.sin(angle) * moveSpeed;
+		 * 
+		 * float distance = (float) Math.sqrt((deltaX * deltaX) + (deltaZ *
+		 * deltaZ)); if (distance < 0.1f) { moveTarget = null; playIdle(); } //
+		 * Move towards the moving target getTransform().translate(x, 0.0f, y);
+		 * 
+		 * // Rotate towards the moving target
+		 * playerModel.getTransform().setRotation(0.0f, 90f + (float)
+		 * Math.toDegrees(-angle), 0.0f);
+		 * 
+		 * }
+		 */
 
-		temp += 0.01f;
-		
-		playerModel.getTransform().identity();
-		playerModel.getTransform().rotate(0.0f, (float)Math.sin(temp), 0.0f);
-		
-		if (moveTarget != null) {
+		float moveSpeed = 0.1f;
+		boolean didMove = false;
 
-			Vector2f direction = Vector2f.sub(moveTarget, new Vector2f(
-					getTransform().getPosition().x, getTransform()
-							.getPosition().y), null);
-
-			direction.normalise();
-			
-			System.err.println("Direction: " + direction.toString());
-
-			float moveSpeed = 0.5f;
-
-			float x = (float)Math.asin(direction.x) * moveSpeed;
-			float y = (float)Math.acos(direction.y) * moveSpeed;
-			
-			getTransform().translate(x, 0.0f, y);
-
+		if (Keyboard.isKeyDown(Keyboard.KEY_W)) {
+			move(getTransform().getYaw() + 180.0f, moveSpeed);
+			didMove = true;
 		}
-
-		getTransform().setPosition(
-				getTransform().getPosition().x,
-				TestGame.getWorld().getInterpolatedHeight(
-						getTransform().getPosition().x,
-						getTransform().getPosition().z),
-				getTransform().getPosition().z);
-		playerModel.getTransform().setPosition(
-				getTransform().getPosition().x + 0.5f,
-				getTransform().getPosition().y + 0.7f,
-				getTransform().getPosition().z + 0.5f);
+		if (Keyboard.isKeyDown(Keyboard.KEY_D)) {
+			move(getTransform().getYaw() - 90.0f, didMove ? moveSpeed / 2
+					: moveSpeed);
+			didMove = true;
+		}
+		if (Keyboard.isKeyDown(Keyboard.KEY_A)) {
+			move(getTransform().getYaw() + 90.0f, didMove ? moveSpeed / 2
+					: moveSpeed);
+			didMove = true;
+		}
+		if (Keyboard.isKeyDown(Keyboard.KEY_S)) {
+			move(getTransform().getYaw(), moveSpeed);
+			didMove = true;
+		}
+		getTransform().getPosition().y = TestGame.getWorld()
+				.getInterpolatedHeight(getTransform().getPosition().x,
+						getTransform().getPosition().z);
 	}
 
 	/**
