@@ -121,6 +121,10 @@ public class VertexBuffer {
 		return true;
 	}
 
+	public void delete() {
+		ARBVertexBufferObject.glDeleteBuffersARB(bufferId);
+	}
+
 	/**
 	 * 
 	 * @param data

@@ -5,8 +5,8 @@ import java.nio.IntBuffer;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.util.vector.Vector2f;
-import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
+import org.meanworks.engine.math.Vec3;
 
 /**
  * Copyright (C) 2013 Steffen Evensen
@@ -68,7 +68,7 @@ public class MeshBuffer {
 		buffer.put(y);
 	}
 
-	public void addVec3(Vector3f vec) {
+	public void addVec3(Vec3 vec) {
 		addVec3(vec.x, vec.y, vec.z);
 	}
 

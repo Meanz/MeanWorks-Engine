@@ -12,10 +12,10 @@ import static org.lwjgl.opengl.GL11.glLoadIdentity;
 
 import java.util.HashMap;
 
-import org.lwjgl.input.Mouse;
 import org.meanworks.engine.Application;
 import org.meanworks.engine.EngineLogger;
 import org.meanworks.render.opengl.ImmediateRenderer;
+import org.meanworks.testgame.world.World;
 
 public class GuiHandler implements KeyListener, MouseListener {
 
@@ -176,6 +176,9 @@ public class GuiHandler implements KeyListener, MouseListener {
 														.getRuntime()
 														.freeMemory()) / 1000 / 1000)
 												+ "mb", 10, 55);
+						
+						fontRenderer
+						.drawString("Rendered regions: " + World.renderedRegions, 10, 70);						
 
 					}
 				}

@@ -1,8 +1,8 @@
 package org.meanworks.render.geometry.mesh;
 
 import org.lwjgl.util.vector.Vector2f;
-import org.lwjgl.util.vector.Vector3f;
 import org.meanworks.engine.EngineLogger;
+import org.meanworks.engine.math.Vec3;
 import org.meanworks.render.geometry.Triangle;
 import org.meanworks.render.geometry.Vertex;
 
@@ -180,55 +180,55 @@ public class MeshData {
 				Vertex p1, p2, p3;
 				p1 = p2 = p3 = null;
 				if (hasNormals && !hasTexCoords) {
-					p1 = new Vertex(new Vector3f(positions[offset],
+					p1 = new Vertex(new Vec3(positions[offset],
 							positions[offset + 1], positions[offset + 2]),
-							new Vector3f(normals[offset], normals[offset + 1],
+							new Vec3(normals[offset], normals[offset + 1],
 									normals[offset + 2]));
-					p2 = new Vertex(new Vector3f(positions[offset + 3],
+					p2 = new Vertex(new Vec3(positions[offset + 3],
 							positions[offset + 4], positions[offset + 5]),
-							new Vector3f(normals[offset + 3],
+							new Vec3(normals[offset + 3],
 									normals[offset + 4], normals[offset + 5]));
-					p3 = new Vertex(new Vector3f(positions[offset + 6],
+					p3 = new Vertex(new Vec3(positions[offset + 6],
 							positions[offset + 7], positions[offset + 8]),
-							new Vector3f(normals[offset + 6],
+							new Vec3(normals[offset + 6],
 									normals[offset + 7], normals[offset + 8]));
 				} else if (!hasNormals && hasTexCoords) {
-					p1 = new Vertex(new Vector3f(positions[offset],
+					p1 = new Vertex(new Vec3(positions[offset],
 							positions[offset + 1], positions[offset + 2]),
 							new Vector2f(texCoords[toffset],
 									texCoords[toffset + 1]));
-					p2 = new Vertex(new Vector3f(positions[offset + 3],
+					p2 = new Vertex(new Vec3(positions[offset + 3],
 							positions[offset + 4], positions[offset + 5]),
 							new Vector2f(texCoords[toffset + 2],
 									texCoords[toffset + 3]));
-					p3 = new Vertex(new Vector3f(positions[offset + 6],
+					p3 = new Vertex(new Vec3(positions[offset + 6],
 							positions[offset + 7], positions[offset + 8]),
 							new Vector2f(texCoords[toffset + 4],
 									texCoords[toffset + 5]));
 				} else if (hasNormals && hasTexCoords) {
-					p1 = new Vertex(new Vector3f(positions[offset],
+					p1 = new Vertex(new Vec3(positions[offset],
 							positions[offset + 1], positions[offset + 2]),
-							new Vector3f(normals[offset], normals[offset + 1],
+							new Vec3(normals[offset], normals[offset + 1],
 									normals[offset + 2]), new Vector2f(
 									texCoords[toffset], texCoords[toffset + 1]));
-					p2 = new Vertex(new Vector3f(positions[offset + 3],
+					p2 = new Vertex(new Vec3(positions[offset + 3],
 							positions[offset + 4], positions[offset + 5]),
-							new Vector3f(normals[offset + 3],
+							new Vec3(normals[offset + 3],
 									normals[offset + 4], normals[offset + 5]),
 							new Vector2f(texCoords[toffset + 2],
 									texCoords[toffset + 3]));
-					p3 = new Vertex(new Vector3f(positions[offset + 6],
+					p3 = new Vertex(new Vec3(positions[offset + 6],
 							positions[offset + 7], positions[offset + 8]),
-							new Vector3f(normals[offset + 6],
+							new Vec3(normals[offset + 6],
 									normals[offset + 7], normals[offset + 8]),
 							new Vector2f(texCoords[toffset + 4],
 									texCoords[toffset + 5]));
 				} else if (!hasNormals && !hasTexCoords) {
-					p1 = new Vertex(new Vector3f(positions[offset],
+					p1 = new Vertex(new Vec3(positions[offset],
 							positions[offset + 1], positions[offset + 2]));
-					p2 = new Vertex(new Vector3f(positions[offset + 3],
+					p2 = new Vertex(new Vec3(positions[offset + 3],
 							positions[offset + 4], positions[offset + 5]));
-					p3 = new Vertex(new Vector3f(positions[offset + 6],
+					p3 = new Vertex(new Vec3(positions[offset + 6],
 							positions[offset + 7], positions[offset + 8]));
 				} else {
 					EngineLogger

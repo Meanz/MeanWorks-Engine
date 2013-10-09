@@ -33,6 +33,13 @@ public class Geometry extends Node implements Renderable {
 	}
 
 	/**
+	 * Clear this geometry
+	 */
+	public void clear() {
+		meshes.clear();
+	}
+
+	/**
 	 * Set the material of this geometry object
 	 * 
 	 * @param material
@@ -79,6 +86,18 @@ public class Geometry extends Node implements Renderable {
 	}
 
 	/**
+	 * 
+	 */
+	public Geometry instance() {
+		Geometry geometry = new Geometry();
+		geometry.setMaterial(getMaterial());
+		for (String key : meshes.keySet()) {
+			geometry.addMesh(key, meshes.get(key));
+		}
+		return geometry;
+	}
+
+	/**
 	 * Render this geometry
 	 * 
 	 * @param camera
@@ -95,7 +114,7 @@ public class Geometry extends Node implements Renderable {
 					new Vector4f(1.0f, 1.0f, 1.0f, 1.0f));
 			getMaterial().setProperty("fSpecularIntensity", 30.0f);
 			getMaterial().setProperty("tColorMap", 0);
-			
+
 			/*
 			 * Update viewing matrices
 			 */

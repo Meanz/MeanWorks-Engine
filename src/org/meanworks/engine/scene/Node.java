@@ -38,9 +38,14 @@ public abstract class Node {
 	private LinkedList<Node> children = new LinkedList<>();
 
 	/*
-	 * 
+	 * Whether or not this node inherits transforms from it's parent
 	 */
 	private NodeInheritance nodeInheritance;
+
+	/*
+	 * The culling method for this node
+	 */
+	private CullHint cullHint;
 
 	/*
 	 * The transform of this node
@@ -51,6 +56,7 @@ public abstract class Node {
 	 * Construct a new node
 	 */
 	public Node() {
+		cullHint = CullHint.PARENT_CULL;
 		transform = new Transform();
 		nodeInheritance = NodeInheritance.INHERIT_NONE;
 	}
@@ -127,13 +133,6 @@ public abstract class Node {
 		transformMatrix = Matrix4f.mul(transformMatrix,
 				transform.getTransformMatrix(), null);
 		return transformMatrix;
-	}
-
-	/**
-	 * Debug function for drawing node
-	 */
-	public void drawNodeBox() {
-
 	}
 
 	/**

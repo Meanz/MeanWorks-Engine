@@ -2,11 +2,12 @@ package org.meanworks.render.geometry;
 
 import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector3f;
+import org.meanworks.engine.math.Vec3;
 
 public class Vertex {
 
-	private Vector3f position;
-	private Vector3f normal;
+	private Vec3 position;
+	private Vec3 normal;
 	private Vector2f texCoord;
 
 	/**
@@ -15,7 +16,7 @@ public class Vertex {
 	 * @param normal
 	 * @param texCoord
 	 */
-	public Vertex(Vector3f position, Vector3f normal, Vector2f texCoord) {
+	public Vertex(Vec3 position, Vec3 normal, Vector2f texCoord) {
 		this.position = position;
 		this.normal = normal;
 		this.texCoord = texCoord;
@@ -26,7 +27,7 @@ public class Vertex {
 	 * @param position
 	 * @param normal
 	 */
-	public Vertex(Vector3f position, Vector3f normal) {
+	public Vertex(Vec3 position, Vec3 normal) {
 		this(position, normal, null);
 	}
 
@@ -35,7 +36,7 @@ public class Vertex {
 	 * @param position
 	 * @param texCoord
 	 */
-	public Vertex(Vector3f position, Vector2f texCoord) {
+	public Vertex(Vec3 position, Vector2f texCoord) {
 		this(position, null, texCoord);
 	}
 
@@ -43,7 +44,7 @@ public class Vertex {
 	 * 
 	 * @param position
 	 */
-	public Vertex(Vector3f position) {
+	public Vertex(Vec3 position) {
 		this(position, null, null);
 	}
 
@@ -52,7 +53,7 @@ public class Vertex {
 	 * 
 	 * @return
 	 */
-	public Vector3f getPosition() {
+	public Vec3 getPosition() {
 		return position;
 	}
 
@@ -61,7 +62,7 @@ public class Vertex {
 	 * 
 	 * @return
 	 */
-	public Vector3f getNormal() {
+	public Vec3 getNormal() {
 		return normal;
 	}
 

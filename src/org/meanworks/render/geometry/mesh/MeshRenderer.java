@@ -105,6 +105,18 @@ public class MeshRenderer {
 
 	}
 
+	public void clear() {
+		if (indexBuffer != null) {
+			indexBuffer.delete();
+		}
+		if (vertexBufferArray != null) {
+			vertexBufferArray.delete();
+		}
+		for (BufferEntry vb : vertexBuffers) {
+			vb.buffer.delete();
+		}
+	}
+
 	/**
 	 * 
 	 * @param buffer

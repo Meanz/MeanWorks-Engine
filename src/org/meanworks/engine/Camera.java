@@ -6,12 +6,19 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
+import org.meanworks.engine.math.Frustum;
 import org.meanworks.engine.math.MatrixHelper;
 import org.meanworks.engine.math.Ray;
+import org.meanworks.engine.math.Vec3;
 import org.meanworks.engine.math.VectorMath;
 import org.meanworks.engine.scene.Node;
 
 public class Camera {
+
+	/*
+	 * The view frustum for the camera
+	 */
+	private Frustum cameraFrustum;
 
 	/*
 	 * The view matrix for the camera
@@ -39,27 +46,27 @@ public class Camera {
 	/*
 	 * Euclidean representation of the cameras position
 	 */
-	private Vector3f cameraPosition;
+	private Vec3 cameraPosition;
 	/*
 	 * The target that the camera is looking at
 	 */
-	private Vector3f cameraLookAt;
+	private Vec3 cameraLookAt;
 	/*
 	 * Euler representation of the cameras angles
 	 */
-	private Vector3f rotation;
+	private Vec3 rotation;
 	/*
 	 * 
 	 */
-	private static Vector3f xVector = new Vector3f(1.0f, 0.0f, 0.0f);
+	private static Vec3 xVector = new Vec3(1.0f, 0.0f, 0.0f);
 	/*
 	 * 
 	 */
-	private static Vector3f zVector = new Vector3f(0.0f, 0.0f, 1.0f);
+	private static Vec3 zVector = new Vec3(0.0f, 0.0f, 1.0f);
 	/*
 	 * 
 	 */
-	private static Vector3f upVector = new Vector3f(0.0f, 1.0f, 0.0f);
+	private static Vec3 upVector = new Vec3(0.0f, 1.0f, 0.0f);
 	/*
 	 * 
 	 */
@@ -82,14 +89,17 @@ public class Camera {
 		this.windowHeight = windowHeight;
 		this.fovY = fovY;
 		this.aspect = aspect;
-		this.cameraPosition = new Vector3f(0.0f, 0.0f, 0.0f);
-		this.cameraLookAt = new Vector3f(1.0f, 1.0f, 1.0f);
-		this.rotation = new Vector3f(0.0f, 0.0f, 0.0f);
+		this.cameraPosition = new Vec3(0.0f, 0.0f, 0.0f);
+		this.cameraLookAt = new Vec3(1.0f, 1.0f, 1.0f);
+		this.rotation = new Vec3(0.0f, 0.0f, 0.0f);
 
-		projectionMatrix = perspective(fovY, aspect, 0.0f, 1000.0f, new Matrix4f());
+		projectionMatrix = perspective(fovY, aspect, 0.0f, 1000.0f,
+				new Matrix4f());
 		viewMatrix = new Matrix4f();
 		projectionViewMatrix = new Matrix4f();
 		cameraTranslationMatrix = new Matrix4f();
+
+		cameraFrustum = new Frustum();
 	}
 
 	/**
@@ -127,6 +137,15 @@ public class Camera {
 	}
 
 	/**
+	 * Get the camera frustum
+	 * 
+	 * @return
+	 */
+	public Frustum getFrustum() {
+		return cameraFrustum;
+	}
+
+	/**
 	 * 
 	 * @return
 	 */
@@ -159,7 +178,7 @@ public class Camera {
 	 * @param y
 	 * @param z
 	 */
-	public void setPosition(Vector3f position) {
+	public void setPosition(Vec3 position) {
 		setPosition(position.x, position.y, position.z);
 	}
 
@@ -181,7 +200,7 @@ public class Camera {
 	 * 
 	 * @return
 	 */
-	public Vector3f getPosition() {
+	public Vec3 getPosition() {
 		return cameraPosition;
 	}
 
@@ -249,30 +268,44 @@ public class Camera {
 
 		if (isFlying()) {
 			viewMatrix.setIdentity();
-			viewMatrix.rotate((float) Math.toRadians(rotation.x), xVector);
-			viewMatrix.rotate((float) Math.toRadians(rotation.y), upVector);
-			viewMatrix.translate(cameraPosition.negate(null), viewMatrix);
+			viewMatrix.rotate((float) Math.toRadians(rotation.x), new Vector3f(
+					xVector.x, xVector.y, xVector.z));
+			viewMatrix.rotate((float) Math.toRadians(rotation.y), new Vector3f(
+					upVector.x, upVector.y, upVector.z));
+			viewMatrix.translate(new Vector3f(cameraPosition.x,
+					cameraPosition.y, cameraPosition.z).negate(null),
+					viewMatrix);
 		} else if (followTarget != null) {
 			/*
 			 * viewMatrix = lookAt(cameraPosition, followTarget.getTransform()
 			 * .getPosition());
 			 */
 			viewMatrix.setIdentity();
-			viewMatrix.rotate((float) Math.toRadians(rotation.x), xVector);
-			viewMatrix.rotate((float) Math.toRadians(rotation.y + 180), upVector);
-			viewMatrix.translate(cameraPosition.negate(null), viewMatrix);
+			viewMatrix.rotate((float) Math.toRadians(rotation.x), new Vector3f(
+					xVector.x, xVector.y, xVector.z));
+			viewMatrix.rotate((float) Math.toRadians(rotation.y + 180),
+					new Vector3f(upVector.x, upVector.y, upVector.z));
+			viewMatrix.translate(new Vector3f(cameraPosition.x,
+					cameraPosition.y, cameraPosition.z).negate(null),
+					viewMatrix);
 		} else {
 			viewMatrix.setIdentity();
 
-			viewMatrix.rotate((float) Math.toRadians(rotation.x), xVector);
-			viewMatrix.rotate((float) Math.toRadians(rotation.y), upVector);
-			viewMatrix.translate(cameraPosition.negate(null), viewMatrix);
+			viewMatrix.rotate((float) Math.toRadians(rotation.x), new Vector3f(
+					xVector.x, xVector.y, xVector.z));
+			viewMatrix.rotate((float) Math.toRadians(rotation.y), new Vector3f(
+					upVector.x, upVector.y, upVector.z));
+			viewMatrix.translate(new Vector3f(cameraPosition.x,
+					cameraPosition.y, cameraPosition.z).negate(null),
+					viewMatrix);
 		}
 		// Translation
 		MatrixHelper.setupMatrices(projectionMatrix, viewMatrix);
 
 		// Calculate matrices
 		Matrix4f.mul(projectionMatrix, viewMatrix, projectionViewMatrix);
+
+		cameraFrustum.createFrustrum(projectionMatrix, viewMatrix);
 	}
 
 	/**
@@ -367,26 +400,25 @@ public class Camera {
 		float nmy = -((wh / 2.0f) - my) / (wh / 2.0f);
 		float alpha = (float) Math.tan(Math.toRadians(fovx / 2.0f)) * nmx;
 		float beta = (float) Math.tan(Math.toRadians(fovy / 2.0f)) * nmy;
-		Vector3f eye = cameraPosition;
+		Vec3 eye = cameraPosition;
 		// Create a forward vector
 		float factor = (float) Math.cos(Math.toRadians(rotation.x));
-		Vector3f forward = new Vector3f();
-		forward.x = (float) Math.sin(Math.toRadians(rotation.y + 180.0f)) * factor;
-		forward.y = (float) Math.sin(Math.toRadians(-rotation.x));
-		forward.z = (float) -Math.cos(Math.toRadians(rotation.y + 180.0f)) * factor;
-		VectorMath.mulLocal(forward, 100);
-		Vector3f center = new Vector3f(cameraPosition.x + forward.x,
-				cameraPosition.y + forward.y, cameraPosition.z + forward.z);
-		Vector3f a = (Vector3f) VectorMath.sub(eye, center).negate();
-		Vector3f zaxis = a.normalise(null);
-		Vector3f xaxis = VectorMath.cross(zaxis, upVector).normalise(null);
-		Vector3f yaxis = VectorMath.cross(xaxis, zaxis);
+		Vec3 forward = new Vec3((float) Math.sin(Math
+				.toRadians(rotation.y + 180.0f)) * factor,
+				(float) Math.sin(Math.toRadians(-rotation.x)),
+				(float) -Math.cos(Math.toRadians(rotation.y + 180.0f)) * factor);
+		forward.scale(100);
+		Vec3 center = new Vec3(cameraPosition.x + forward.x, cameraPosition.y
+				+ forward.y, cameraPosition.z + forward.z);
+		Vec3 a = Vec3.sub(eye, center).negate();
+		Vec3 zaxis = a.normalize();
+		Vec3 xaxis = Vec3.cross(zaxis, upVector).normalize();
+		Vec3 yaxis = Vec3.cross(xaxis, zaxis);
 
-		Vector3f dirVec = VectorMath.add(
-				VectorMath.add(VectorMath.mul(xaxis, alpha),
-						VectorMath.mul(yaxis, beta)), zaxis);
-
-		float absLength = (float) Math.abs(dirVec.length());
+		Vec3 dirVec = Vec3.add(Vec3.scale(xaxis, alpha), Vec3.scale(yaxis, beta));
+		dirVec.add(zaxis);
+		
+		float absLength = (float) Math.abs(dirVec.getLength());
 		Vector3f rayDirection = new Vector3f(dirVec.x / absLength, dirVec.y
 				/ absLength, dirVec.z / absLength);
 
@@ -451,7 +483,7 @@ public class Camera {
 
 			// Set our position to the players position
 			this.setPosition(followTarget.getTransform().getPosition());
-			
+
 			this.translate(0.0f, 2.5f, 0.0f);
 
 		} else if (isFlying()) {

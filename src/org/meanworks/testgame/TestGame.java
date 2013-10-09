@@ -9,25 +9,21 @@ import static org.lwjgl.opengl.GL11.glColor4f;
 import static org.lwjgl.opengl.GL11.glDisable;
 import static org.lwjgl.opengl.GL11.glEnable;
 
-import java.io.File;
-
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.util.vector.Vector3f;
 import org.meanworks.engine.Application;
 import org.meanworks.engine.GameApplication;
+import org.meanworks.engine.Util;
 import org.meanworks.engine.gui.Button;
-import org.meanworks.engine.gui.GuiHandler;
 import org.meanworks.engine.gui.impl.PerformanceGraph;
 import org.meanworks.engine.gui.impl.Tooltip;
 import org.meanworks.engine.gui.impl.radialmenu.RadialButton;
 import org.meanworks.engine.gui.impl.radialmenu.RadialMenu;
 import org.meanworks.engine.math.Ray;
+import org.meanworks.engine.math.Vec3;
 import org.meanworks.engine.model.MWMLoader;
 import org.meanworks.render.geometry.Geometry;
 import org.meanworks.render.geometry.Vertex;
-import org.meanworks.render.geometry.animation.AnimationChannel;
-import org.meanworks.render.geometry.animation.LoopMode;
 import org.meanworks.render.opengl.ImmediateRenderer;
 import org.meanworks.render.opengl.Window;
 import org.meanworks.render.opengl.shader.ShaderProgram;
@@ -62,11 +58,6 @@ public class TestGame extends GameApplication {
 	/*
 	 * 
 	 */
-	private GuiHandler guiHandler;
-
-	/*
-	 * 
-	 */
 	private ShaderProgram waterShader;
 
 	/*
@@ -83,6 +74,11 @@ public class TestGame extends GameApplication {
 	 * 
 	 */
 	private Geometry kostjaModel = null;
+	
+	/*
+	 * 
+	 */
+	private Geometry treeModel;
 
 	/**
 	 * 
@@ -107,28 +103,7 @@ public class TestGame extends GameApplication {
 	 */
 	@Override
 	public void setup() {
-		try {
-			String osName = System.getProperty("os.name").toLowerCase();
-			boolean isMacOs = osName.startsWith("mac os x");
-			if (isMacOs) {
-				System.setProperty("java.library.path",
-						System.getProperty("java.library.path") + ";"
-								+ new File("native/macosx").getAbsolutePath());
-				System.setProperty("org.lwjgl.librarypath", new File(
-						"native/macosx").getAbsolutePath());
-			} else {
-				System.setProperty("java.library.path",
-						System.getProperty("java.library.path")
-								+ ";"
-								+ new File("native/windows/").getAbsolutePath()
-										.replaceAll("\\/", "\\"));
-				System.setProperty("org.lwjgl.librarypath",
-						new File("native/windows/").getAbsolutePath()
-								.replaceAll("\\/", "\\"));
-			}
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
+		Util.loadLWJGL();
 		setWindow(Window.createWindow(1200, 800));
 	}
 
@@ -141,21 +116,14 @@ public class TestGame extends GameApplication {
 	public void preload() {
 
 		/*
-		 * Create the gui handler
-		 */
-		guiHandler = new GuiHandler(this);
-		getInputHandler().addKeyListener(guiHandler);
-		getInputHandler().addMouseListener(guiHandler);
-
-		/*
 		 * Setup Gui
 		 */
 		RadialMenu radialMenu = new RadialMenu() {
 		};
-		guiHandler.addComponent(radialMenu);
+		getGui().addComponent(radialMenu);
 		radialMenu.addButton(new RadialButton("Test Button 1"));
 		radialMenu.addButton(new RadialButton("Test Button 2"));
-		guiHandler.addComponent(new Button("Wireframe", 10, 100, 110, 35) {
+		getGui().addComponent(new Button("Wireframe", 10, 100, 110, 35) {
 
 			private boolean wireframe = false;
 
@@ -169,7 +137,7 @@ public class TestGame extends GameApplication {
 			}
 		});
 
-		guiHandler.addComponent(new Button("Stop Flying", 10, 140, 110, 35) {
+		getGui().addComponent(new Button("Stop Flying", 10, 140, 110, 35) {
 
 			@Override
 			public void onButtonClick() {
@@ -183,9 +151,9 @@ public class TestGame extends GameApplication {
 			}
 		});
 
-		guiHandler.addComponent(new PerformanceGraph() {
+		getGui().addComponent(new PerformanceGraph() {
 		});
-		guiHandler.addComponent(new Tooltip() {
+		getGui().addComponent(new Tooltip() {
 		});
 
 		/*
@@ -204,15 +172,15 @@ public class TestGame extends GameApplication {
 		 * Create our player
 		 */
 		player = new Player();
-		player.getTransform().setPosition(315,
-				world.getInterpolatedHeight(315, 213), 213);
+		player.getTransform().setPosition(5000,
+				world.getInterpolatedHeight(315, 213), 5000);
 		getScene().getRootNode().addChild(player);
 		
 		getCamera().follow(player);
 
 		// Let's try to load a model
 		kostjaModel = MWMLoader.loadModel("./data/models/kostja.mwm");
-		kostjaModel.getTransform().setPosition(315, 135, 213);
+		kostjaModel.getTransform().setPosition(5000, 135, 4990);
 		kostjaModel.getTransform().setScale(0.2f, 0.2f, 0.2f);
 		getScene().getRootNode().addChild(kostjaModel);
 
@@ -221,6 +189,11 @@ public class TestGame extends GameApplication {
 		 */
 		waterShader = getAssetManager().loadShader("./data/shaders/water");
 		waterTexture = getAssetManager().loadTexture("./data/images/water.png");
+
+		treeModel = MWMLoader.loadModel("./data/models/PineTree.mwm");
+		//treeModel.getTransform().setScale(0.2f, 0.2f, 0.2f);
+		treeModel.getTransform().setPosition(5000, 135, 5000);
+		getScene().getRootNode().addChild(treeModel);
 
 	}
 
@@ -231,10 +204,6 @@ public class TestGame extends GameApplication {
 	 */
 	@Override
 	public void update() {
-		// Update the gui handler
-		guiHandler.update();
-
-		// Update the camera
 
 		/*
 		 * Make the camera follow the player third person wise
@@ -255,7 +224,7 @@ public class TestGame extends GameApplication {
 					0.0f);
 		}
 
-		if (!guiHandler.didConsumeInput()) {
+		if (!getGui().didConsumeInput()) {
 
 			float moveSpeed = 0.1f;
 			// Ray trace the ground
@@ -326,7 +295,7 @@ public class TestGame extends GameApplication {
 		waterShader.useNone();
 
 		// Draw the gui
-		guiHandler.render();
+		
 
 		glEnable(GL_CULL_FACE);
 	}
@@ -350,18 +319,18 @@ public class TestGame extends GameApplication {
 		// |_____|
 		// |_____|
 		// p1----p2
-		Vertex p1 = new Vertex(new Vector3f(
+		Vertex p1 = new Vertex(new Vec3(
 				(float) (int) selectedTile.getTilePosition().x
 						+ Region.TILE_WIDTH, p1H,
 				(float) (int) selectedTile.getTilePosition().y));
-		Vertex p2 = new Vertex(new Vector3f(
+		Vertex p2 = new Vertex(new Vec3(
 				(float) (int) selectedTile.getTilePosition().x, p2H,
 				(float) (int) selectedTile.getTilePosition().y));
-		Vertex p3 = new Vertex(new Vector3f(
+		Vertex p3 = new Vertex(new Vec3(
 				(float) (int) selectedTile.getTilePosition().x, p3H,
 				(float) (int) selectedTile.getTilePosition().y
 						+ Region.TILE_LENGTH));
-		Vertex p4 = new Vertex(new Vector3f(
+		Vertex p4 = new Vertex(new Vec3(
 				(float) (int) selectedTile.getTilePosition().x
 						+ Region.TILE_WIDTH, p4H,
 				(float) (float) (int) selectedTile.getTilePosition().y

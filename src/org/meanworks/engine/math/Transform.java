@@ -31,17 +31,17 @@ public class Transform {
 	/*
 	 * 
 	 */
-	private Vector3f position;
+	private Vec3 position;
 
 	/*
 	 * 
 	 */
-	private Vector3f rotation;
+	private Vec3 rotation;
 
 	/*
 	 * 
 	 */
-	private Vector3f scale;
+	private Vec3 scale;
 
 	/*
 	 * 
@@ -53,9 +53,9 @@ public class Transform {
 	 */
 	public Transform() {
 		transformMatrix = new Matrix4f();
-		position = new Vector3f();
-		rotation = new Vector3f();
-		scale = new Vector3f();
+		position = new Vec3();
+		rotation = new Vec3();
+		scale = new Vec3();
 	}
 
 	/**
@@ -81,7 +81,7 @@ public class Transform {
 	 * 
 	 * @return
 	 */
-	public Vector3f getPosition() {
+	public Vec3 getPosition() {
 		return position;
 	}
 
@@ -90,7 +90,7 @@ public class Transform {
 	 * 
 	 * @return
 	 */
-	public Vector3f getScale() {
+	public Vec3 getScale() {
 		return scale;
 	}
 
@@ -190,7 +190,8 @@ public class Transform {
 	 */
 	public void calculateTransformMatrix() {
 		transformMatrix.setIdentity();
-		transformMatrix.translate(position);
+		transformMatrix.translate(new Vector3f(position.x, position.y,
+				position.z));
 		// Perform expensive rotation operations
 		transformMatrix.rotate((float) Math.toRadians(rotation.x),
 				new Vector3f(1.0f, 0.0f, 0.0f));
@@ -199,7 +200,7 @@ public class Transform {
 		transformMatrix.rotate((float) Math.toRadians(rotation.z),
 				new Vector3f(0.0f, 0.0f, 1.0f));
 		// Scale
-		transformMatrix.scale(scale);
+		transformMatrix.scale(new Vector3f(scale.x, scale.y, scale.z));
 	}
 
 	/**

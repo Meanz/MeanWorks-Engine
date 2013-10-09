@@ -50,7 +50,9 @@ public class WorldLoader implements Runnable {
 						region.buildTerrain();
 						time = System.currentTimeMillis() - time;
 					}
-					regionTasks.clear();
+					synchronized (nextQueue) {
+						regionTasks.clear();
+					}
 				}
 				Thread.sleep(200); // Sleep for 200ms while waiting for new
 									// tasks
@@ -59,5 +61,4 @@ public class WorldLoader implements Runnable {
 			}
 		}
 	}
-
 }

@@ -1,12 +1,15 @@
 package org.meanworks.testgame.world;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 import org.lwjgl.util.vector.Vector3f;
 import org.meanworks.engine.Application;
 import org.meanworks.engine.EngineLogger;
+import org.meanworks.engine.math.FrustumResult;
 import org.meanworks.engine.math.Ray;
 import org.meanworks.engine.math.VectorMath;
+import org.meanworks.render.geometry.Geometry;
 import org.meanworks.render.material.Material;
 import org.meanworks.render.texture.Texture;
 import org.meanworks.render.texture.TextureArray;
@@ -14,10 +17,12 @@ import org.meanworks.render.texture.TextureLoader;
 
 public class World {
 
+	public static int renderedRegions = 0;
+
 	/*
 	 * The view distance of this world
 	 */
-	public final static int VIEW_DISTANCE = 2;
+	public final static int VIEW_DISTANCE = 4;
 
 	/*
 	 * The world cursors position
@@ -58,7 +63,17 @@ public class World {
 	/*
 	 * 
 	 */
-	private long accumTime = 0;
+	private Geometry treeModel;
+
+	/*
+	 * 
+	 */
+	private Texture treeTexture;
+
+	/*
+	 * 
+	 */
+	private LinkedList<Geometry> trees = new LinkedList<Geometry>();
 
 	/**
 	 * Construct a new
@@ -97,6 +112,23 @@ public class World {
 		material = new Material("worldMaterial", Application.getApplication()
 				.getAssetManager().loadShader(("./data/shaders/terrain")));
 
+		/*
+		 * Load the tree
+		 */
+		/*
+		 * treeModel = null;//
+		 * DaeToFeConverter.convertModel("./data/models/pineTree.dae");
+		 * treeTexture = Application.getApplication().getAssetManager()
+		 * .loadTexture("./data/models/pinetex.png"); for (int x = 4900; x <
+		 * 5100; x++) { for (int y = 4900; y < 5100; y++) { int should = (int)
+		 * (Math.random() * 15f); if (should == 5) {
+		 * System.err.println("Added tree at " + x + " / " + y); Geometry tree =
+		 * treeModel.instance(); trees.add(tree);
+		 * tree.getTransform().setPosition((float) x, 110, (float) y); } } }
+		 */
+
+		regionList = new Region[(VIEW_DISTANCE * 2) * (VIEW_DISTANCE * 2)];
+
 	}
 
 	/**
@@ -122,13 +154,24 @@ public class World {
 	 * @return
 	 */
 	public Region getRegion(int regionX, int regionY) {
-		for (Region region : loadedRegions) {
-			if (region.getRegionX() == regionX
-					&& region.getRegionY() == regionY) {
-				return region;
-			}
+
+		int minX = worldX - VIEW_DISTANCE;
+		int maxX = worldX + VIEW_DISTANCE;
+		int minY = worldY - VIEW_DISTANCE;
+		int maxY = worldY + VIEW_DISTANCE;
+
+		if (regionX < minX || regionX >= maxX || regionY < minY
+				|| regionY >= maxY || regionX < 0 || regionY < 0) {
+			return null;
 		}
-		return null;
+		// width=VIEW_DISTANCE * 2
+		// pos = x * width + y
+		if (regionList == null) {
+			System.err.println("REGION LIST = NULL");
+			return null;
+		}
+		return regionList[(regionX - minX) * (VIEW_DISTANCE * 2)
+				+ (regionY - minY)];
 	}
 
 	/**
@@ -153,21 +196,13 @@ public class World {
 	 * @return
 	 */
 	public float getInterpolatedHeight(float xPos, float zPos) {
-		// we first get the height of four points of the quad underneath the
-		// point
-		// Check to make sure this point is not off the map at all
 		float scaleFactor = 1.0f;
 		int x = (int) (xPos / scaleFactor);
 		int z = (int) (zPos / scaleFactor);
-
-		int xPlusOne = x + 1;
-		int zPlusOne = z + 1;
-
 		float triZ0 = (getTileHeight(x, z));
 		float triZ1 = (getTileHeight(x + 1, z));
 		float triZ2 = (getTileHeight(x, z + 1));
 		float triZ3 = (getTileHeight(x + 1, z + 1));
-
 		float height = 0.0f;
 		float sqX = (xPos / scaleFactor) - x;
 		float sqZ = (zPos / scaleFactor) - z;
@@ -255,7 +290,8 @@ public class World {
 						intersectionPoint)) {
 					// System.err.println("Found tile1 at [" + x + ", " + z
 					// + "] \n");
-					//System.err.println("Intersection point: " + intersectionPoint.toString());
+					// System.err.println("Intersection point: " +
+					// intersectionPoint.toString());
 					return new Vector3f(x, 0.0f, z);
 				}
 				if (VectorMath.intersectsTriangle(ray, t2_p1, t2_p2, t2_p3,
@@ -323,31 +359,71 @@ public class World {
 		if (middleRegionX != worldX || middleRegionY != worldY) {
 			isListUpdateNeeded = true;
 		}
-		this.worldX = middleRegionX;
-		this.worldY = middleRegionY;
 		if (isListUpdateNeeded) {
-			regionList = new Region[(VIEW_DISTANCE * 2) * (VIEW_DISTANCE * 2)];
+			Region[] tempList = new Region[(VIEW_DISTANCE * 2)
+					* (VIEW_DISTANCE * 2)];
+			LinkedList<Region> toBeBuilt = new LinkedList<>();
 			int off = 0;
-			for (int x = worldX - VIEW_DISTANCE; x < worldX + VIEW_DISTANCE; x++) {
-				for (int y = worldY - VIEW_DISTANCE; y < worldY + VIEW_DISTANCE; y++) {
+			for (int x = middleRegionX - VIEW_DISTANCE; x < middleRegionX
+					+ VIEW_DISTANCE; x++) {
+				for (int y = middleRegionY - VIEW_DISTANCE; y < middleRegionY
+						+ VIEW_DISTANCE; y++) {
 					if (x < 0 || y < 0) {
 						continue;
 					}
 					Region currRegion = getRegion(x, y);
+
+					int oldLod = currRegion == null ? -1 : currRegion
+							.getLodLevel();
+
 					if (currRegion == null) {
-						currRegion = requestRegion(x, y);
-						if (currRegion == null) {
-							EngineLogger.info("Could not load region (" + x
-									+ ", " + y + ")");
-							continue;
-						}
+						currRegion = new Region(this, x, y);
+						toBeBuilt.add(currRegion);
 					}
-					regionList[off++] = currRegion;
+					// Distance from middle
+					int dx = Math.abs(x - middleRegionX);
+					int dy = Math.abs(y - middleRegionY);
+					double dist = Math.sqrt(dx * dx + dy * dy);
+					dist = (int) dist;
+					if (dist <= 1) {
+						currRegion.setLodLevel(1);
+					}
+					if (dist > 1) {
+						currRegion.setLodLevel(2);
+					}
+					if (dist > 3) {
+						currRegion.setLodLevel(4);
+					}
+					if (dist > 5) {
+						currRegion.setLodLevel(8);
+					}
+					if (dist > 7) {
+						currRegion.setLodLevel(16);
+					}
+					if (dist > 9) {
+						currRegion.setLodLevel(32);
+					}
+					if (oldLod != currRegion.getLodLevel() && oldLod != -1) {
+						updateRegion(currRegion);
+					}
+					tempList[off++] = currRegion;
 				}
 			}
+			regionList = tempList;
+			for (Region region : toBeBuilt) {
+				worldLoader.addTask(region);
+			}
+
+			// We can either clear it, or leave it up to the GC to remove the
+			// used memory
+			toBeBuilt.clear();
+
 			EngineLogger.info("Updated list.");
+			System.gc();
 			isListUpdateNeeded = false;
 		}
+		this.worldX = middleRegionX;
+		this.worldY = middleRegionY;
 		int off = 0;
 		for (int x = worldX - VIEW_DISTANCE; x < worldX + VIEW_DISTANCE; x++) {
 			for (int y = worldY - VIEW_DISTANCE; y < worldY + VIEW_DISTANCE; y++) {
@@ -363,10 +439,19 @@ public class World {
 	}
 
 	/**
+	 * Send this region for update
+	 * 
+	 * @param region
+	 */
+	public void updateRegion(Region region) {
+		region.flagUpdate();
+		worldLoader.addTask(region);
+	}
+
+	/**
 	 * Render the world
 	 */
 	public void render() {
-
 		material.apply();
 
 		// Bind the tile atlas
@@ -381,6 +466,7 @@ public class World {
 
 		if (regionList != null) {
 			int off = 0;
+			renderedRegions = 0;
 			for (int x = worldX - VIEW_DISTANCE; x < worldX + VIEW_DISTANCE; x++) {
 				for (int y = worldY - VIEW_DISTANCE; y < worldY + VIEW_DISTANCE; y++) {
 					if (x < 0 || y < 0) {
@@ -388,7 +474,26 @@ public class World {
 					}
 					Region currRegion = regionList[off++];
 					if (currRegion != null) {
-						currRegion.render();
+						FrustumResult result = Application
+								.getApplication()
+								.getCamera()
+								.getFrustum()
+								.cubeInFrustum(
+										new Vector3f(currRegion.getRegionX()
+												* Region.REGION_WIDTH, 50.0f,
+												currRegion.getRegionY()
+														* Region.REGION_HEIGHT),
+										new Vector3f(currRegion.getRegionX()
+												* Region.REGION_WIDTH
+												+ Region.REGION_WIDTH, 200.0f,
+												currRegion.getRegionY()
+														* Region.REGION_HEIGHT
+														+ Region.REGION_HEIGHT));
+						if (result == FrustumResult.INSIDE
+								|| result == FrustumResult.PARTIALLY_INSIDE) {
+							currRegion.render();
+							renderedRegions++;
+						}
 					}
 				}
 			}

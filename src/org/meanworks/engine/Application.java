@@ -1,7 +1,12 @@
 package org.meanworks.engine;
 
+import static org.lwjgl.opengl.GL11.GL_CULL_FACE;
+import static org.lwjgl.opengl.GL11.glDisable;
+import static org.lwjgl.opengl.GL11.glEnable;
+
 import org.lwjgl.opengl.Display;
 import org.meanworks.engine.asset.AssetManager;
+import org.meanworks.engine.gui.GuiHandler;
 import org.meanworks.engine.gui.InputHandler;
 import org.meanworks.engine.gui.impl.PerformanceGraph;
 import org.meanworks.engine.scene.SceneGraph;
@@ -61,6 +66,11 @@ public abstract class Application {
 	private SceneGraph scene;
 
 	/*
+	 * 
+	 */
+	private GuiHandler guiHandler;
+
+	/*
 	 * Statistics
 	 */
 	private int fps = 0;
@@ -78,6 +88,15 @@ public abstract class Application {
 	 * Application settings
 	 */
 	private int targetUps = 50; // Number of updates per second
+
+	/**
+	 * Get the gui handler of this application
+	 * 
+	 * @return
+	 */
+	public GuiHandler getGui() {
+		return guiHandler;
+	}
 
 	/**
 	 * Get the scene graph of this application
@@ -230,6 +249,9 @@ public abstract class Application {
 		inputHandler = new InputHandler();
 		assetManager = new AssetManager();
 		scene = new SceneGraph();
+		guiHandler = new GuiHandler(this);
+		getInputHandler().addKeyListener(guiHandler);
+		getInputHandler().addMouseListener(guiHandler);
 
 		/*
 		 * Setup the default material
@@ -289,6 +311,8 @@ public abstract class Application {
 
 				inputHandler.update();
 
+				guiHandler.update();
+
 				update(); // Call the update function
 				scene.update();
 
@@ -304,6 +328,10 @@ public abstract class Application {
 
 			render(); // Call the render function
 			scene.render();
+			
+			glDisable(GL_CULL_FACE);
+			guiHandler.render();
+			glEnable(GL_CULL_FACE);
 
 			fpsc++;
 
