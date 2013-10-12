@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Stack;
 
 import org.lwjgl.util.vector.Matrix4f;
+import org.meanworks.engine.bounding.BoundingBox;
 import org.meanworks.engine.math.Transform;
 
 /**
@@ -46,6 +47,11 @@ public abstract class Node {
 	 * The culling method for this node
 	 */
 	private CullHint cullHint;
+	
+	/*
+	 * 
+	 */
+	private BoundingBox cullingBox;
 
 	/*
 	 * The transform of this node
@@ -59,6 +65,7 @@ public abstract class Node {
 		cullHint = CullHint.PARENT_CULL;
 		transform = new Transform();
 		nodeInheritance = NodeInheritance.INHERIT_NONE;
+		cullingBox = new BoundingBox();
 	}
 
 	/**
@@ -109,6 +116,14 @@ public abstract class Node {
 	public Transform getTransform() {
 		return transform;
 	}
+	
+	/**
+	 * 
+	 */
+	public void updateCullingBox() {
+		//Pass the request down the hierarchy to see if updates are needed
+		
+	}
 
 	/**
 	 * Get the transform matrix of this node
@@ -143,6 +158,7 @@ public abstract class Node {
 		/*
 		 * Update transform if needed
 		 */
+		updateCullingBox();
 
 		/*
 		 * Send the update request to the class that extends this node

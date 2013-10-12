@@ -1,4 +1,4 @@
-package org.meanworks.engine;
+package org.meanworks.engine.core;
 
 import static org.lwjgl.opengl.GL11.GL_CULL_FACE;
 import static org.lwjgl.opengl.GL11.glDisable;
@@ -6,14 +6,16 @@ import static org.lwjgl.opengl.GL11.glEnable;
 
 import org.lwjgl.opengl.Display;
 import org.meanworks.engine.asset.AssetManager;
+import org.meanworks.engine.camera.Camera;
+import org.meanworks.engine.camera.FirstPersonCamera;
 import org.meanworks.engine.gui.GuiHandler;
 import org.meanworks.engine.gui.InputHandler;
 import org.meanworks.engine.gui.impl.PerformanceGraph;
 import org.meanworks.engine.scene.SceneGraph;
+import org.meanworks.engine.util.Timer;
 import org.meanworks.render.material.Material;
 import org.meanworks.render.opengl.Renderer;
 import org.meanworks.render.opengl.Window;
-import org.meanworks.render.opengl.shader.ShaderHelper;
 
 public abstract class Application {
 
@@ -69,6 +71,11 @@ public abstract class Application {
 	 * 
 	 */
 	private GuiHandler guiHandler;
+
+	/*
+	 * 
+	 */
+	private Timer timer;
 
 	/*
 	 * Statistics
@@ -156,7 +163,7 @@ public abstract class Application {
 	 */
 	public void setWindow(Window window) {
 		this.window = window;
-		camera = new Camera(window.getWidth(), window.getHeight(), 60,
+		camera = new FirstPersonCamera(window.getWidth(), window.getHeight(), 60,
 				window.getAspect());
 	}
 
@@ -242,6 +249,9 @@ public abstract class Application {
 		int SKIP_TICKS = 1000 / targetUps;
 
 		int savedUps = 0;
+		
+		//Create the timer
+		timer = new Timer();
 
 		/*
 		 * Create the input handler
@@ -328,7 +338,7 @@ public abstract class Application {
 
 			render(); // Call the render function
 			scene.render();
-			
+
 			glDisable(GL_CULL_FACE);
 			guiHandler.render();
 			glEnable(GL_CULL_FACE);

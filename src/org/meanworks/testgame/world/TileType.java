@@ -5,7 +5,7 @@ public enum TileType {
 	GRASS("Grass", 0),
 	DIRT("Dirt", 6),
 	ROCK("Rock", 2),
-	MARSH("Marsh", 8),
+	MARSH("Marsh", 9),
 	COBBLE("Cobblestone", 4),
 	SLAB("Slab", 5),
 	PACKED_DIRT("Packed Dirt", 7)

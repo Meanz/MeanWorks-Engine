@@ -6,7 +6,7 @@ import java.util.LinkedList;
 
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
-import org.meanworks.engine.Application;
+import org.meanworks.engine.core.Application;
 
 public abstract class Component {
 

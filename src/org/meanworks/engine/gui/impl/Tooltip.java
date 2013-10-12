@@ -12,7 +12,7 @@ import static org.lwjgl.opengl.GL11.glColor4f;
 import java.awt.Font;
 
 import org.lwjgl.opengl.GL11;
-import org.meanworks.engine.Application;
+import org.meanworks.engine.core.Application;
 import org.meanworks.engine.gui.Component;
 import org.newdawn.slick.SlickException;
 import org.newdawn.slick.UnicodeFont;

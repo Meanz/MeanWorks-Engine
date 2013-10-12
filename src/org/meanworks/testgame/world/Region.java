@@ -1,13 +1,13 @@
 package org.meanworks.testgame.world;
 
+import java.util.Random;
+
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
-import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
 import org.meanworks.engine.gui.impl.PerformanceGraph;
 import org.meanworks.engine.math.Vec3;
-import org.meanworks.engine.math.VectorMath;
 import org.meanworks.render.geometry.Geometry;
 import org.meanworks.render.geometry.Vertex;
 import org.meanworks.render.geometry.mesh.Mesh;
@@ -32,8 +32,8 @@ public class Region {
 	 */
 	public final static float TILE_WIDTH = 1.0f;
 	public final static float TILE_LENGTH = 1.0f;
-	public final static int REGION_WIDTH = 64;
-	public final static int REGION_HEIGHT = 64;
+	public final static int REGION_WIDTH = 32;
+	public final static int REGION_HEIGHT = 32;
 
 	/*
 	 * The array of tiles
@@ -49,11 +49,6 @@ public class Region {
 	 * Flagged when the geometry is finished processing
 	 */
 	private boolean built;
-
-	/*
-	 * The data buffer
-	 */
-	private MeshBuffer buffer;
 
 	/*
 	 * The world reference
@@ -72,10 +67,23 @@ public class Region {
 	 * 
 	 */
 	private Geometry regionGeometry;
+
+	/*
+	 * The data buffer
+	 */
+	private MeshBuffer meshBuffer;
 	/*
 	 * 
 	 */
 	private Mesh regionMesh;
+	/*
+	 * 
+	 */
+	private MeshBuffer grassBuffer;
+	/*
+	 * 
+	 */
+	private Mesh grassMesh;
 	/*
 	 * 
 	 */
@@ -315,6 +323,122 @@ public class Region {
 		return tileTransitions;
 	}
 
+	public void addGrass(int index, Vec3 in1, Vec3 in2, float height) {
+
+		Vec3 p1 = new Vec3(in1.x, in1.y, in1.z);
+		Vec3 p2 = new Vec3(in2.x, in2.y, in2.z);
+		Vec3 p3 = new Vec3(in2.x, in2.y + height, in2.z);
+		Vec3 p4 = new Vec3(in1.x, in1.y + height, in1.z);
+
+		float minTexX = 0f;
+		float minTexY = 0f;
+		float maxTexX = 0.5f;
+		float maxTexY = 0.5f;
+
+		int texType = (int) (Math.random() * 5d);
+		Vec3 texp1 = new Vec3(minTexX, maxTexY, texType == 2 ? 10 : 8);
+		Vec3 texp2 = new Vec3(maxTexX, maxTexY, texType == 2 ? 10 : 8);
+		Vec3 texp3 = new Vec3(maxTexX, minTexY, texType == 2 ? 10 : 8);
+		Vec3 texp4 = new Vec3(minTexX, minTexY, texType == 2 ? 10 : 8);
+
+		grassBuffer.addVec3(p1);
+		grassBuffer.addVec3(texp1);
+		index++;
+		grassBuffer.addVec3(p2);
+		grassBuffer.addVec3(texp2);
+		index++;
+		grassBuffer.addVec3(p3);
+		grassBuffer.addVec3(texp3);
+		index++;
+		grassBuffer.addVec3(p4);
+		grassBuffer.addVec3(texp4);
+		index++;
+
+		// p1 p2 p4
+		grassBuffer.addIndex(index - 4);
+		grassBuffer.addIndex(index - 3);
+		grassBuffer.addIndex(index - 1);
+		// p4 p2 p3
+		grassBuffer.addIndex(index - 1);
+		grassBuffer.addIndex(index - 3);
+		grassBuffer.addIndex(index - 2);
+
+		// p4 p2 p1
+		grassBuffer.addIndex(index - 1);
+		grassBuffer.addIndex(index - 3);
+		grassBuffer.addIndex(index - 4);
+
+		// p3 p2 p4
+		grassBuffer.addIndex(index - 2);
+		grassBuffer.addIndex(index - 3);
+		grassBuffer.addIndex(index - 1);
+	}
+
+	public void buildGrass() {
+		if (lodLevel != 1) {
+			return;
+		}
+		/* We need to iterate EVERY tile */
+		int numGrassTiles = 0;
+		for (int x = 0; x < REGION_WIDTH; x++) {
+			for (int y = 0; y < REGION_HEIGHT; y++) {
+				if (getTile(x, y).getTileType() == TileType.GRASS) {
+					numGrassTiles++;
+				}
+			}
+		}
+
+		int grassDensity = 16;
+
+		grassBuffer = new MeshBuffer(numGrassTiles * (grassDensity * 4) * 6
+				* 4, numGrassTiles * (grassDensity * 12));
+
+		int index = 0;
+		float grassHeight = 2.0f;
+		for (int x = 0; x < REGION_WIDTH; x++) {
+			for (int y = 0; y < REGION_HEIGHT; y++) {
+				if (getTile(x, y).getTileType() == TileType.GRASS) {
+
+					int _x = regionX * REGION_WIDTH + x;
+					int _y = regionY * REGION_HEIGHT + y;
+
+					int lodOffset = 1;
+					float p1H = (float) world.getWorldGen().getHeight(
+							_x + lodOffset, _y);
+					float p2H = tiles[x][y].getTileHeight();
+					float p3H = (float) world.getWorldGen().getHeight(_x,
+							_y + lodOffset);
+					float p4H = (float) world.getWorldGen().getHeight(
+							_x + lodOffset, _y + lodOffset);
+
+					Random random = new Random(getRegionX() * getRegionY() + _x * _y);
+
+					// Add all four vertices
+
+					// First point x, lowestHeight, z
+					// Second point x, highestHeight, z
+					for (int j = 0; j < grassDensity; j++) {
+						float r1 = random.nextFloat() + 0.1f;
+						float r2 = random.nextFloat() + 0.1f;
+						float r3 = random.nextFloat() + 0.1f;
+						float r4 = random.nextFloat() + 0.1f;
+						float x1 = _x + r1;
+						float z1 = _y + r2;
+						float x2 = _x + r3 + r1;
+						float z2 = _y + r4 + r2;
+
+						float height1 = world.getInterpolatedHeight(x1, z1);
+						float height2 = world.getInterpolatedHeight(x2, z2);
+
+						addGrass(index, new Vec3(x1, height1, z1), new Vec3(x2,
+								height2, z2), 1.5f + (random.nextFloat() * 0.2f));
+						index += 4;
+					}
+				}
+			}
+		}
+	}
+
 	public void buildTerrain() {
 		if (lodLevel == 0 || lodLevel < 0) {
 			System.err.println("LODLEVEL CANT BE ZERO OR LESS");
@@ -322,7 +446,7 @@ public class Region {
 		}
 		int numTiles = (REGION_WIDTH * REGION_HEIGHT) / lodLevel;
 		int FLOATS_IN_VEC = 3;
-		buffer = new MeshBuffer((numTiles * 4 * FLOATS_IN_VEC * 2)
+		meshBuffer = new MeshBuffer((numTiles * 4 * FLOATS_IN_VEC * 2)
 				+ (numTiles * 4 * FLOATS_IN_VEC) + (numTiles * 4 * 4),
 				(numTiles * 6));
 		int index = 0;
@@ -376,42 +500,43 @@ public class Region {
 				// Ignore this for now
 				Vector4f tileTransitions = getTileTransition(_x, _y);
 
-				buffer.addVec3(p1.getPosition());
-				buffer.addVec3(p1.getNormal());
-				buffer.addVec3(texp1);
-				buffer.addVec4(tileTransitions);
+				meshBuffer.addVec3(p1.getPosition());
+				meshBuffer.addVec3(p1.getNormal());
+				meshBuffer.addVec3(texp1);
+				meshBuffer.addVec4(tileTransitions);
 
 				index++;
 
-				buffer.addVec3(p2.getPosition());
-				buffer.addVec3(p2.getNormal());
-				buffer.addVec3(texp2);
-				buffer.addVec4(tileTransitions);
+				meshBuffer.addVec3(p2.getPosition());
+				meshBuffer.addVec3(p2.getNormal());
+				meshBuffer.addVec3(texp2);
+				meshBuffer.addVec4(tileTransitions);
 
 				index++;
 
-				buffer.addVec3(p3.getPosition());
-				buffer.addVec3(p3.getNormal());
-				buffer.addVec3(texp3);
-				buffer.addVec4(tileTransitions);
+				meshBuffer.addVec3(p3.getPosition());
+				meshBuffer.addVec3(p3.getNormal());
+				meshBuffer.addVec3(texp3);
+				meshBuffer.addVec4(tileTransitions);
 
 				index++;
 
-				buffer.addVec3(p4.getPosition());
-				buffer.addVec3(p4.getNormal());
-				buffer.addVec3(texp4);
-				buffer.addVec4(tileTransitions);
+				meshBuffer.addVec3(p4.getPosition());
+				meshBuffer.addVec3(p4.getNormal());
+				meshBuffer.addVec3(texp4);
+				meshBuffer.addVec4(tileTransitions);
 
 				index++;
 
-				buffer.addIndex(index - 4);
-				buffer.addIndex(index - 3);
-				buffer.addIndex(index - 1);
-				buffer.addIndex(index - 3);
-				buffer.addIndex(index - 2);
-				buffer.addIndex(index - 1);
+				meshBuffer.addIndex(index - 4);
+				meshBuffer.addIndex(index - 3);
+				meshBuffer.addIndex(index - 1);
+				meshBuffer.addIndex(index - 3);
+				meshBuffer.addIndex(index - 2);
+				meshBuffer.addIndex(index - 1);
 			}
 		}
+		buildGrass();
 		built = true;
 	}
 
@@ -445,18 +570,21 @@ public class Region {
 					regionGeometry = new Geometry();
 					regionGeometry.setMaterial(null);
 				}
-				MeshRenderer meshRenderer = new MeshRenderer();
-				meshRenderer.clear();
 				regionGeometry.clear();
+
+				/*
+				 * Setup the terrain mesh
+				 */
+				MeshRenderer meshRenderer = new MeshRenderer();
 				regionMesh = new Mesh();
-				meshRenderer.addIndex(buffer.getFlippedIntBuffer(),
-						buffer.getNumIndices());
+				meshRenderer.addIndex(meshBuffer.getFlippedIntBuffer(),
+						meshBuffer.getNumIndices());
 
 				VertexBuffer vbData = new VertexBuffer(BufferType.ARRAY_BUFFER,
 						BufferUsage.STATIC_DRAW);
 
 				vbData.bind();
-				vbData.bufferData(buffer.getFlippedFloatBuffer());
+				vbData.bufferData(meshBuffer.getFlippedFloatBuffer());
 
 				// Some vars we need to know
 				int stride = 13 * 4; // 13 floats
@@ -467,12 +595,37 @@ public class Region {
 				entry.addAttribute(3, 4, GL11.GL_FLOAT, false, stride, 36); // tile
 																			// transition
 																			// coords
-
 				meshRenderer.compile();
 				regionMesh.setMeshRenderer(meshRenderer);
-
 				regionGeometry.addMesh("region_" + regionX + "_" + regionY,
 						regionMesh);
+
+				/*
+				 * Setup grass mesh
+				 */
+				if (lodLevel == 1) {
+					meshRenderer = new MeshRenderer();
+					grassMesh = new Mesh();
+					meshRenderer.addIndex(grassBuffer.getFlippedIntBuffer(),
+							grassBuffer.getNumIndices());
+
+					vbData = new VertexBuffer(BufferType.ARRAY_BUFFER,
+							BufferUsage.STATIC_DRAW);
+
+					vbData.bind();
+					vbData.bufferData(grassBuffer.getFlippedFloatBuffer());
+
+					stride = 6 * 4; // 3 floats so far
+					entry = meshRenderer.addVertexBuffer(vbData);
+					entry.addAttribute(0, 3, GL11.GL_FLOAT, false, stride, 0);
+					entry.addAttribute(2, 3, GL11.GL_FLOAT, false, stride, 12);
+
+					meshRenderer.compile();
+
+					grassMesh.setMeshRenderer(meshRenderer);
+					regionGeometry.addMesh("region_grass_" + regionX + "_"
+							+ regionY, grassMesh);
+				}
 				needsUpdate = false;
 				time = System.nanoTime() - time;
 				PerformanceGraph.feedTick2((int) time);

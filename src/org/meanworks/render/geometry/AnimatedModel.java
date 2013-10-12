@@ -12,8 +12,8 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
-import org.meanworks.engine.Application;
 import org.meanworks.engine.EngineLogger;
+import org.meanworks.engine.core.Application;
 import org.meanworks.render.geometry.animation.Animation;
 import org.meanworks.render.geometry.animation.AnimationChannel;
 import org.meanworks.render.geometry.animation.Skeleton;
@@ -88,7 +88,7 @@ public class AnimatedModel extends Model {
 	 * Construct a new AnimatedModel
 	 */
 	public AnimatedModel() {
-		renderSkeleton = false;
+		renderSkeleton = true;
 
 		setMaterial(new Material("animatedModelMaterial", Application
 				.getApplication().getAssetManager()
@@ -271,7 +271,7 @@ public class AnimatedModel extends Model {
 		if (skeleton == null) {
 
 			// Don't render
-
+			System.err.println("No skeleton :(");
 			return;
 		}
 

@@ -6,7 +6,7 @@ import java.util.HashMap;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.Renderable;
 import org.lwjgl.util.vector.Vector4f;
-import org.meanworks.engine.Application;
+import org.meanworks.engine.core.Application;
 import org.meanworks.engine.scene.Node;
 import org.meanworks.render.geometry.mesh.Mesh;
 import org.meanworks.render.material.Material;
@@ -36,6 +36,9 @@ public class Geometry extends Node implements Renderable {
 	 * Clear this geometry
 	 */
 	public void clear() {
+		for (Mesh mesh : meshes.values()) {
+			mesh.getMeshRenderer().clear();
+		}
 		meshes.clear();
 	}
 

@@ -63,6 +63,9 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 import org.lwjgl.opengl.GL30;
+import org.lwjgl.opengl.GL32;
+import org.lwjgl.opengl.GL31;
+import org.lwjgl.opengl.GL33;
 import org.lwjgl.util.glu.GLU;
 import org.meanworks.engine.EngineLogger;
 
@@ -262,42 +265,36 @@ public class TextureLoader {
 
 		texture.bind2DArray();
 
-		// GL12.glTexImage3D(target, level, internalFormat, width, height,
-		// depth, border, format, type, pixels);
-
 		GL12.glTexImage3D(GL30.GL_TEXTURE_2D_ARRAY, 0, GL11.GL_RGBA,
 				textureData[0].width, textureData[0].height,
 				textureData.length, 0, GL_RGBA, GL_UNSIGNED_BYTE,
 				(ByteBuffer) null);
 
+		// GL12.glTexImage3D(target, level, internalFormat, width, height,
+		// depth, border, format, type, pixels);
 		int errorCode = GL11.glGetError();
 		if (errorCode != 0) {
 			System.err.println("Bind tex array " + errorCode + " "
 					+ GLU.gluErrorString(errorCode));
 		}
 
+		/*
+		 * Upload the whole image array
+		 */
 		for (int i = 0; i < textureData.length; i++) {
-			// Upload pixel data.
-			// GL12.glTexSubImage3D(target, level, xoffset, yoffset, zoffset,
-			// width, height, depth, format, type, pixels);
-			/*GL12.glTexSubImage3D(GL30.GL_TEXTURE_2D_ARRAY, 0, 0, 0, i,
-					textureData[i].width, textureData[i].height, 1,
-					textureData[i].srcPixelFormat, GL_UNSIGNED_BYTE,
-					textureData[i].data);*/
-			
-			gluBuild3DMipmaps(GL30.GL_TEXTURE_2D_ARRAY, textureData[i].srcPixelFormat, textureData[i].width, textureData[i].height, textureData[i].srcPixelFormat, 
-					GL_UNSIGNED_BYTE, i, textureData[i].data);
 
-			errorCode = GL11.glGetError();
-			if (errorCode != 0) {
-				System.err.println("TEX[" + i + "] " + errorCode + " "
-						+ GLU.gluErrorString(errorCode));
-			}
+			int width = textureData[i].width;
+			int height = textureData[i].height;
+			int format = textureData[i].srcPixelFormat;
+			ByteBuffer data = textureData[i].data;
 
+			GL12.glTexSubImage3D(GL30.GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, width,
+					height, 1, format, GL_UNSIGNED_BYTE, data);
 		}
-		// Always set reasonable texture parameters
+		
+		GL30.glGenerateMipmap(GL30.GL_TEXTURE_2D_ARRAY);
 		GL11.glTexParameteri(GL30.GL_TEXTURE_2D_ARRAY,
-				GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR);
+				GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_LINEAR_MIPMAP_LINEAR);
 		GL11.glTexParameteri(GL30.GL_TEXTURE_2D_ARRAY,
 				GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_LINEAR);
 		GL11.glTexParameteri(GL30.GL_TEXTURE_2D_ARRAY, GL11.GL_TEXTURE_WRAP_S,
@@ -306,140 +303,6 @@ public class TextureLoader {
 				GL12.GL_CLAMP_TO_EDGE);
 
 		texture.unbind2DArray();
-	}
-
-	/**
-	 * Method gluBuild2DMipmaps
-	 * 
-	 * @param target
-	 * @param components
-	 * @param width
-	 * @param height
-	 * @param format
-	 * @param type
-	 * @param data
-	 * @return int
-	 */
-	public static int gluBuild3DMipmaps(final int target, final int components,
-			final int width, final int height, final int format,
-			final int type, final int zOffset, final ByteBuffer data) {
-		if (width < 1 || height < 1)
-			return GLU_INVALID_VALUE;
-
-		final int bpp = bytesPerPixel(format, type);
-		if (bpp == 0)
-			return GLU_INVALID_ENUM;
-
-		final int maxSize = glGetIntegerv(GL_MAX_TEXTURE_SIZE);
-
-		int w = get2Fold(width);
-		if (w > maxSize)
-			w = maxSize;
-
-		int h = get2Fold(height);
-		if (h > maxSize)
-			h = maxSize;
-
-		// Get current glPixelStore state
-		PixelStoreState pss = new PixelStoreState();
-
-		// set pixel packing
-		glPixelStorei(GL_PACK_ROW_LENGTH, 0);
-		glPixelStorei(GL_PACK_ALIGNMENT, 1);
-		glPixelStorei(GL_PACK_SKIP_ROWS, 0);
-		glPixelStorei(GL_PACK_SKIP_PIXELS, 0);
-
-		ByteBuffer image;
-		int retVal = 0;
-		boolean done = false;
-
-		if (w != width || h != height) {
-			// must rescale image to get "top" mipmap texture image
-			image = BufferUtils.createByteBuffer((w + 4) * h * bpp);
-			int error = GLU.gluScaleImage(format, width, height, type, data, w,
-					h, type, image);
-			if (error != 0) {
-				retVal = error;
-				done = true;
-			}
-
-			/* set pixel unpacking */
-			glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-			glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-			glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
-			glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
-		} else {
-			image = data;
-		}
-
-		ByteBuffer bufferA = null;
-		ByteBuffer bufferB = null;
-
-		int level = 0;
-		while (!done) {
-			if (image != data) {
-				/* set pixel unpacking */
-				glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-				glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-				glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
-				glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
-			}
-
-			// GL11.glTexImage2D(target, level, internalformat, width, height,
-			// border, format, type, pixels);
-
-			// glTexImage2D(target, level, components, w, h, 0, format, type,
-			// image);
-
-			// GL12.glTexSubImage3D(target, level, xoffset, yoffset, zoffset,
-			// width, height, depth, format, type, pixels);
-
-			GL12.glTexSubImage3D(target, level, 0, 0, zOffset, w, h, 1, format,
-					type, image);
-
-			if (w == 1 && h == 1)
-				break;
-
-			final int newW = (w < 2) ? 1 : w >> 1;
-			final int newH = (h < 2) ? 1 : h >> 1;
-
-			final ByteBuffer newImage;
-
-			if (bufferA == null)
-				newImage = (bufferA = BufferUtils.createByteBuffer((newW + 4)
-						* newH * bpp));
-			else if (bufferB == null)
-				newImage = (bufferB = BufferUtils.createByteBuffer((newW + 4)
-						* newH * bpp));
-			else
-				newImage = bufferB;
-
-			int error = GLU.gluScaleImage(format, w, h, type, image, newW,
-					newH, type, newImage);
-			if (error != 0) {
-				retVal = error;
-				done = true;
-			}
-
-			image = newImage;
-			if (bufferB != null)
-				bufferB = bufferA;
-
-			w = newW;
-			h = newH;
-			level++;
-			
-			int errorCode = GL11.glGetError();
-			if (errorCode != 0) {
-				System.err.println("TEX[" + zOffset + "][" + (level - 1) + "] " + errorCode + " "
-						+ GLU.gluErrorString(errorCode));
-			}			
-		}
-
-		// Restore original glPixelStore state
-		pss.save();
-
-		return retVal;
 	}
 
 	/**

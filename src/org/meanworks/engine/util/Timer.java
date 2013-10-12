@@ -1,8 +1,4 @@
-package org.meanworks.engine;
-
-import java.util.LinkedList;
-
-import org.lwjgl.util.Renderable;
+package org.meanworks.engine.util;
 
 /**
  * Copyright (C) 2013 Steffen Evensen
@@ -22,35 +18,57 @@ import org.lwjgl.util.Renderable;
  * 
  * @author Meanz
  */
-public class RenderQueue {
+public class Timer {
 
-	/*
-	 * The render queue
-	 */
-	private LinkedList<Renderable> queue = new LinkedList<>();
-
-	/**
-	 * Construct a new Render Queue
-	 */
-	public RenderQueue() {
-
-	}
+	private long time;
+	private long delta;
+	private long milliDelta;
+	private long elapsed;
+	private long start;
 
 	/**
-	 * Add the given renderable to the render queue
 	 * 
-	 * @param renderable
 	 */
-	public void addToQueue(Renderable renderable) {
-		queue.add(renderable);
+	public Timer() {
+		start = System.nanoTime();
 	}
 
 	/**
-	 * Simple yet efficient
+	 * Tick the timer
 	 */
-	public void doRender() {
-		for (Renderable renderable : queue) {
-			renderable.render();
-		}
+	public void tick() {
+		long _newTime = System.nanoTime();
+		delta = time - _newTime;
+		time = _newTime;
+		milliDelta = delta / 1000000;
+		elapsed = time - start;
 	}
+
+	/**
+	 * Get the delta time in milliseconds
+	 * 
+	 * @return
+	 */
+	public long getMilliDelta() {
+		return milliDelta;
+	}
+
+	/**
+	 * Get the delta in nano seconds
+	 * 
+	 * @return
+	 */
+	public long getNanoDelta() {
+		return delta;
+	}
+
+	/**
+	 * Get the elapsed tick count
+	 * 
+	 * @return
+	 */
+	public long getTickCount() {
+		return elapsed;
+	}
+
 }

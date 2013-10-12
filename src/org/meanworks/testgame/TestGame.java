@@ -11,9 +11,7 @@ import static org.lwjgl.opengl.GL11.glEnable;
 
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
-import org.meanworks.engine.Application;
-import org.meanworks.engine.GameApplication;
-import org.meanworks.engine.Util;
+import org.meanworks.engine.core.Application;
 import org.meanworks.engine.gui.Button;
 import org.meanworks.engine.gui.impl.PerformanceGraph;
 import org.meanworks.engine.gui.impl.Tooltip;
@@ -22,8 +20,12 @@ import org.meanworks.engine.gui.impl.radialmenu.RadialMenu;
 import org.meanworks.engine.math.Ray;
 import org.meanworks.engine.math.Vec3;
 import org.meanworks.engine.model.MWMLoader;
+import org.meanworks.engine.util.Util;
+import org.meanworks.render.geometry.AnimatedModel;
 import org.meanworks.render.geometry.Geometry;
 import org.meanworks.render.geometry.Vertex;
+import org.meanworks.render.geometry.animation.AnimationChannel;
+import org.meanworks.render.geometry.animation.LoopMode;
 import org.meanworks.render.opengl.ImmediateRenderer;
 import org.meanworks.render.opengl.Window;
 import org.meanworks.render.opengl.shader.ShaderProgram;
@@ -33,7 +35,7 @@ import org.meanworks.testgame.world.Region;
 import org.meanworks.testgame.world.Tile;
 import org.meanworks.testgame.world.World;
 
-public class TestGame extends GameApplication {
+public class TestGame extends Application {
 
 	/*
 	 * The world
@@ -79,6 +81,11 @@ public class TestGame extends GameApplication {
 	 * 
 	 */
 	private Geometry treeModel;
+	
+	/*
+	 * 
+	 */
+	private AnimatedModel model;
 
 	/**
 	 * 
@@ -194,7 +201,20 @@ public class TestGame extends GameApplication {
 		//treeModel.getTransform().setScale(0.2f, 0.2f, 0.2f);
 		treeModel.getTransform().setPosition(5000, 135, 5000);
 		getScene().getRootNode().addChild(treeModel);
-
+		
+		
+		model = MWMLoader.loadAnimatedModel("./data/models/Sinbad/Sinbad_mesh.mwm");
+		
+		AnimationChannel channel = model.createChannel();
+		channel.playAnimation(model.getAnimation("RunBase"), LoopMode.LM_LOOP);
+		
+		channel = model.createChannel();
+		channel.playAnimation(model.getAnimation("RunTop"), LoopMode.LM_LOOP);
+		
+		model.getTransform().setScale(0.2f, 0.2f, 0.2f);
+		model.getTransform().setPosition(4998f, 138f, 5024f);
+		
+		getScene().getRootNode().addChild(model);
 	}
 
 	/*

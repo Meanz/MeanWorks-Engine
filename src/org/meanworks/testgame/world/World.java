@@ -3,9 +3,10 @@ package org.meanworks.testgame.world;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
+import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
-import org.meanworks.engine.Application;
 import org.meanworks.engine.EngineLogger;
+import org.meanworks.engine.core.Application;
 import org.meanworks.engine.math.FrustumResult;
 import org.meanworks.engine.math.Ray;
 import org.meanworks.engine.math.VectorMath;
@@ -22,7 +23,7 @@ public class World {
 	/*
 	 * The view distance of this world
 	 */
-	public final static int VIEW_DISTANCE = 4;
+	public final static int VIEW_DISTANCE = 8;
 
 	/*
 	 * The world cursors position
@@ -96,7 +97,10 @@ public class World {
 				"./data/images/terrain/cobble.png",
 				"./data/images/terrain/slab.jpg",
 				"./data/images/terrain/dirt.jpg",
-				"./data/images/terrain/packed-dirt.jpg"
+				"./data/images/terrain/packed-dirt.jpg",
+				"./data/images/terrain/grasssprite_spring.png",
+				"./data/images/terrain/marsh.png",
+				"./data/images/terrain/grasssprite_spring2.png",
 
 		});// Application.getApplication().getAssetManager().loadTexture("./data/images/terrain/atlas.png",
 			// true);
@@ -452,18 +456,17 @@ public class World {
 	 * Render the world
 	 */
 	public void render() {
-		material.apply();
 
 		// Bind the tile atlas
 		getTileAtlas().bind2DArray();
 		// Render all active regions
-		material.getShaderProgram().setTextureLocation("tColorMap", 0);
-		material.getShaderProgram().setProjectionViewMatrix(
-				Application.getApplication().getCamera()
-						.getProjectionViewMatrix());
-		material.getShaderProgram().setModelMatrix(
-				Application.getApplication().getCamera().getModelMatrix());
-
+		material.setProperty("time", (int) System.currentTimeMillis());
+		material.setProperty("tColorMap", 0);
+		material.setProperty("mProjectionView", Application.getApplication()
+				.getCamera().getProjectionViewMatrix());
+		material.setProperty("mModelMatrix", new Matrix4f());
+		material.apply();
+		
 		if (regionList != null) {
 			int off = 0;
 			renderedRegions = 0;

@@ -11,7 +11,7 @@ import java.util.LinkedList;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Matrix4f;
-import org.meanworks.engine.Application;
+import org.meanworks.engine.core.Application;
 import org.meanworks.render.geometry.AnimatedModel;
 import org.meanworks.render.geometry.Geometry;
 import org.meanworks.render.geometry.animation.Animation;

@@ -12,8 +12,8 @@ import static org.lwjgl.opengl.GL11.glLoadIdentity;
 
 import java.util.HashMap;
 
-import org.meanworks.engine.Application;
 import org.meanworks.engine.EngineLogger;
+import org.meanworks.engine.core.Application;
 import org.meanworks.render.opengl.ImmediateRenderer;
 import org.meanworks.testgame.world.World;
 

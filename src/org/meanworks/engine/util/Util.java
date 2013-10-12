@@ -1,4 +1,4 @@
-package org.meanworks.engine;
+package org.meanworks.engine.util;
 
 import java.io.File;
 

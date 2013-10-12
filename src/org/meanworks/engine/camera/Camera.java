@@ -1,4 +1,4 @@
-package org.meanworks.engine;
+package org.meanworks.engine.camera;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -6,6 +6,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
+import org.meanworks.engine.core.Application;
 import org.meanworks.engine.math.Frustum;
 import org.meanworks.engine.math.MatrixHelper;
 import org.meanworks.engine.math.Ray;
@@ -13,7 +14,7 @@ import org.meanworks.engine.math.Vec3;
 import org.meanworks.engine.math.VectorMath;
 import org.meanworks.engine.scene.Node;
 
-public class Camera {
+public abstract class Camera {
 
 	/*
 	 * The view frustum for the camera
@@ -100,6 +101,15 @@ public class Camera {
 		cameraTranslationMatrix = new Matrix4f();
 
 		cameraFrustum = new Frustum();
+	}
+
+	/**
+	 * Get the target the camera is following
+	 * 
+	 * @return
+	 */
+	public Node getFollowTarget() {
+		return followTarget;
 	}
 
 	/**
@@ -237,18 +247,6 @@ public class Camera {
 	}
 
 	/**
-	 * Bugged function
-	 * 
-	 * @param position
-	 * @param orientation
-	 * @return
-	 */
-	public Vector3f forward(Vector3f position, Vector3f orientation) {
-		return Vector3f.add(position, new Vector3f(orientation.x * 2.0f,
-				orientation.y * 2.0f, orientation.z * 2.0f), null);
-	}
-
-	/**
 	 * Updates the camera matrices
 	 */
 	public void updateCamera() {
@@ -309,7 +307,11 @@ public class Camera {
 	}
 
 	/**
+	 * Setup the camera to look at something
 	 * 
+	 * @param eye
+	 * @param target
+	 * @return
 	 */
 	public Matrix4f lookAt(Vector3f eye, Vector3f target) {
 		Matrix4f persp = new Matrix4f();
@@ -326,25 +328,6 @@ public class Camera {
 		}
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);
 		return persp;
-		/*
-		 * Vector3f zaxis = (Vector3f) Vector3f.sub(eye, target,
-		 * null).normalise(); Vector3f xaxis = (Vector3f)
-		 * Vector3f.cross(upVector, zaxis, null) .normalise(); Vector3f yaxis =
-		 * Vector3f.cross(zaxis, xaxis, null);
-		 * 
-		 * Matrix4f orientation = new Matrix4f(); Matrix4f translation = new
-		 * Matrix4f();
-		 * 
-		 * FloatBuffer tempBuffer = BufferUtils.createFloatBuffer(16);
-		 * tempBuffer.put(new float[] { xaxis.x, yaxis.x, zaxis.x, 0, xaxis.y,
-		 * yaxis.y, zaxis.y, 0, xaxis.z, yaxis.z, zaxis.z, 0, 0, 0, 0, 1 });
-		 * tempBuffer.flip(); orientation.load(tempBuffer); tempBuffer =
-		 * BufferUtils.createFloatBuffer(16); tempBuffer.put(new float[] { 1, 0,
-		 * 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, -eye.x, -eye.y, -eye.z, 1 });
-		 * tempBuffer.flip(); translation.load(tempBuffer);
-		 * 
-		 * viewMatrix = Matrix4f.mul(orientation, translation, null);
-		 */
 	}
 
 	/**
@@ -415,9 +398,10 @@ public class Camera {
 		Vec3 xaxis = Vec3.cross(zaxis, upVector).normalize();
 		Vec3 yaxis = Vec3.cross(xaxis, zaxis);
 
-		Vec3 dirVec = Vec3.add(Vec3.scale(xaxis, alpha), Vec3.scale(yaxis, beta));
+		Vec3 dirVec = Vec3.add(Vec3.scale(xaxis, alpha),
+				Vec3.scale(yaxis, beta));
 		dirVec.add(zaxis);
-		
+
 		float absLength = (float) Math.abs(dirVec.getLength());
 		Vector3f rayDirection = new Vector3f(dirVec.x / absLength, dirVec.y
 				/ absLength, dirVec.z / absLength);
@@ -425,123 +409,8 @@ public class Camera {
 		return new Ray(new Vector3f(eye.x, eye.y, eye.z), rayDirection);
 	}
 
-	public void thirdPersonCamera() {
-		//
-		if (Mouse.isButtonDown(1)) { // RMB
-			float mouseRatio = 0.2f;
-
-			float yincr = Application.getApplication().getInputHandler()
-					.getDX()
-					* mouseRatio;
-			float pincr = -Application.getApplication().getInputHandler()
-					.getDY()
-					* mouseRatio;
-			yaw(yincr);
-			// pitch(pincr);
-		}
-
-		// Set our position to the players position
-		this.setPosition(followTarget.getTransform().getPosition());
-
-		// The distance from the camera
-		float distance = 10;
-
-		// Find the yaw of our camera
-		float yaw = (float) Math.toRadians(getYaw());
-		float pitch = (float) Math.toRadians(getPitch());
-
-		float factor = (float) Math.cos(Math.toRadians(rotation.x));
-		Vector3f forward = new Vector3f();
-		forward.x = (float) Math.sin(Math.toRadians(rotation.y)) * factor;
-		forward.y = (float) Math.sin(Math.toRadians(-rotation.x));
-		forward.z = (float) -Math.cos(Math.toRadians(rotation.y)) * factor;
-
-		translate((float) forward.x * distance, (float) forward.y * distance,
-				(float) forward.z * distance);
-	}
-
-	public void update() {
-		float moveSpeed = 0.2f;
-		if (Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
-			Application.getApplication().stop();
-		}
-
-		if (followTarget != null) {
-
-			if (Mouse.isButtonDown(1)) { // RMB
-				float mouseRatio = 0.2f;
-
-				float yincr = Application.getApplication().getInputHandler()
-						.getDX()
-						* mouseRatio;
-				float pincr = Application.getApplication().getInputHandler()
-						.getDY()
-						* mouseRatio;
-				yaw(yincr);
-				pitch(pincr);
-			}
-
-			// Set our position to the players position
-			this.setPosition(followTarget.getTransform().getPosition());
-
-			this.translate(0.0f, 2.5f, 0.0f);
-
-		} else if (isFlying()) {
-			if (Mouse.isButtonDown(1)) { // RMB
-				float mouseRatio = 0.2f;
-
-				float yincr = Application.getApplication().getInputHandler()
-						.getDX()
-						* mouseRatio;
-				float pincr = -Application.getApplication().getInputHandler()
-						.getDY()
-						* mouseRatio;
-				yaw(yincr);
-				pitch(pincr);
-			}
-
-			if (Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) {
-				moveSpeed = 1.0f;
-			}
-			if (Keyboard.isKeyDown(Keyboard.KEY_W)) {
-				translate(
-						moveSpeed * (float) Math.sin(Math.toRadians(getYaw())),
-						0.0f,
-						-moveSpeed * (float) Math.cos(Math.toRadians(getYaw())));
-			}
-			if (Keyboard.isKeyDown(Keyboard.KEY_D)) {
-				translate(
-						moveSpeed
-								* (float) Math.sin(Math
-										.toRadians(getYaw() + 90)),
-						0.0f,
-						-moveSpeed
-								* (float) Math.cos(Math
-										.toRadians(getYaw() + 90)));
-			}
-			if (Keyboard.isKeyDown(Keyboard.KEY_A)) {
-				translate(
-						moveSpeed
-								* (float) Math.sin(Math
-										.toRadians(getYaw() - 90)),
-						0.0f,
-						-moveSpeed
-								* (float) Math.cos(Math
-										.toRadians(getYaw() - 90)));
-			}
-			if (Keyboard.isKeyDown(Keyboard.KEY_S)) {
-				translate(
-						-moveSpeed * (float) Math.sin(Math.toRadians(getYaw())),
-						0.0f,
-						moveSpeed * (float) Math.cos(Math.toRadians(getYaw())));
-			}
-			if (Keyboard.isKeyDown(Keyboard.KEY_E)) {
-				translate(0.0f, -0.5f * moveSpeed, 0.0f);
-			}
-			if (Keyboard.isKeyDown(Keyboard.KEY_Q)) {
-				translate(0.0f, 0.5f * moveSpeed, 0.0f);
-			}
-		} else {
-		}
-	}
+	/**
+	 * Update the camera
+	 */
+	public abstract void update();
 }

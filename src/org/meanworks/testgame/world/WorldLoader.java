@@ -2,8 +2,8 @@ package org.meanworks.testgame.world;
 
 import java.util.LinkedList;
 
-import org.meanworks.engine.Application;
 import org.meanworks.engine.EngineLogger;
+import org.meanworks.engine.core.Application;
 import org.meanworks.engine.gui.impl.PerformanceGraph;
 
 public class WorldLoader implements Runnable {
