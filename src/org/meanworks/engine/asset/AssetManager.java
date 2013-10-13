@@ -1,16 +1,20 @@
 package org.meanworks.engine.asset;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 
 import org.meanworks.engine.EngineConfig;
 import org.meanworks.engine.EngineLogger;
+import org.meanworks.engine.fx.ShaderParseException;
+import org.meanworks.engine.fx.ShaderParser;
 import org.meanworks.render.opengl.shader.Shader;
+import org.meanworks.render.opengl.shader.Shader.ShaderType;
 import org.meanworks.render.opengl.shader.ShaderHelper;
 import org.meanworks.render.opengl.shader.ShaderProgram;
-import org.meanworks.render.opengl.shader.Shader.ShaderType;
 import org.meanworks.render.texture.Texture;
 import org.meanworks.render.texture.TextureLoader;
 
@@ -74,7 +78,43 @@ public class AssetManager implements AssetListener {
 	 */
 	public ShaderProgram loadShader(String shaderPath) {
 
+		// Don't know how much I like this but okay
 		ShaderProgram shaderProgram = shaders.get(shaderPath.toLowerCase());
+		if (shaderProgram != null) {
+			return shaderProgram;
+		}
+
+		String shaderFile = shaderPath + ".shader";
+
+		shaderProgram = new ShaderProgram();
+		if (!shaderProgram.create()) {
+			return null;
+		}
+
+		try {
+			ShaderParser.parseShader(shaderProgram, "./data/shaders/",
+					new FileInputStream(new File(shaderFile)));
+		} catch (IOException | ShaderParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			// Delete the program
+			shaderProgram.delete();
+			return null;
+		}
+
+		// Add the vertex shader file to our watch list
+		assetWatcher.watchFile("shader_" + shaderProgram.getProgramId(),
+				shaderFile.toLowerCase());
+		// Add the shader program to our store list
+		shaders.put(shaderPath.toLowerCase(), shaderProgram);
+
+		if (true) {
+			return shaderProgram;
+		}
+		/*
+		 * Old code
+		 */
+		// ShaderProgram shaderProgram = shaders.get(shaderPath.toLowerCase());
 		if (shaderProgram != null) {
 			return shaderProgram;
 		}
@@ -145,12 +185,14 @@ public class AssetManager implements AssetListener {
 	public Texture loadTexture(String path) {
 		return loadTexture(path, false);
 	}
-	
+
 	/**
 	 * Load a texture from the given path
 	 * 
-	 * @param path The path to the texture
-	 * @param mipMapping Whether to create mip maps or not
+	 * @param path
+	 *            The path to the texture
+	 * @param mipMapping
+	 *            Whether to create mip maps or not
 	 * @return
 	 */
 	public Texture loadTexture(String path, boolean mipMapping) {
@@ -171,7 +213,6 @@ public class AssetManager implements AssetListener {
 		textures.put(path.toLowerCase(), outTexture);
 		return outTexture;
 	}
-	
 
 	/**
 	 * Loads a texture from the given path without storing it for later use
@@ -182,7 +223,7 @@ public class AssetManager implements AssetListener {
 	public Texture forceLoadTexture(String path) {
 		return TextureLoader.loadTexture(path);
 	}
-	
+
 	/**
 	 * Loads a shader from the given path without storing it for later use
 	 * 
@@ -254,63 +295,10 @@ public class AssetManager implements AssetListener {
 						boolean found = false;
 						for (ShaderProgram shaderProgram : shaders.values()) {
 							if (shaderProgram.getProgramId() == shaderProgramId) {
-
-								String shaderPath = key
-										.startsWith("shader_vert") ? filePath
-										.toLowerCase().split(".vert")[0]
-										: filePath.toLowerCase().split(".frag")[0];
-								String vertexShaderFile = shaderPath + ".vert";
-								String fragmentShaderFile = shaderPath
-										+ ".frag";
-
-								/*
-								 * Create vertex shader
-								 */
-								Shader vertexShader = new Shader(
-										ShaderType.VERTEX_SHADER);
-								if (!vertexShader.create()) {
-									break;
-								}
-								vertexShader.readShaderData(new File(
-										vertexShaderFile));
-
-								/*
-								 * Create fragment shader
-								 */
-								Shader fragmentShader = new Shader(
-										ShaderType.FRAGMENT_SHADER);
-								if (!fragmentShader.create()) {
-									vertexShader.delete();
-									break;
-								}
-								fragmentShader.readShaderData(new File(
-										fragmentShaderFile));
-
-								// If we have come this far let's go on to
-								// fixing up the shader
-								LinkedList<Shader> shaders = shaderProgram
-										.detatchAll();
-
-								shaderProgram.attach(vertexShader);
-								shaderProgram.attach(fragmentShader);
-
-								if (!shaderProgram.compile()) {
-									vertexShader.delete();
-									fragmentShader.delete();
-									shaderProgram.detatchAll();
-									for (Shader shader : shaders) {
-										shaderProgram.attach(shader);
-									}
-									if (!shaderProgram.compile()) {
-										EngineLogger
-												.error("Something odd happened here, what now ?");
-									}
-								} else {
-									// Delete the old shaders
-									for (Shader shader : shaders) {
-										shader.delete();
-									}
-								}
+								String shaderFile = key + ".shader";
+								ShaderParser.parseShader(shaderProgram,
+										"./data/shaders/", new FileInputStream(
+												new File(shaderFile)));
 								found = true;
 								break;
 							}
@@ -320,9 +308,93 @@ public class AssetManager implements AssetListener {
 									.warning("Could not find stored shader "
 											+ key);
 						}
+					} catch (NumberFormatException | IOException
+							| ShaderParseException e) {
+						e.printStackTrace();
+					}
 
-					} catch (Exception ex) {
-						ex.printStackTrace();
+					if (false) {
+						// Old dead code
+						try {
+							int shaderProgramId = Integer.parseInt(key
+									.substring(12));
+
+							boolean found = false;
+							for (ShaderProgram shaderProgram : shaders.values()) {
+								if (shaderProgram.getProgramId() == shaderProgramId) {
+
+									String shaderPath = key
+											.startsWith("shader_vert") ? filePath
+											.toLowerCase().split(".vert")[0]
+											: filePath.toLowerCase().split(
+													".frag")[0];
+									String vertexShaderFile = shaderPath
+											+ ".vert";
+									String fragmentShaderFile = shaderPath
+											+ ".frag";
+
+									/*
+									 * Create vertex shader
+									 */
+									Shader vertexShader = new Shader(
+											ShaderType.VERTEX_SHADER);
+									if (!vertexShader.create()) {
+										break;
+									}
+									vertexShader.readShaderData(new File(
+											vertexShaderFile));
+
+									/*
+									 * Create fragment shader
+									 */
+									Shader fragmentShader = new Shader(
+											ShaderType.FRAGMENT_SHADER);
+									if (!fragmentShader.create()) {
+										vertexShader.delete();
+										break;
+									}
+									fragmentShader.readShaderData(new File(
+											fragmentShaderFile));
+
+									// If we have come this far let's go on to
+									// fixing up the shader
+									LinkedList<Shader> shaders = shaderProgram
+											.detatchAll();
+
+									shaderProgram.attach(vertexShader);
+									shaderProgram.attach(fragmentShader);
+
+									if (!shaderProgram.compile()) {
+										vertexShader.delete();
+										fragmentShader.delete();
+										shaderProgram.detatchAll();
+										for (Shader shader : shaders) {
+											shaderProgram.attach(shader);
+										}
+										if (!shaderProgram.compile()) {
+											EngineLogger
+													.error("Something odd happened here, what now ?");
+										}
+									} else {
+										// Delete the old shaders
+										for (Shader shader : shaders) {
+											shader.delete();
+										}
+									}
+									found = true;
+									break;
+								}
+							}
+							if (!found) {
+								EngineLogger
+										.warning("Could not find stored shader "
+												+ key);
+							}
+
+						} catch (Exception ex) {
+							ex.printStackTrace();
+						}
+
 					}
 
 				}

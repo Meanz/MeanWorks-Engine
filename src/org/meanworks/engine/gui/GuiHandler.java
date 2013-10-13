@@ -11,6 +11,7 @@ import static org.lwjgl.opengl.GL11.glEnable;
 import static org.lwjgl.opengl.GL11.glLoadIdentity;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 
 import org.meanworks.engine.EngineLogger;
 import org.meanworks.engine.core.Application;
@@ -33,6 +34,11 @@ public class GuiHandler implements KeyListener, MouseListener {
 	 * The list of gui components
 	 */
 	private HashMap<String, Component> components = new HashMap<String, Component>();
+
+	/*
+	 * The list of gui components flagged for deletion
+	 */
+	private LinkedList<String> deleteQueue = new LinkedList<>();
 
 	/*
 	 * 
@@ -62,6 +68,16 @@ public class GuiHandler implements KeyListener, MouseListener {
 	public GuiHandler(Application application) {
 		this.application = application;
 		fontRenderer = new FontRenderer("./data/fonts/arial.ttf", 14);
+	}
+
+	/**
+	 * Flags a component for deletion (Does not work on sub components)
+	 */
+	public void flagDelete(String componentId) {
+		if (componentId == null) {
+			return;
+		}
+		deleteQueue.add(componentId);
 	}
 
 	/**
@@ -107,6 +123,15 @@ public class GuiHandler implements KeyListener, MouseListener {
 		if (mouseFocus != null || keyFocus != null) {
 			consumedInput = true;
 		}
+		for (int i = components.values().size() - 1; i >= 0; i--) {
+			((Component) components.values().toArray()[i]).fireUpdate();
+		}
+		if (deleteQueue.size() > 0) {
+			for (String key : deleteQueue) {
+				removeComponent(key);
+			}
+			deleteQueue.clear();
+		}
 	}
 
 	/**
@@ -131,6 +156,24 @@ public class GuiHandler implements KeyListener, MouseListener {
 	}
 
 	/**
+	 * Remove the given component
+	 * 
+	 * @param componentId
+	 * @return
+	 */
+	public boolean removeComponent(String componentId) {
+		if (componentId == null) {
+			return false;
+		}
+		if (components.containsKey(componentId)) {
+			components.remove(componentId);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
 	 * The render function for the gui handler
 	 */
 	public void render() {
@@ -151,8 +194,8 @@ public class GuiHandler implements KeyListener, MouseListener {
 						for (Component component : components.values()) {
 							component.fireRender();
 						}
-						fontRenderer.drawString("FractalEngine v 0.022 Alpha [DEBUG]",
-								10, 10);
+						fontRenderer.drawString(
+								"FractalEngine v 0.022 Alpha [DEBUG]", 10, 10);
 						fontRenderer.drawString("FPS: " + application.getFps(),
 								10, 25);
 						fontRenderer
@@ -176,9 +219,9 @@ public class GuiHandler implements KeyListener, MouseListener {
 														.getRuntime()
 														.freeMemory()) / 1000 / 1000)
 												+ "mb", 10, 55);
-						
-						fontRenderer
-						.drawString("Rendered regions: " + World.renderedRegions, 10, 70);						
+
+						fontRenderer.drawString("Rendered regions: "
+								+ World.renderedRegions, 10, 70);
 
 					}
 				}
@@ -276,7 +319,8 @@ public class GuiHandler implements KeyListener, MouseListener {
 		// TODO: Revise this method, uses a lot of processing.
 
 		if (mouseFocus != null) {
-			if (mouseFocus.fireMouseMove(Component.getMouseX(), Component.getMouseY(), dx, dy)) {
+			if (mouseFocus.fireMouseMove(Component.getMouseX(),
+					Component.getMouseY(), dx, dy)) {
 				return;
 			}
 		}

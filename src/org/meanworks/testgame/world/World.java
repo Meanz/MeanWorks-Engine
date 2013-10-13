@@ -4,9 +4,9 @@ import java.util.LinkedList;
 
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
-import org.meanworks.engine.EngineLogger;
 import org.meanworks.engine.core.Application;
 import org.meanworks.engine.gui.impl.PerformanceGraph;
+import org.meanworks.engine.gui.impl.Toast;
 import org.meanworks.engine.math.FrustumResult;
 import org.meanworks.engine.math.Ray;
 import org.meanworks.engine.math.VectorMath;
@@ -424,7 +424,7 @@ public class World {
 			// used memory
 			toBeBuilt.clear();
 
-			EngineLogger.info("Updated list.");
+			Toast.makeTopToast("Updated world.");
 			System.gc();
 			isListUpdateNeeded = false;
 		}
@@ -461,9 +461,10 @@ public class World {
 	public void render() {
 
 		/*
-		 * TODO: Add a proper way to handle geometries such as the terrain using the geometry system provided by the engine
+		 * TODO: Add a proper way to handle geometries such as the terrain using
+		 * the geometry system provided by the engine
 		 */
-		
+
 		// Bind the tile atlas
 		getTileAtlas().bind2DArray();
 		// Render all active regions

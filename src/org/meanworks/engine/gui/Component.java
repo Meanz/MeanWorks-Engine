@@ -453,6 +453,23 @@ public abstract class Component {
 	public abstract void render();
 
 	/**
+	 * 
+	 */
+	public final void fireUpdate() {
+		for (Component component : components) {
+			component.update();
+		}
+		update();
+	}
+
+	/**
+	 * Can be called from a super
+	 */
+	public void update() {
+
+	}
+
+	/**
 	 * Helper functions
 	 */
 	public void drawLine(int x1, int y1, int x2, int y2) {
