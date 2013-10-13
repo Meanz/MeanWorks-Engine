@@ -1,82 +1,49 @@
 package org.meanworks.engine.gui.impl;
 
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Random;
 
 import org.lwjgl.opengl.GL11;
 import org.meanworks.engine.gui.Component;
-import org.meanworks.engine.gui.FontRenderer;
 
 public class PerformanceGraph extends Component {
 
-	public static Object syncObject = new Object();
+	private static class PerformanceGraphEntry {
 
-	private static float divisor = 1f;
-	private static LinkedList<Integer> heightValues = new LinkedList<>();
-	private static int highestVal1 = 0;
+		float red = 0.0f;
+		float green = 0.0f;
+		float blue = 0.0f;
 
-	private static float divisor2 = 1f;
-	private static LinkedList<Integer> heightValues2 = new LinkedList<>();
-	private static int highestVal2 = 0;
+		float divisor = 1f;
+		int highestVal = 0;
+		LinkedList<Integer> values = new LinkedList<>();
 
-	public static void feedTick(int hv) {
-		if (heightValues.size() == 50) {
-			heightValues.pop();
-			heightValues.add(hv);
-		} else {
-			heightValues.add(hv);
-		}
-
-		float range = 100;
-		int maxVal = 0;
-		for (Integer _hv : heightValues) {
-			if (_hv > maxVal) {
-				maxVal = _hv;
+		public void feed(int hv) {
+			if (values.size() == 50) {
+				values.pop();
+				values.add(hv);
+			} else {
+				values.add(hv);
 			}
-		}
-		highestVal1 = maxVal;
-		divisor = ((float) maxVal) / range;
-	}
 
-	public static void feedTick2(int hv) {
-		hv = hv / 1000;
-		if (heightValues2.size() == 50) {
-			heightValues2.pop();
-			heightValues2.add(hv);
-		} else {
-			heightValues2.add(hv);
-		}
-
-		float range = 100;
-		int maxVal = 0;
-		for (Integer _hv : heightValues2) {
-			if (_hv > maxVal) {
-				maxVal = _hv;
+			float range = 100;
+			int maxVal = 0;
+			for (Integer _hv : values) {
+				if (_hv > maxVal) {
+					maxVal = _hv;
+				}
 			}
-		}
-		highestVal2 = maxVal;
-		divisor2 = ((float) maxVal) / range;
-	}
-
-	public PerformanceGraph() {
-		super("PerformanceGraph", 10, 400, 200, 240);
-	}
-
-	public void render() {
-
-		if (heightValues.size() > 50) {
-			heightValues.clear();
+			highestVal = maxVal;
+			divisor = ((float) maxVal) / range;
 		}
 
-		FontRenderer.arial14.drawString("Highestval 1: " + highestVal1, 10, 410);
-		FontRenderer.arial14.drawString("Highestval 2: " + highestVal2, 10, 425);
-		GL11.glDisable(GL11.GL_TEXTURE_2D);
-		GL11.glBegin(GL11.GL_LINES);
-		{
-			GL11.glColor3f(0.0f, 1.0f, 0.0f);
+		public void render() {
 			int x = 10;
 			int lastY = 0;
 			int idx = 0;
-			for (Integer hv : heightValues) {
+			GL11.glColor3f(red, green, blue);
+			for (Integer hv : values) {
 				float pointValue = (float) hv / divisor;
 				line(x, 640 - lastY, x + 10, 640 - (int) pointValue);
 				x += 10;
@@ -86,26 +53,43 @@ public class PerformanceGraph extends Component {
 					break;
 				}
 			}
+		}
+	}
 
-			GL11.glColor3f(1.0f, 0.0f, 0.0f);
-			x = 10;
-			lastY = 0;
-			idx = 0;
-			for (Integer hv : heightValues2) {
-				float pointValue = (float) hv / divisor2;
-				line(x, 640 - lastY, x + 10, 640 - (int) pointValue);
-				x += 10;
-				lastY = (int) pointValue;
-				idx++;
-				if (idx > 50) {
-					break;
-				}
+	public static Object syncObject = new Object();
+	private static HashMap<Integer, PerformanceGraphEntry> graphs = new HashMap<>();
+
+	public static void tick(int idx, int hv) {
+		PerformanceGraphEntry pge = graphs.get(idx);
+		if (pge != null) {
+			pge.feed(hv);
+		} else {
+			pge = new PerformanceGraphEntry();
+			pge.feed(hv);
+			Random random = new Random(idx + 1500);
+			pge.red = random.nextFloat();
+			pge.blue = random.nextFloat();
+			pge.green = random.nextFloat();
+			graphs.put(idx, pge);
+		}
+	}
+
+	public PerformanceGraph() {
+		super("PerformanceGraph", 10, 400, 200, 240);
+	}
+
+	public void render() {
+		GL11.glDisable(GL11.GL_TEXTURE_2D);
+		GL11.glBegin(GL11.GL_LINES);
+		{
+			for (PerformanceGraphEntry pge : graphs.values()) {
+				pge.render();
 			}
 		}
 		GL11.glEnd();
 	}
 
-	public void line(int x1, int y1, int x2, int y2) {
+	public static void line(int x1, int y1, int x2, int y2) {
 		GL11.glVertex2f(x1, y1);
 		GL11.glVertex2f(x2, y2);
 	}

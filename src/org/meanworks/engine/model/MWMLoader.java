@@ -9,11 +9,11 @@ import java.nio.IntBuffer;
 import java.util.LinkedList;
 
 import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Matrix4f;
 import org.meanworks.engine.core.Application;
+import org.meanworks.engine.scene.Geometry;
+import org.meanworks.engine.scene.GeometryNode;
 import org.meanworks.render.geometry.AnimatedModel;
-import org.meanworks.render.geometry.Geometry;
 import org.meanworks.render.geometry.animation.Animation;
 import org.meanworks.render.geometry.animation.AnimationNode;
 import org.meanworks.render.geometry.animation.AnimationNode.QuatKey;
@@ -22,10 +22,6 @@ import org.meanworks.render.geometry.animation.Bone;
 import org.meanworks.render.geometry.animation.Skeleton;
 import org.meanworks.render.geometry.mesh.Mesh;
 import org.meanworks.render.geometry.mesh.MeshRenderer;
-import org.meanworks.render.geometry.mesh.MeshRenderer.BufferEntry;
-import org.meanworks.render.opengl.VertexBuffer;
-import org.meanworks.render.opengl.VertexBuffer.BufferType;
-import org.meanworks.render.opengl.VertexBuffer.BufferUsage;
 
 /**
  * Copyright (C) 2013 Steffen Evensen
@@ -90,12 +86,13 @@ public class MWMLoader {
 		return mat4;
 	}
 
-	public static Geometry loadModel(String fileName) {
-		return loadModel(new Geometry(), fileName);
+	public static GeometryNode loadModel(String fileName) {
+		return loadModel(new GeometryNode(new Geometry()), fileName);
 	}
 
 	public static AnimatedModel loadAnimatedModel(String fileName) {
-		return (AnimatedModel) loadModel(new AnimatedModel(), fileName);
+		return (AnimatedModel) loadModel(new AnimatedModel(new Geometry()),
+				fileName);
 	}
 
 	/**
@@ -104,9 +101,8 @@ public class MWMLoader {
 	 * @param fileName
 	 * @return
 	 */
-	public static Geometry loadModel(Geometry geometry, String fileName) {
+	public static GeometryNode loadModel(GeometryNode geometry, String fileName) {
 		try {
-
 			RandomAccessFile raf = new RandomAccessFile(fileName, "r");
 			byte[] data = new byte[(int) raf.length()];
 			raf.read(data);
@@ -251,8 +247,8 @@ public class MWMLoader {
 						}
 
 						meshRenderer.compile();
-						geometry.addMesh("mesh_" + meshName + "_" + meshId,
-								mesh);
+						geometry.getGeometry().addMesh(
+								"mesh_" + meshName + "_" + meshId, mesh);
 						System.err.println("Added mesh: "
 								+ ("mesh_" + meshName + "_" + meshId));
 

@@ -3,7 +3,6 @@ package org.meanworks.render.material;
 import java.util.HashMap;
 
 import org.meanworks.engine.EngineLogger;
-import org.meanworks.render.opengl.shader.Property;
 import org.meanworks.render.opengl.shader.ShaderProgram;
 
 public class Material {

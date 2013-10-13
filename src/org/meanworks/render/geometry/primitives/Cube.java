@@ -1,6 +1,6 @@
 package org.meanworks.render.geometry.primitives;
 
-import org.meanworks.render.geometry.Geometry;
+import org.meanworks.engine.scene.Geometry;
 
 public class Cube extends Geometry {
 

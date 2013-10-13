@@ -11,9 +11,9 @@ import java.util.List;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
-import org.lwjgl.util.vector.Vector4f;
 import org.meanworks.engine.EngineLogger;
 import org.meanworks.engine.core.Application;
+import org.meanworks.engine.scene.Geometry;
 import org.meanworks.render.geometry.animation.Animation;
 import org.meanworks.render.geometry.animation.AnimationChannel;
 import org.meanworks.render.geometry.animation.Skeleton;
@@ -87,12 +87,14 @@ public class AnimatedModel extends Model {
 	/**
 	 * Construct a new AnimatedModel
 	 */
-	public AnimatedModel() {
+	public AnimatedModel(Geometry geometry) {
+		super(geometry);
 		renderSkeleton = true;
 
-		setMaterial(new Material("animatedModelMaterial", Application
-				.getApplication().getAssetManager()
-				.loadShader("./data/shaders/simple_skinning")));
+		getGeometry().setMaterial(
+				new Material("animatedModelMaterial", Application
+						.getApplication().getAssetManager()
+						.loadShader("./data/shaders/simple_skinning")));
 
 	}
 
@@ -291,13 +293,7 @@ public class AnimatedModel extends Model {
 		/*
 		 * Update the material
 		 */
-		getMaterial().setProperty("vAmbientColor",
-				new Vector4f(0.5f, 0.5f, 0.5f, 1.0f));
-		getMaterial().setProperty("vDiffuseColor",
-				new Vector4f(1.0f, 1.0f, 1.0f, 1.0f));
-		getMaterial().setProperty("fSpecularIntensity", 30.0f);
-		getMaterial().setProperty("tColorMap", 0);
-		getMaterial().setProperty("mBones", skinningMatrices);
+		getGeometry().getMaterial().setProperty("mBones", skinningMatrices);
 
 		/*
 		 * Send render requests to the meshes

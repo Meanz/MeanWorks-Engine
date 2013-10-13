@@ -1,4 +1,4 @@
-package org.meanworks.testgame.world;
+package org.meanworks.testgame.entity;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.util.vector.Vector2f;

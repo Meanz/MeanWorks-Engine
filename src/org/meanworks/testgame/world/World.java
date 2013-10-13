@@ -1,16 +1,18 @@
 package org.meanworks.testgame.world;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 import org.meanworks.engine.EngineLogger;
 import org.meanworks.engine.core.Application;
+import org.meanworks.engine.gui.impl.PerformanceGraph;
 import org.meanworks.engine.math.FrustumResult;
 import org.meanworks.engine.math.Ray;
 import org.meanworks.engine.math.VectorMath;
-import org.meanworks.render.geometry.Geometry;
+import org.meanworks.engine.scene.Geometry;
+import org.meanworks.engine.scene.GeometryNode;
+import org.meanworks.engine.util.PerlinNoise;
 import org.meanworks.render.material.Material;
 import org.meanworks.render.texture.Texture;
 import org.meanworks.render.texture.TextureArray;
@@ -18,6 +20,9 @@ import org.meanworks.render.texture.TextureLoader;
 
 public class World {
 
+	/*
+	 * Debug counter for how many regions were rendered
+	 */
 	public static int renderedRegions = 0;
 
 	/*
@@ -31,14 +36,14 @@ public class World {
 	private int worldX;
 	private int worldY;
 
-	// to be able to
-	// load further
-	private ArrayList<Region> loadedRegions = new ArrayList<>();
-
-	//
+	/*
+	 * Whether the region list needs to be updated
+	 */
 	private boolean isListUpdateNeeded = true;
 
-	//
+	/*
+	 * The list of active regions
+	 */
 	private Region[] regionList;
 
 	/*
@@ -49,7 +54,7 @@ public class World {
 	/*
 	 * The world gen for testing
 	 */
-	private WorldGen worldGen;
+	private PerlinNoise worldGen;
 
 	/*
 	 * The world loader
@@ -64,7 +69,7 @@ public class World {
 	/*
 	 * 
 	 */
-	private Geometry treeModel;
+	private GeometryNode treeModel;
 
 	/*
 	 * 
@@ -81,7 +86,7 @@ public class World {
 	 */
 	public World() {
 
-		worldGen = new WorldGen();
+		worldGen = new PerlinNoise();
 		worldGen.setSeed(1337133713);
 		worldLoader = new WorldLoader();
 
@@ -188,7 +193,6 @@ public class World {
 	public Region requestRegion(int regionX, int regionY) {
 		Region region = new Region(this, regionX, regionY);
 		worldLoader.addTask(region);
-		loadedRegions.add(region);
 		return region;
 	}
 
@@ -226,7 +230,7 @@ public class World {
 	 * 
 	 * @return
 	 */
-	public WorldGen getWorldGen() {
+	public PerlinNoise getWorldGen() {
 		return worldGen;
 	}
 
@@ -342,17 +346,15 @@ public class World {
 	 * @return
 	 */
 	public Tile getTile(int absX, int absY) {
-		synchronized (loadedRegions) {
-			int regionX = absX / Region.REGION_WIDTH;
-			int regionY = absY / Region.REGION_HEIGHT;
+		int regionX = absX / Region.REGION_WIDTH;
+		int regionY = absY / Region.REGION_HEIGHT;
 
-			Region region = getRegion(regionX, regionY);
-			if (region != null) {
-				return region.getTile(absX - (regionX * Region.REGION_WIDTH),
-						absY - (regionY * Region.REGION_HEIGHT));
-			} else {
-				return null;
-			}
+		Region region = getRegion(regionX, regionY);
+		if (region != null) {
+			return region.getTile(absX - (regionX * Region.REGION_WIDTH), absY
+					- (regionY * Region.REGION_HEIGHT));
+		} else {
+			return null;
 		}
 	}
 
@@ -440,6 +442,7 @@ public class World {
 				}
 			}
 		}
+		PerformanceGraph.tick(2, renderedRegions);
 	}
 
 	/**
@@ -448,7 +451,7 @@ public class World {
 	 * @param region
 	 */
 	public void updateRegion(Region region) {
-		region.flagUpdate();
+		region.getRegionMesh().flagUpdate();
 		worldLoader.addTask(region);
 	}
 
@@ -457,6 +460,10 @@ public class World {
 	 */
 	public void render() {
 
+		/*
+		 * TODO: Add a proper way to handle geometries such as the terrain using the geometry system provided by the engine
+		 */
+		
 		// Bind the tile atlas
 		getTileAtlas().bind2DArray();
 		// Render all active regions
@@ -466,7 +473,7 @@ public class World {
 				.getCamera().getProjectionViewMatrix());
 		material.setProperty("mModelMatrix", new Matrix4f());
 		material.apply();
-		
+
 		if (regionList != null) {
 			int off = 0;
 			renderedRegions = 0;
@@ -503,7 +510,6 @@ public class World {
 		}
 
 		getTileAtlas().unbind2DArray();
-
 		material.getShaderProgram().useNone();
 	}
 }

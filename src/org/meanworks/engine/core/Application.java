@@ -287,7 +287,7 @@ public abstract class Application {
 				upsc = 0;
 				fpsc = 0;
 				last_fps = System.currentTimeMillis();
-				PerformanceGraph.feedTick(fps);
+				PerformanceGraph.tick(1, fps);
 			}
 			/*
 			 * Update

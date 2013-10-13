@@ -1,6 +1,6 @@
-package org.meanworks.testgame.world;
+package org.meanworks.engine.util;
 
-public class WorldGen {
+public class PerlinNoise {
 
     private int seed;
     private double persistence;
@@ -8,7 +8,7 @@ public class WorldGen {
     private double amplitude;
     private int octaves;
 
-    public WorldGen() {
+    public PerlinNoise() {
         seed = 1327;
         persistence = 0.7d;
         frequency = 0.006d;

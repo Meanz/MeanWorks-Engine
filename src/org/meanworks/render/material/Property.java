@@ -1,4 +1,4 @@
-package org.meanworks.render.opengl.shader;
+package org.meanworks.render.material;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -11,6 +11,7 @@ import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
 import org.meanworks.engine.EngineLogger;
 import org.meanworks.engine.math.MatrixHelper;
+import org.meanworks.render.opengl.shader.ShaderProgram;
 
 /**
  * 

@@ -1,8 +1,6 @@
 package org.meanworks.engine;
 
-import java.util.LinkedList;
-
-import org.meanworks.render.opengl.VertexBuffer;
+import org.meanworks.render.opengl.shader.ShaderProgram;
 import org.meanworks.render.texture.Texture;
 
 /**
@@ -23,51 +21,45 @@ import org.meanworks.render.texture.Texture;
  * 
  * @author Meanz
  */
-public class OpenGLRegistry {
+public class Renderer {
 
 	/*
-	 * The registry singleton
+	 * The currently bound textures
 	 */
-	private static OpenGLRegistry singleton;
-
-	/**
-	 * Get the registry singleton
-	 * 
-	 * @return
-	 */
-	private static OpenGLRegistry getRegistry() {
-		if (singleton == null) {
-			singleton = new OpenGLRegistry();
-		}
-		return singleton;
-	}
+	private static Texture[] boundTextures = new Texture[EngineConfig.MAX_TEXTURE_UNITS];
 
 	/*
-	 * The list of vertex buffers created
+	 * The currently bound shader program
 	 */
-	private LinkedList<VertexBuffer> vertexBuffers = new LinkedList<VertexBuffer>();
-
-	/*
-	 * The list of textures created
-	 */
-	private LinkedList<Texture> textures = new LinkedList<Texture>();
+	private static ShaderProgram boundShaderProgram;
 
 	/**
-	 * Register a vertex buffers
+	 * Bind the given texture to the given texture unit
 	 * 
-	 * @param vb
-	 */
-	public void registerVertexBuffer(VertexBuffer vb) {
-		vertexBuffers.add(vb);
-	}
-
-	/**
-	 * Register a texture
-	 * 
+	 * @param textureUnit
 	 * @param texture
 	 */
-	public void registerTexture(Texture texture) {
-		textures.add(texture);
+	public static void bindTexture(int textureUnit, Texture texture) {
+		boundTextures[textureUnit] = texture;
 	}
 
+	/**
+	 * Bind a shader program
+	 * 
+	 * @param program
+	 */
+	public static void bindShaderProgram(ShaderProgram program) {
+		boundShaderProgram = program;
+	}
+
+	/**
+	 * Clear the drawing state
+	 */
+	public static void clearState() {
+		boundShaderProgram = null;
+		// Clear all texture units
+		for (int i = 0; i < boundTextures.length; i++) {
+			boundTextures[i] = null;
+		}
+	}
 }

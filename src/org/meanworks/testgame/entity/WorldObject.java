@@ -1,7 +1,7 @@
-package org.meanworks.testgame.world;
+package org.meanworks.testgame.entity;
 
+import org.meanworks.engine.scene.Geometry;
 import org.meanworks.engine.scene.Node;
-import org.meanworks.render.geometry.Geometry;
 
 /**
  * Copyright (C) 2013 Steffen Evensen

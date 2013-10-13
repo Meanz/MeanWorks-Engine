@@ -47,7 +47,7 @@ public class WorldLoader implements Runnable {
 					// Process each task
 					for (Region region : regionTasks) {
 						long time = System.currentTimeMillis();
-						region.buildTerrain();
+						region.getRegionMesh().buildTerrain();
 						time = System.currentTimeMillis() - time;
 					}
 					synchronized (nextQueue) {

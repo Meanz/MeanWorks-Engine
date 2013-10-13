@@ -20,9 +20,9 @@ import org.meanworks.engine.gui.impl.radialmenu.RadialMenu;
 import org.meanworks.engine.math.Ray;
 import org.meanworks.engine.math.Vec3;
 import org.meanworks.engine.model.MWMLoader;
+import org.meanworks.engine.scene.GeometryNode;
 import org.meanworks.engine.util.Util;
 import org.meanworks.render.geometry.AnimatedModel;
-import org.meanworks.render.geometry.Geometry;
 import org.meanworks.render.geometry.Vertex;
 import org.meanworks.render.geometry.animation.AnimationChannel;
 import org.meanworks.render.geometry.animation.LoopMode;
@@ -30,7 +30,7 @@ import org.meanworks.render.opengl.ImmediateRenderer;
 import org.meanworks.render.opengl.Window;
 import org.meanworks.render.opengl.shader.ShaderProgram;
 import org.meanworks.render.texture.Texture;
-import org.meanworks.testgame.world.Player;
+import org.meanworks.testgame.entity.Player;
 import org.meanworks.testgame.world.Region;
 import org.meanworks.testgame.world.Tile;
 import org.meanworks.testgame.world.World;
@@ -75,13 +75,13 @@ public class TestGame extends Application {
 	/*
 	 * 
 	 */
-	private Geometry kostjaModel = null;
-	
+	private GeometryNode kostjaModel = null;
+
 	/*
 	 * 
 	 */
-	private Geometry treeModel;
-	
+	private GeometryNode treeModel;
+
 	/*
 	 * 
 	 */
@@ -182,7 +182,7 @@ public class TestGame extends Application {
 		player.getTransform().setPosition(5000,
 				world.getInterpolatedHeight(315, 213), 5000);
 		getScene().getRootNode().addChild(player);
-		
+
 		getCamera().follow(player);
 
 		// Let's try to load a model
@@ -198,22 +198,22 @@ public class TestGame extends Application {
 		waterTexture = getAssetManager().loadTexture("./data/images/water.png");
 
 		treeModel = MWMLoader.loadModel("./data/models/PineTree.mwm");
-		//treeModel.getTransform().setScale(0.2f, 0.2f, 0.2f);
+		// treeModel.getTransform().setScale(0.2f, 0.2f, 0.2f);
 		treeModel.getTransform().setPosition(5000, 135, 5000);
 		getScene().getRootNode().addChild(treeModel);
-		
-		
-		model = MWMLoader.loadAnimatedModel("./data/models/Sinbad/Sinbad_mesh.mwm");
-		
+
+		model = MWMLoader
+				.loadAnimatedModel("./data/models/Sinbad/Sinbad_mesh.mwm");
+
 		AnimationChannel channel = model.createChannel();
 		channel.playAnimation(model.getAnimation("RunBase"), LoopMode.LM_LOOP);
-		
+
 		channel = model.createChannel();
 		channel.playAnimation(model.getAnimation("RunTop"), LoopMode.LM_LOOP);
-		
+
 		model.getTransform().setScale(0.2f, 0.2f, 0.2f);
 		model.getTransform().setPosition(4998f, 138f, 5024f);
-		
+
 		getScene().getRootNode().addChild(model);
 	}
 
@@ -260,10 +260,10 @@ public class TestGame extends Application {
 				// We want to find out the exact coordinate of where we clicked
 				// But for now let's just take the tile
 				if (selectedTile != null) {
-					//System.err.println("Moving to point "
-					//		+ selectedTile.getTilePosition().toString());
-					//player.moveTowards(selectedTile.getTilePosition().x,
-					//		selectedTile.getTilePosition().y);
+					// System.err.println("Moving to point "
+					// + selectedTile.getTilePosition().toString());
+					// player.moveTowards(selectedTile.getTilePosition().x,
+					// selectedTile.getTilePosition().y);
 				}
 			}
 		}
@@ -315,7 +315,6 @@ public class TestGame extends Application {
 		waterShader.useNone();
 
 		// Draw the gui
-		
 
 		glEnable(GL_CULL_FACE);
 	}
