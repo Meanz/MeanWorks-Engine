@@ -1,7 +1,10 @@
 package org.meanworks.render.geometry;
 
+import java.util.HashMap;
+
 import org.meanworks.engine.scene.Geometry;
 import org.meanworks.engine.scene.GeometryNode;
+import org.meanworks.render.geometry.mesh.Mesh;
 
 /**
  * Copyright (C) 2013 Steffen Evensen
@@ -25,6 +28,43 @@ public class Model extends GeometryNode {
 
 	public Model(Geometry geometry) {
 		super(geometry);
+	}
+
+	/**
+	 * Shallow copies this model Used for instancing. The model will not be
+	 * added to the scene automatically
+	 * 
+	 * @return
+	 */
+	public Model shallowCopy() {
+		Model model = new Model(this.getGeometry());
+		return model;
+	}
+
+	/**
+	 * Copies this model and it's entire data structure. The model will not be
+	 * added to the scene automatically
+	 * 
+	 * @return
+	 */
+	public Model deepCopy() {
+		/*
+		 * Check if there is actually something to copy
+		 */
+		if (getGeometry() == null) {
+			return null;
+		}
+		Geometry geometry = new Geometry();
+		// We use the same material here
+		geometry.setMaterial(this.getGeometry().getMaterial());
+
+		HashMap<String, Mesh> meshes = getGeometry().getMeshes();
+		for (String key : meshes.keySet()) {
+			geometry.addMesh(key, meshes.get(key).deepCopy());
+		}
+
+		Model model = new Model(geometry);
+		return model;
 	}
 
 }

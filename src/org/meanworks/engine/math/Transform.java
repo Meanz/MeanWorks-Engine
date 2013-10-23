@@ -48,6 +48,11 @@ public class Transform {
 	 */
 	private boolean needsUpdate = false;
 
+	/*
+	 * 
+	 */
+	private boolean isChanged = true;
+
 	/**
 	 * Construct a new Transform
 	 */
@@ -56,6 +61,22 @@ public class Transform {
 		position = new Vec3();
 		rotation = new Vec3();
 		scale = new Vec3();
+	}
+
+	/**
+	 * Unflags the is changed flag
+	 */
+	public void unflagChange() {
+		isChanged = false;
+	}
+
+	/**
+	 * Check whether or not this transform has changed or not
+	 * 
+	 * @return
+	 */
+	public boolean isChanged() {
+		return isChanged;
 	}
 
 	/**
@@ -102,6 +123,7 @@ public class Transform {
 		position.y = 0;
 		position.z = 0;
 		needsUpdate = true;
+		isChanged = true;
 	}
 
 	/**
@@ -116,6 +138,7 @@ public class Transform {
 		position.y += y;
 		position.z += z;
 		needsUpdate = true;
+		isChanged = true;
 	}
 
 	/**
@@ -130,6 +153,7 @@ public class Transform {
 		position.y = y;
 		position.z = z;
 		needsUpdate = true;
+		isChanged = true;
 	}
 
 	/**
@@ -144,6 +168,7 @@ public class Transform {
 		scale.y = y;
 		scale.z = z;
 		needsUpdate = true;
+		isChanged = true;
 	}
 
 	/**
@@ -158,6 +183,7 @@ public class Transform {
 		rotation.y = y;
 		rotation.z = z;
 		needsUpdate = true;
+		isChanged = true;
 	}
 
 	/**
@@ -172,6 +198,7 @@ public class Transform {
 		rotation.y += y;
 		rotation.z += z;
 		needsUpdate = true;
+		isChanged = true;
 	}
 
 	/**

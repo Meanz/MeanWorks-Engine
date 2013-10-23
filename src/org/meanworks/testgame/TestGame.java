@@ -34,6 +34,7 @@ import org.meanworks.testgame.entity.Player;
 import org.meanworks.testgame.world.Region;
 import org.meanworks.testgame.world.Tile;
 import org.meanworks.testgame.world.World;
+import org.meanworks.tools.SceneUi;
 
 public class TestGame extends Application {
 
@@ -82,11 +83,6 @@ public class TestGame extends Application {
 	 */
 	private GeometryNode treeModel;
 
-	/*
-	 * 
-	 */
-	private AnimatedModel model;
-
 	/**
 	 * 
 	 * @return
@@ -121,7 +117,6 @@ public class TestGame extends Application {
 	 */
 	@Override
 	public void preload() {
-
 		/*
 		 * Setup Gui
 		 */
@@ -202,19 +197,10 @@ public class TestGame extends Application {
 		treeModel.getTransform().setPosition(5000, 135, 5000);
 		getScene().getRootNode().addChild(treeModel);
 
-		model = MWMLoader
-				.loadAnimatedModel("./data/models/Sinbad/Sinbad_mesh.mwm");
-
-		AnimationChannel channel = model.createChannel();
-		channel.playAnimation(model.getAnimation("RunBase"), LoopMode.LM_LOOP);
-
-		channel = model.createChannel();
-		channel.playAnimation(model.getAnimation("RunTop"), LoopMode.LM_LOOP);
-
-		model.getTransform().setScale(0.2f, 0.2f, 0.2f);
-		model.getTransform().setPosition(4998f, 138f, 5024f);
-
-		getScene().getRootNode().addChild(model);
+		/*
+		 * Do tests
+		 */
+		Tests.doTests(this);
 	}
 
 	/*

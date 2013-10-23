@@ -22,6 +22,19 @@ public class Mesh {
 	}
 
 	/**
+	 * Deep copy this mesh
+	 * 
+	 * @return
+	 */
+	public Mesh deepCopy() {
+		Mesh newMesh = new Mesh();
+		MeshRenderer newMeshRenderer = meshRenderer.deepCopy();
+		newMesh.setMeshRenderer(newMeshRenderer);
+		newMesh.setMeshTexture(meshTexture);
+		return newMesh;
+	}
+
+	/**
 	 * Set the texture of this mesh
 	 * 
 	 * @param texture

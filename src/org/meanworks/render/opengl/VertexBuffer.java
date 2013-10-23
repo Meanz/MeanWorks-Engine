@@ -9,7 +9,12 @@ import org.lwjgl.opengl.GL11;
 import org.meanworks.engine.EngineLogger;
 
 public class VertexBuffer {
-
+	/**
+	 * An enum describing what type of buffer this is
+	 * 
+	 * @author meanz
+	 * 
+	 */
 	public static enum BufferType {
 
 		INDEX_BUFFER(ARBVertexBufferObject.GL_ELEMENT_ARRAY_BUFFER_ARB),
@@ -39,6 +44,12 @@ public class VertexBuffer {
 
 	};
 
+	/**
+	 * An enum describing how this buffer will be used
+	 * 
+	 * @author meanz
+	 * 
+	 */
 	public static enum BufferUsage {
 
 		DYNAMIC_COPY(ARBVertexBufferObject.GL_DYNAMIC_COPY_ARB), DYNAMIC_DRAW(
@@ -72,22 +83,35 @@ public class VertexBuffer {
 	}
 
 	/*
-	 * 
+	 * For storing the data
+	 */
+	private FloatBuffer floatBuffer;
+	/*
+	 * For storing the data
+	 */
+	private IntBuffer intBuffer;
+	/*
+	 * For storing the data
+	 */
+	private DoubleBuffer doubleBuffer;
+	/*
+	 * The id of this buffer
 	 */
 	private int bufferId;
-
 	/*
-	 * 
+	 * The type of buffer this is
 	 */
 	private BufferType bufferType;
-
 	/*
-	 * 
+	 * The usage of this buffer
 	 */
 	private BufferUsage bufferUsage;
 
 	/**
+	 * Constructs a new VertexBuffer
 	 * 
+	 * @param bufferType
+	 * @param bufferUsage
 	 */
 	public VertexBuffer(BufferType bufferType, BufferUsage bufferUsage) {
 		this.create();
@@ -121,6 +145,9 @@ public class VertexBuffer {
 		return true;
 	}
 
+	/**
+	 * Delete this buffer
+	 */
 	public void delete() {
 		ARBVertexBufferObject.glDeleteBuffersARB(bufferId);
 	}
@@ -130,6 +157,9 @@ public class VertexBuffer {
 	 * @param data
 	 */
 	public void bufferData(FloatBuffer data) {
+		floatBuffer = data;
+		intBuffer = null;
+		doubleBuffer = null;
 		bind();
 		ARBVertexBufferObject.glBufferDataARB(bufferType.getBufferType(), data,
 				bufferUsage.getBufferUsage());
@@ -140,6 +170,9 @@ public class VertexBuffer {
 	 * @param data
 	 */
 	public void bufferData(IntBuffer data) {
+		floatBuffer = null;
+		intBuffer = data;
+		doubleBuffer = null;
 		bind();
 		ARBVertexBufferObject.glBufferDataARB(bufferType.getBufferType(), data,
 				bufferUsage.getBufferUsage());
@@ -150,13 +183,16 @@ public class VertexBuffer {
 	 * @param data
 	 */
 	public void bufferData(DoubleBuffer data) {
+		floatBuffer = null;
+		intBuffer = null;
+		doubleBuffer = data;
 		bind();
 		ARBVertexBufferObject.glBufferDataARB(bufferType.getBufferType(), data,
 				bufferUsage.getBufferUsage());
 	}
 
 	/**
-	 * 
+	 * Bind this VertexBuffer
 	 */
 	public void bind() {
 		ARBVertexBufferObject.glBindBufferARB(bufferType.getBufferType(),
@@ -164,6 +200,7 @@ public class VertexBuffer {
 	}
 
 	/**
+	 * Get the OpenGL ID of this Vertexbuffer
 	 * 
 	 * @return
 	 */
@@ -172,12 +209,32 @@ public class VertexBuffer {
 	}
 
 	/**
-	 * We need a way to setup the buffer pointers, And also we should consult
-	 * the OpenGL manual, should we pack Verts, Norms and Tex coords in a single
-	 * vbo or should we split them into several vbos?
+	 * Deep copies this VertexBuffer
 	 * 
-	 * Before we design this we need to take that into consideration, We could
-	 * however add a build function inside the mesh class.
+	 * @return The deep copied instance of this VertexBuffer
 	 */
+	public VertexBuffer deepCopy() {
+		VertexBuffer vb = new VertexBuffer(bufferType, bufferUsage);
+		if (!vb.isValid()) {
+			EngineLogger
+					.error("[VertexBuffer] Could not deepCopy VertexBuffer");
+			return null;
+		}
+		if (floatBuffer != null) {
+			vb.bufferData(floatBuffer);
+			return vb;
+		}
+		if (intBuffer != null) {
+			vb.bufferData(intBuffer);
+			return vb;
+		}
+		if (doubleBuffer != null) {
+			vb.bufferData(doubleBuffer);
+			return vb;
+		}
+		// Err?
+		EngineLogger.warning("[VertexBuffer] Deep copy on empty VertexBuffer");
+		return vb;
+	}
 
 }

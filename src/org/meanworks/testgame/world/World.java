@@ -442,7 +442,6 @@ public class World {
 				}
 			}
 		}
-		PerformanceGraph.tick(2, renderedRegions);
 	}
 
 	/**

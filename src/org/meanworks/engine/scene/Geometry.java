@@ -54,8 +54,18 @@ public class Geometry {
 		 * TODO: Improve mesh destroying
 		 */
 		for (Mesh mesh : meshes.values()) {
-			// mesh.getMeshRenderer().clear();
+			mesh.getMeshRenderer().clear();
 		}
+		meshes.clear();
+	}
+
+	/**
+	 * Get the list of meshes
+	 * 
+	 * @return
+	 */
+	public HashMap<String, Mesh> getMeshes() {
+		return meshes;
 	}
 
 	/**

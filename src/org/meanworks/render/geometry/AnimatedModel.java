@@ -50,16 +50,6 @@ public class AnimatedModel extends Model {
 	private LinkedList<Animation> availableAnimations = new LinkedList<Animation>();
 
 	/*
-	 * The bind shape matrix for this mesh
-	 */
-	private Matrix4f bindShapeMatrix;
-
-	/*
-	 * The bind shape matrices of this animated model
-	 */
-	private Matrix4f[] bindShapeMatrices;
-
-	/*
 	 * 
 	 */
 	private Matrix4f[] transformMatrices;
@@ -96,6 +86,26 @@ public class AnimatedModel extends Model {
 						.getApplication().getAssetManager()
 						.loadShader("./data/shaders/simple_skinning")));
 
+	}
+
+	/**
+	 * 
+	 */
+	@Override
+	public AnimatedModel shallowCopy() {
+		AnimatedModel model = new AnimatedModel(this.getGeometry());
+		model.setSkeleton(new Skeleton(skeleton));
+		model.setAvailableAnimations(availableAnimations);
+		return model;
+	}
+
+	/**
+	 * Set whether to render the skeleton or not
+	 * 
+	 * @param renderSkeleton
+	 */
+	public void setRenderSkeleton(boolean renderSkeleton) {
+		this.renderSkeleton = renderSkeleton;
 	}
 
 	/**
@@ -161,7 +171,7 @@ public class AnimatedModel extends Model {
 	 * @param channel
 	 */
 	public void removeChannel(AnimationChannel channel) {
-
+		channels.remove(channel);
 	}
 
 	/**
@@ -256,24 +266,25 @@ public class AnimatedModel extends Model {
 	}
 
 	/**
-	 * Set the bind shape matrices for this animated model
-	 * 
-	 * @param bindShapeMatrices
-	 */
-	public void setBindShapeMatrices(Matrix4f[] bindShapeMatrices) {
-		this.bindShapeMatrices = bindShapeMatrices;
-	}
-
-	/**
 	 * Render this skinned model
 	 */
 	@Override
 	public void render() {
 
+		/*
+		 * If we don't have a skeleton we can't perform rendering
+		 */
 		if (skeleton == null) {
+			return;
+		}
 
-			// Don't render
-			System.err.println("No skeleton :(");
+		/*
+		 * Check if we have the required data to render
+		 */
+		if (getGeometry() == null) {
+			return;
+		}
+		if (getGeometry().getMaterial() == null) {
 			return;
 		}
 

@@ -40,9 +40,34 @@ public class MeshRenderer {
 	@SuppressWarnings("all")
 	public class BufferEntry {
 
+		/*
+		 * The buffer of this entry
+		 */
 		VertexBuffer buffer;
+		/*
+		 * The attributes for this buffer
+		 */
 		LinkedList<BufferAttribute> bufferAttributes = new LinkedList<>();
 
+		/**
+		 * Add the given buffer attribute to this buffer entry
+		 * 
+		 * @param ba
+		 */
+		public void addAttribute(BufferAttribute ba) {
+			bufferAttributes.add(ba);
+		}
+
+		/**
+		 * Add an attribute to this buffer entry
+		 * 
+		 * @param index
+		 * @param size
+		 * @param type
+		 * @param normalized
+		 * @param stride
+		 * @param bufferOffset
+		 */
 		public void addAttribute(int index, int size, int type,
 				boolean normalized, int stride, int bufferOffset) {
 			BufferAttribute bufferAttribute = new BufferAttribute();
@@ -52,12 +77,15 @@ public class MeshRenderer {
 			bufferAttribute.normalized = normalized;
 			bufferAttribute.stride = stride;
 			bufferAttribute.bufferOffset = bufferOffset;
-			bufferAttributes.add(bufferAttribute);
+			addAttribute(bufferAttribute);
 		}
 
 	}
 
-	/*
+	/**
+	 * Structure for a buffer attribute
+	 * 
+	 * @author meanz
 	 * 
 	 */
 	@SuppressWarnings("all")
@@ -68,10 +96,18 @@ public class MeshRenderer {
 		boolean normalized;
 		int stride;
 		int bufferOffset;
-	}
 
-	// int index, int size, int type, boolean normalized, int stride, long
-	// buffer_buffer_offset
+		public BufferAttribute copy() {
+			BufferAttribute ba = new BufferAttribute();
+			ba.index = index;
+			ba.size = size;
+			ba.type = type;
+			ba.normalized = normalized;
+			ba.stride = stride;
+			ba.bufferOffset = bufferOffset;
+			return ba;
+		}
+	}
 
 	/*
 	 * The list of vertex buffers
@@ -79,7 +115,7 @@ public class MeshRenderer {
 	private LinkedList<BufferEntry> vertexBuffers = new LinkedList<>();
 
 	/*
-	 * 
+	 * The index buffer for this mesh renderer
 	 */
 	private VertexBuffer indexBuffer = null;
 
@@ -89,22 +125,51 @@ public class MeshRenderer {
 	private VertexBufferArray vertexBufferArray;
 
 	/*
-	 * 
+	 * The number of vertices stored in this mesh renderer
 	 */
 	private int numVertices;
 
 	/*
-	 * 
+	 * The number of indices stored in this mesh renderer
 	 */
 	private int numIndices;
 
 	/**
-	 * Constructor
+	 * Deep copy this mesh renderer
+	 * 
+	 * @return
 	 */
-	public MeshRenderer() {
+	public MeshRenderer deepCopy() {
 
+		MeshRenderer mr = new MeshRenderer();
+
+		mr.setNumIndices(numIndices);
+		mr.setNumVertices(numVertices);
+
+		/*
+		 * Check if we have an index buffer to copy
+		 */
+		if (indexBuffer != null) {
+			mr.setIndexBuffer(indexBuffer.deepCopy());
+		}
+
+		/*
+		 * Copy the rest of the buffers
+		 */
+		for (BufferEntry be : vertexBuffers) {
+			VertexBuffer vb = be.buffer.deepCopy();
+			BufferEntry newBe = mr.addVertexBuffer(vb);
+			for (BufferAttribute ba : be.bufferAttributes) {
+				newBe.addAttribute(ba.copy());
+			}
+		}
+
+		return mr;
 	}
 
+	/**
+	 * Deletes all buffers associated with this mesh renderer
+	 */
 	public void clear() {
 		if (indexBuffer != null) {
 			indexBuffer.delete();

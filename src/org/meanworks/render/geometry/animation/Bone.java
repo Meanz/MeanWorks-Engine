@@ -38,18 +38,13 @@ public class Bone {
 	public Matrix4f offsetMatrix;
 
 	/*
-	 * The current transform of this bone This is the transform we use when
-	 * rendering
-	 */
-	public Matrix4f transform;
-
-	/*
-	 * 
+	 * The local transform of this bone This transform tells us how this bone is
+	 * rotated in relation to it's parent
 	 */
 	public Matrix4f localTransform = new Matrix4f();
 
 	/*
-	 * 
+	 * This transform tells us the final transformation for the bone
 	 */
 	public Matrix4f globalTransform = new Matrix4f();
 
@@ -72,9 +67,12 @@ public class Bone {
 	 */
 	public Bone(Bone other) {
 		this.boneId = other.boneId;
-		this.boneName = other.boneName;
-		this.offsetMatrix = other.offsetMatrix;
-		this.transform = new Matrix4f();
+		this.boneName = new String(other.boneName);
+		this.offsetMatrix = new Matrix4f().load(other.offsetMatrix);
+		this.localTransform = new Matrix4f().load(other.localTransform);
+		this.globalTransform = new Matrix4f().load(other.globalTransform);
+		// The skeleton has to set this bone's parent
+		this.parent = null;
 	}
 
 	/**
@@ -93,21 +91,39 @@ public class Bone {
 
 		return node.globalTransform;
 	}
-	
-	
-	
+
+	/**
+	 * Get the global transform of this bone
+	 * 
+	 * @return
+	 */
 	public Matrix4f getGlobalTransform() {
 		return this.globalTransform;
 	}
-	
+
+	/**
+	 * Set the global transform of this bone
+	 * 
+	 * @param globalTransform
+	 */
 	public void setGlobalTransform(Matrix4f globalTransform) {
 		this.globalTransform = globalTransform;
 	}
-	
+
+	/**
+	 * Get the local transform of this bone
+	 * 
+	 * @return
+	 */
 	public Matrix4f getLocalTransform() {
 		return this.localTransform;
 	}
-	
+
+	/**
+	 * Set the local transform of this bone
+	 * 
+	 * @param localTransform
+	 */
 	public void setLocalTransform(Matrix4f localTransform) {
 		this.localTransform = localTransform;
 	}
@@ -167,20 +183,11 @@ public class Bone {
 	}
 
 	/**
-	 * Get the current transform of this bone
+	 * Set the id of this bone
 	 * 
-	 * @return
+	 * @param boneId
 	 */
-	public Matrix4f getTransform() {
-		return transform;
-	}
-
-	/**
-	 * Set the transform for this bone
-	 * 
-	 * @param transform
-	 */
-	public void setTransform(Matrix4f transform) {
-		this.transform = transform;
+	public void setBoneId(int boneId) {
+		this.boneId = boneId;
 	}
 }

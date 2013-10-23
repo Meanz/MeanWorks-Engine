@@ -51,6 +51,19 @@ public class SceneGraph {
 		for (Node child : node.getChildren()) {
 			doUpdate(child);
 		}
+		// Will be called after all childs are updated
+		// This will be used to unflag flags that we wanted to pass down the
+		// hierarchy.
+		// Example is the update flag.
+		// If node1 needs to be updated, all it's children will be notified of
+		// this and so
+		// The children updates while each of the children copies the
+		// needsUpdate flag so it's children
+		// Will also be updated
+		// And when each child has finished the update on itself and all it's
+		// children
+		// The post update function is used to unflag the update flag.
+		node.doPostUpdate();
 	}
 
 	/**

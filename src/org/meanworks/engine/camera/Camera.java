@@ -304,6 +304,8 @@ public abstract class Camera {
 		Matrix4f.mul(projectionMatrix, viewMatrix, projectionViewMatrix);
 
 		cameraFrustum.createFrustrum(projectionMatrix, viewMatrix);
+		
+		immediateCameraSetup();
 	}
 
 	/**
