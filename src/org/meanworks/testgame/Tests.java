@@ -63,23 +63,20 @@ public class Tests {
 		/*
 		 * Copy this model and play a different animation
 		 */
-		for (int x = 0; x < 20; x++) {
-			for (int y = 0; y < 20; y++) {
+		for (int x = 0; x < 10; x++) {
+			for (int y = 0; y < 10; y++) {
 				AnimatedModel model2 = model.shallowCopy();
 
 				final Transform model2Transform = model2.getTransform();
 				model2Transform.setScale(0.2f, 0.2f, 0.2f);
 				model2Transform.setPosition(4992f + (x * 3), 138f,
 						5024f + (y * 3));
-				/*
-				 * Play some animations
-				 */
+
 				final AnimationChannel channel3 = model2.createChannel();
 				channel3.playAnimation(model2.getAnimation("Dance"),
 						LoopMode.LM_LOOP);
 
-				/*
-				 */
+
 				tg.getScene().getRootNode().addChild(model2);
 			}
 		}

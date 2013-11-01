@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 import org.meanworks.engine.scene.Geometry;
 import org.meanworks.engine.scene.GeometryNode;
-import org.meanworks.render.geometry.mesh.Mesh;
+import org.meanworks.engine.scene.Mesh;
 
 /**
  * Copyright (C) 2013 Steffen Evensen

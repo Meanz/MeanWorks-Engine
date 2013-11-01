@@ -13,6 +13,7 @@ import org.lwjgl.util.vector.Matrix4f;
 import org.meanworks.engine.core.Application;
 import org.meanworks.engine.scene.Geometry;
 import org.meanworks.engine.scene.GeometryNode;
+import org.meanworks.engine.scene.Mesh;
 import org.meanworks.render.geometry.AnimatedModel;
 import org.meanworks.render.geometry.animation.Animation;
 import org.meanworks.render.geometry.animation.AnimationNode;
@@ -20,7 +21,6 @@ import org.meanworks.render.geometry.animation.AnimationNode.QuatKey;
 import org.meanworks.render.geometry.animation.AnimationNode.Vec3Key;
 import org.meanworks.render.geometry.animation.Bone;
 import org.meanworks.render.geometry.animation.Skeleton;
-import org.meanworks.render.geometry.mesh.Mesh;
 import org.meanworks.render.geometry.mesh.MeshRenderer;
 
 /**

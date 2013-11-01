@@ -219,7 +219,7 @@ public class AnimationChannel {
 
 		// Calculate coefficients
 		float sclp, sclq;
-		if ((1.0f - cosom) > (0.01f)) // 0.0001 -> some epsillon
+		if ((1.0f - cosom) > (0.0001f)) // 0.0001 -> some epsillon
 		{
 			// Standard case (slerp)
 			float omega, sinom;

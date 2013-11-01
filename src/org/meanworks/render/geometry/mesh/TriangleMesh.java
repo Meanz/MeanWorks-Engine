@@ -4,6 +4,7 @@ import java.util.LinkedList;
 
 import org.lwjgl.opengl.GL11;
 import org.meanworks.engine.EngineConfig;
+import org.meanworks.engine.scene.Mesh;
 import org.meanworks.render.geometry.Triangle;
 import org.meanworks.render.opengl.DisplayList;
 

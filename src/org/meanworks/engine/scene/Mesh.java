@@ -1,5 +1,6 @@
-package org.meanworks.render.geometry.mesh;
+package org.meanworks.engine.scene;
 
+import org.meanworks.render.geometry.mesh.MeshRenderer;
 import org.meanworks.render.material.Material;
 import org.meanworks.render.texture.Texture;
 

@@ -79,13 +79,14 @@ public class Bone {
 	 * Calculate the global transform of this bone
 	 */
 	public Matrix4f calculateGlobalTransform() {
-		Bone node = this;
-		node.globalTransform = node.localTransform;
+		final Bone node = this;
+		// Set the global transform to this localtransform
+		node.globalTransform.load(node.localTransform);
+		// Ref to the curr it node
 		Bone pNode = node.parent;
-
 		while (pNode != null) {
-			node.globalTransform = Matrix4f.mul(pNode.localTransform,
-					node.globalTransform, null);
+			Matrix4f.mul(pNode.localTransform, node.globalTransform,
+					node.globalTransform);
 			pNode = pNode.parent;
 		}
 
