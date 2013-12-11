@@ -21,7 +21,7 @@ import org.meanworks.render.texture.Texture;
  * 
  * @author Meanz
  */
-public class Renderer {
+public class RenderState {
 
 	/*
 	 * The currently bound textures
@@ -32,6 +32,37 @@ public class Renderer {
 	 * The currently bound shader program
 	 */
 	private static ShaderProgram boundShaderProgram;
+
+	/*
+	 * Holds information about how many vertices is being rendered
+	 */
+	private static int renderedVertices;
+
+	/**
+	 * Get the number of rendered vertices
+	 * 
+	 * @return
+	 */
+	public static int getRenderedVertices() {
+		return renderedVertices;
+	}
+
+	/**
+	 * Clears the number of rendered vertices
+	 */
+	public static void clearRenderedVertices() {
+		renderedVertices = 0;
+	}
+
+	/**
+	 * Add the given number of vertices to the total amount of rendered vertices
+	 * this frame
+	 * 
+	 * @param amt
+	 */
+	public static void addRenderedVertices(int amt) {
+		renderedVertices += amt;
+	}
 
 	/**
 	 * Bind the given texture to the given texture unit
@@ -44,11 +75,20 @@ public class Renderer {
 	}
 
 	/**
+	 * Get's the currently bound shader program
+	 * 
+	 * @return
+	 */
+	public static ShaderProgram getBoundShader() {
+		return boundShaderProgram;
+	}
+
+	/**
 	 * Bind a shader program
 	 * 
 	 * @param program
 	 */
-	public static void bindShaderProgram(ShaderProgram program) {
+	public static void setBoundShader(ShaderProgram program) {
 		boundShaderProgram = program;
 	}
 
@@ -56,7 +96,10 @@ public class Renderer {
 	 * Clear the drawing state
 	 */
 	public static void clearState() {
-		boundShaderProgram = null;
+		if (getBoundShader() != null) {
+			ShaderProgram.bindNone();
+			setBoundShader(null);
+		}
 		// Clear all texture units
 		for (int i = 0; i < boundTextures.length; i++) {
 			boundTextures[i] = null;

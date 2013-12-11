@@ -2,7 +2,6 @@ package org.meanworks.engine.asset;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -11,6 +10,7 @@ import org.meanworks.engine.EngineConfig;
 import org.meanworks.engine.EngineLogger;
 import org.meanworks.engine.fx.ShaderParseException;
 import org.meanworks.engine.fx.ShaderParser;
+import org.meanworks.render.material.Material;
 import org.meanworks.render.opengl.shader.Shader;
 import org.meanworks.render.opengl.shader.Shader.ShaderType;
 import org.meanworks.render.opengl.shader.ShaderHelper;
@@ -56,6 +56,11 @@ public class AssetManager implements AssetListener {
 	 * The list of modified actions
 	 */
 	private LinkedList<ModifiedFile> modifiedFiles = new LinkedList<>();
+
+	/*
+	 * The list of materials
+	 */
+	private HashMap<String, Material> materials = new HashMap<>();
 
 	/**
 	 * Construct a new AssetManager

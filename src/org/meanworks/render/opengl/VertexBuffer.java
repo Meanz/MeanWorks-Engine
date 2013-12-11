@@ -120,6 +120,15 @@ public class VertexBuffer {
 	}
 
 	/**
+	 * Get the type of buffer
+	 * 
+	 * @return
+	 */
+	public BufferType getType() {
+		return bufferType;
+	}
+
+	/**
 	 * Check whether this is a valid vertex buffer or not
 	 * 
 	 * @return
@@ -197,6 +206,15 @@ public class VertexBuffer {
 	public void bind() {
 		ARBVertexBufferObject.glBindBufferARB(bufferType.getBufferType(),
 				bufferId);
+	}
+
+	/**
+	 * Get the float buffer for this vertex buffer
+	 * 
+	 * @return
+	 */
+	public FloatBuffer getFloatBuffer() {
+		return floatBuffer;
 	}
 
 	/**

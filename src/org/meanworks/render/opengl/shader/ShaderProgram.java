@@ -10,6 +10,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.util.vector.Matrix4f;
 import org.meanworks.engine.EngineLogger;
+import org.meanworks.engine.RenderState;
 import org.meanworks.engine.math.MatrixHelper;
 
 public class ShaderProgram {
@@ -50,13 +51,13 @@ public class ShaderProgram {
 		ARBShaderObjects.glDetachObjectARB(programId, shader.getId());
 		isCompiled = false;
 	}
-	
+
 	/**
 	 * 
 	 */
 	public LinkedList<Shader> detatchAll() {
 		LinkedList<Shader> retList = new LinkedList<>();
-		for(Shader shader : attachedShaders) {
+		for (Shader shader : attachedShaders) {
 			retList.add(shader);
 			ARBShaderObjects.glDetachObjectARB(programId, shader.getId());
 		}
@@ -167,9 +168,13 @@ public class ShaderProgram {
 					.error("[ERROR TRIED TO USE UNCOMPILED SHADER PROGRAM]");
 			return;
 		}
+		if (RenderState.getBoundShader() == this) {
+			return;
+		}
 		ARBShaderObjects.glUseProgramObjectARB(programId);
+		RenderState.setBoundShader(this);
 	}
-	
+
 	public static void bindNone() {
 		ARBShaderObjects.glUseProgramObjectARB(0);
 	}
@@ -178,6 +183,7 @@ public class ShaderProgram {
 	 * Use no shader programs
 	 */
 	public void useNone() {
+		RenderState.setBoundShader(null);
 		bindNone();
 	}
 
@@ -258,6 +264,7 @@ public class ShaderProgram {
 
 	/**
 	 * Useless function
+	 * 
 	 * @param loc
 	 * @param name
 	 */
@@ -275,7 +282,7 @@ public class ShaderProgram {
 		int loc = ARBShaderObjects.glGetUniformLocationARB(programId,
 				uniformName);
 		if (loc == -1) {
-			//EngineLogger.info("Can not find uniform " + uniformName);
+			// EngineLogger.info("Can not find uniform " + uniformName);
 		}
 
 		return loc;

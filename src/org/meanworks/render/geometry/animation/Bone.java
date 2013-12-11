@@ -53,6 +53,11 @@ public class Bone {
 	 */
 	private Bone parent;
 
+	/*
+	 * The children of this bone
+	 */
+	private Bone[] children;
+
 	/**
 	 * Construct a new bone
 	 */
@@ -75,6 +80,20 @@ public class Bone {
 		this.parent = null;
 	}
 
+	public Matrix4f calculateGlobalTransform_new() {
+		
+		final Bone node = this;
+		
+		node.globalTransform.load(node.localTransform);
+		
+		if(parent != null) {
+			Matrix4f.mul(parent.globalTransform, node.localTransform,
+					node.globalTransform);
+		}
+		
+		return node.globalTransform;
+	}
+	
 	/**
 	 * Calculate the global transform of this bone
 	 */
@@ -89,7 +108,6 @@ public class Bone {
 					node.globalTransform);
 			pNode = pNode.parent;
 		}
-
 		return node.globalTransform;
 	}
 
@@ -190,5 +208,23 @@ public class Bone {
 	 */
 	public void setBoneId(int boneId) {
 		this.boneId = boneId;
+	}
+
+	/**
+	 * Get the children of this bone
+	 * 
+	 * @return
+	 */
+	public Bone[] getChildren() {
+		return children;
+	}
+
+	/**
+	 * Set the children of this bone
+	 * 
+	 * @param children
+	 */
+	public void setChildren(Bone[] children) {
+		this.children = children;
 	}
 }

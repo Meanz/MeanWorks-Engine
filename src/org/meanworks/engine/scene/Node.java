@@ -242,6 +242,7 @@ public abstract class Node {
 	 * Render this node
 	 */
 	public void render() {
+		
 	};
 
 	/**

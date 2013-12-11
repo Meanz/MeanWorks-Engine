@@ -14,7 +14,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 
 import org.meanworks.engine.EngineLogger;
+import org.meanworks.engine.RenderState;
 import org.meanworks.engine.core.Application;
+import org.meanworks.engine.util.NumberFormatter;
 import org.meanworks.render.opengl.ImmediateRenderer;
 import org.meanworks.testgame.world.World;
 
@@ -222,6 +224,14 @@ public class GuiHandler implements KeyListener, MouseListener {
 
 						fontRenderer.drawString("Rendered regions: "
 								+ World.renderedRegions, 10, 70);
+
+						fontRenderer
+								.drawString(
+										"Rendered Vertices: "
+												+ NumberFormatter
+														.formatNumber(RenderState
+																.getRenderedVertices()),
+										10, 85);
 
 					}
 				}

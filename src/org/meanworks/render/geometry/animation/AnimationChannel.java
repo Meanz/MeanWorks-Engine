@@ -3,6 +3,7 @@ package org.meanworks.render.geometry.animation;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 import org.lwjgl.util.vector.Vector4f;
+import org.meanworks.engine.math.FastMath;
 import org.meanworks.render.geometry.animation.AnimationNode.QuatKey;
 import org.meanworks.render.geometry.animation.AnimationNode.Vec3Key;
 
@@ -200,6 +201,14 @@ public class AnimationChannel {
 		}
 	}
 
+	/**
+	 * Expensive
+	 * 
+	 * @param key1
+	 * @param key2
+	 * @param pFactor
+	 * @return
+	 */
 	public Vector4f interpolate(QuatKey key1, QuatKey key2, float pFactor) {
 
 		QuatKey pStart = key1;
@@ -219,15 +228,15 @@ public class AnimationChannel {
 
 		// Calculate coefficients
 		float sclp, sclq;
-		if ((1.0f - cosom) > (0.0001f)) // 0.0001 -> some epsillon
+		if ((1.0f - cosom) > (FastMath.EPSILON)) // 0.0001 -> some epsillon
 		{
 			// Standard case (slerp)
 			float omega, sinom;
-			omega = (float) Math.acos(cosom); // extract theta from dot
-												// product's cos theta
-			sinom = (float) Math.sin(omega);
-			sclp = (float) Math.sin(((1.0f) - pFactor) * omega) / sinom;
-			sclq = (float) Math.sin(pFactor * omega) / sinom;
+			omega = (float) FastMath.acos(cosom); // extract theta from dot
+													// product's cos theta
+			sinom = (float) FastMath.sin(omega);
+			sclp = (float) FastMath.sin(((1.0f) - pFactor) * omega) / sinom;
+			sclq = (float) FastMath.sin(pFactor * omega) / sinom;
 		} else {
 			// Very close, do linear interp (because it's faster)
 			sclp = (1.0f) - pFactor;
@@ -252,11 +261,11 @@ public class AnimationChannel {
 
 		for (int i = 0; i < animation.getNodes().length; i++) {
 
-			AnimationNode node = animation.getNodes()[i];
+			final AnimationNode node = animation.getNodes()[i];
 
-			Vector3f position = new Vector3f();
-			Vector4f rotation = new Vector4f();
-			Vector3f scale = new Vector3f();
+			float posX = 0, posY = 0, posZ = 0;
+			float rotX = 0, rotY = 0, rotZ = 0, rotW = 0;
+			float scaleX = 0, scaleY = 0, scaleZ = 0;
 
 			// Position Keys
 			if (node.getNumPositionKeys() > 0) {
@@ -289,16 +298,13 @@ public class AnimationChannel {
 				}
 				if (timeDifference > 0) {
 					float interpolationFactor = (float) ((currentTime - key1.time) / timeDifference);
-					position.x = key1.x + (key2.x - key1.x)
-							* interpolationFactor;
-					position.y = key1.y + (key2.y - key1.y)
-							* interpolationFactor;
-					position.z = key1.z + (key2.z - key1.z)
-							* interpolationFactor;
+					posX = key1.x + (key2.x - key1.x) * interpolationFactor;
+					posY = key1.y + (key2.y - key1.y) * interpolationFactor;
+					posZ = key1.z + (key2.z - key1.z) * interpolationFactor;
 				} else {
-					position.x = key1.x;
-					position.y = key1.y;
-					position.z = key1.z;
+					posX = key1.x;
+					posY = key1.y;
+					posZ = key1.z;
 				}
 
 				nodePositions[i].x = (float) currFrame;
@@ -329,12 +335,17 @@ public class AnimationChannel {
 				}
 				if (timeDifference > 0) {
 					float interpolationFactor = (float) ((currentTime - key1.time) / timeDifference);
-					rotation = interpolate(key1, key2, interpolationFactor);
+					final Vector4f rot = interpolate(key1, key2,
+							interpolationFactor);
+					rotX = rot.x;
+					rotY = rot.y;
+					rotZ = rot.z;
+					rotW = rot.w;
 				} else {
-					rotation.x = key1.x;
-					rotation.y = key1.y;
-					rotation.z = key1.z;
-					rotation.w = key1.w;
+					rotX = key1.x;
+					rotY = key1.y;
+					rotZ = key1.z;
+					rotW = key1.w;
 				}
 
 				nodePositions[i].y = (float) currFrame;
@@ -348,13 +359,13 @@ public class AnimationChannel {
 			if (bone != null) {
 
 				// Rotation
-				quatToRotationMatrix(-rotation.x, -rotation.y, -rotation.z,
-						rotation.w, bone.localTransform);
+				quatToRotationMatrix(-rotX, -rotY, -rotZ, rotW,
+						bone.localTransform);
 
 				// Translation
-				bone.localTransform.m30 = position.x;
-				bone.localTransform.m31 = position.y;
-				bone.localTransform.m32 = position.z;
+				bone.localTransform.m30 = posX;
+				bone.localTransform.m31 = posY;
+				bone.localTransform.m32 = posZ;
 
 			} else {
 				System.err.println("Bone " + node.getNodeName()

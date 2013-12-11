@@ -5,6 +5,7 @@ import static org.lwjgl.opengl.GL11.glDisable;
 import static org.lwjgl.opengl.GL11.glEnable;
 
 import org.lwjgl.opengl.Display;
+import org.meanworks.engine.RenderState;
 import org.meanworks.engine.asset.AssetManager;
 import org.meanworks.engine.camera.Camera;
 import org.meanworks.engine.camera.FirstPersonCamera;
@@ -163,8 +164,8 @@ public abstract class Application {
 	 */
 	public void setWindow(Window window) {
 		this.window = window;
-		camera = new FirstPersonCamera(window.getWidth(), window.getHeight(), 60,
-				window.getAspect());
+		camera = new FirstPersonCamera(window.getWidth(), window.getHeight(),
+				60, window.getAspect());
 	}
 
 	/**
@@ -249,8 +250,8 @@ public abstract class Application {
 		int SKIP_TICKS = 1000 / targetUps;
 
 		int savedUps = 0;
-		
-		//Create the timer
+
+		// Create the timer
 		timer = new Timer();
 
 		/*
@@ -319,10 +320,11 @@ public abstract class Application {
 				Display.processMessages();
 				// END OF TEMP LWJGL FUNCTIONS
 
+				// Grab input keys
 				inputHandler.update();
-
+				// Parse input keys in the gui handler
 				guiHandler.update();
-
+				// Parse updates in the application
 				update(); // Call the update function
 				scene.update();
 
@@ -336,8 +338,21 @@ public abstract class Application {
 			 * for analyzing performance)
 			 */
 
+			/*
+			 * Clear the statistics for the last frame
+			 */
+			RenderState.clearRenderedVertices();
+
+			// Clear render state for the next render loop
+			RenderState.clearState();
 			render(); // Call the render function
+
+			// Clear render state for the scene render loop
+			RenderState.clearState();
 			scene.render();
+
+			// Clear render state for the gui render loop
+			RenderState.clearState();
 
 			glDisable(GL_CULL_FACE);
 			guiHandler.render();

@@ -15,7 +15,11 @@ public class Tile {
 	/*
 	 * A vector describing the position of the tile
 	 */
-	private Vector2f tilePosition;
+	private float x;
+	/*
+	 * 
+	 */
+	private float y;
 
 	/**
 	 * Construct a new tile
@@ -24,9 +28,28 @@ public class Tile {
 	 * @param tileHeights
 	 */
 	public Tile(Vector2f tilePosition, TileType tileType, float tileHeight) {
-		this.tilePosition = tilePosition;
+		this.x = tilePosition.x;
+		this.y = tilePosition.y;
 		this.tileType = tileType;
 		this.tileHeight = tileHeight;
+	}
+
+	/**
+	 * Get the x position of this tile
+	 * 
+	 * @return
+	 */
+	public float getX() {
+		return x;
+	}
+
+	/**
+	 * Get the y position of this tile
+	 * 
+	 * @return
+	 */
+	public float getY() {
+		return y;
 	}
 
 	/**
@@ -35,7 +58,7 @@ public class Tile {
 	 * @return The vector of this tile's position
 	 */
 	public Vector2f getTilePosition() {
-		return tilePosition;
+		return new Vector2f(x, y);
 	}
 
 	/**

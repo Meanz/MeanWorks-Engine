@@ -3,7 +3,7 @@ package org.meanworks.engine.scene;
 import java.util.HashMap;
 
 import org.lwjgl.util.vector.Vector4f;
-import org.meanworks.engine.Renderer;
+import org.meanworks.engine.RenderState;
 import org.meanworks.engine.core.Application;
 import org.meanworks.render.material.Material;
 import org.meanworks.render.opengl.shader.ShaderProgram;
@@ -135,8 +135,7 @@ public class Geometry {
 		 */
 		if (material != null) {
 			// Clear state
-			Renderer.clearState();
-			ShaderProgram.bindNone();
+			RenderState.clearState();
 		}
 	}
 

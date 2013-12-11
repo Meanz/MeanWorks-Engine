@@ -18,6 +18,7 @@ import org.meanworks.render.geometry.animation.Animation;
 import org.meanworks.render.geometry.animation.AnimationChannel;
 import org.meanworks.render.geometry.animation.Skeleton;
 import org.meanworks.render.material.Material;
+import org.meanworks.render.opengl.shader.ShaderProgram;
 
 /**
  * Copyright (C) 2013 Steffen Evensen
@@ -74,17 +75,25 @@ public class AnimatedModel extends Model {
 	 */
 	Matrix4f identityMatrix = new Matrix4f();
 
+	/*
+	 * 
+	 */
+	private static ShaderProgram skinningShader;
+
 	/**
 	 * Construct a new AnimatedModel
 	 */
 	public AnimatedModel(Geometry geometry) {
 		super(geometry);
-		renderSkeleton = true;
+		renderSkeleton = false;
+
+		if (skinningShader == null) {
+			skinningShader = Application.getApplication().getAssetManager()
+					.loadShader("./data/shaders/simple_skinning");
+		}
 
 		getGeometry().setMaterial(
-				new Material("animatedModelMaterial", Application
-						.getApplication().getAssetManager()
-						.loadShader("./data/shaders/simple_skinning")));
+				new Material("animatedModelMaterial", skinningShader));
 
 	}
 
@@ -199,27 +208,16 @@ public class AnimatedModel extends Model {
 	 * Calculate the skinning matrices
 	 */
 	public void calculateSkinningMatrices() {
-
 		if (transformMatrices == null || skinningMatrices == null) {
 			return;
 		}
-
-		for (int i = 0; i < skeleton.getBones().length; i++) {
-			transformMatrices[i] = skeleton.getBones()[i]
-					.calculateGlobalTransform();
-		}
-
-		Matrix4f globalInvTransform = Matrix4f.invert(transformMatrices[0],
-				null);
-
-		//
+		transformMatrices = skeleton.calculateGlobalTransforms();
 		for (int i = 0; i < skinningMatrices.length; i++) {
-			Matrix4f temp = Matrix4f.mul(globalInvTransform,
-					transformMatrices[i], null);
-			Matrix4f.mul(temp, skeleton.getBones()[i].getOffsetMatrix(),
+			// transform * invTransform = skinningMatrix
+			Matrix4f.mul(transformMatrices[i],
+					skeleton.getBones()[i].getOffsetMatrix(),
 					skinningMatrices[i]);
 		}
-
 	}
 
 	/**
@@ -265,6 +263,22 @@ public class AnimatedModel extends Model {
 		this.availableAnimations = availableAnimations;
 	}
 
+	@Override
+	public void update() {
+		super.update();
+		/*
+		 * Update animation
+		 */
+		for (AnimationChannel channel : channels) {
+			channel.addTime(Application.getApplication().getFrameTime());
+			channel.update();
+		}
+		/*
+		 * Update skinning matrices
+		 */
+		calculateSkinningMatrices();
+	}
+	
 	/**
 	 * Render this skinned model
 	 */
@@ -287,19 +301,6 @@ public class AnimatedModel extends Model {
 		if (getGeometry().getMaterial() == null) {
 			return;
 		}
-
-		/*
-		 * Update animation
-		 */
-		for (AnimationChannel channel : channels) {
-			channel.addTime(Application.getApplication().getFrameTime());
-			channel.update();
-		}
-
-		/*
-		 * Update skinning matrices
-		 */
-		calculateSkinningMatrices();
 
 		/*
 		 * Update the material

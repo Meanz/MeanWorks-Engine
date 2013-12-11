@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 import org.meanworks.engine.EngineLogger;
+import org.meanworks.engine.RenderState;
 import org.meanworks.render.opengl.VertexBuffer;
 import org.meanworks.render.opengl.VertexBuffer.BufferType;
 import org.meanworks.render.opengl.VertexBuffer.BufferUsage;
@@ -284,6 +285,14 @@ public class MeshRenderer {
 		BufferEntry bufferEntry = new BufferEntry();
 		bufferEntry.buffer = vertexBuffer;
 		vertexBuffers.add(bufferEntry);
+		if (vertexBuffer.getType() == VertexBuffer.BufferType.ARRAY_BUFFER) {
+
+			// This has to be a float buffer
+			// Let's assume every vertex has 3 elements
+			if (vertexBuffer.getFloatBuffer() != null) {
+				numVertices += vertexBuffer.getFloatBuffer().capacity() / 3;
+			}
+		}
 		return bufferEntry;
 	}
 
@@ -367,6 +376,7 @@ public class MeshRenderer {
 				} else {
 					GL11.glDrawArrays(GL11.GL_TRIANGLES, 0, this.numVertices);
 				}
+				RenderState.addRenderedVertices(this.numVertices);
 			}
 			vertexBufferArray.unbind();
 		}
