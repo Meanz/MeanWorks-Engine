@@ -83,6 +83,18 @@ public class ShaderProgram {
 	}
 
 	/**
+	 * Deletes this shader program and it's components
+	 * 
+	 * @return
+	 */
+	public boolean deleteAndComponents() {
+		for (Shader shader : attachedShaders) {
+			shader.delete();
+		}
+		return delete();
+	}
+
+	/**
 	 * Delete the shader program
 	 * 
 	 * @return
@@ -96,6 +108,15 @@ public class ShaderProgram {
 			return false;
 		}
 		return true;
+	}
+
+	/**
+	 * Check whether our program is compiled or not
+	 * 
+	 * @return
+	 */
+	public boolean isCompiled() {
+		return isCompiled;
 	}
 
 	/**

@@ -294,24 +294,24 @@ public class AssetManager implements AssetListener {
 				} else if (key.startsWith("shader_")) {
 
 					try {
-						int shaderProgramId = Integer.parseInt(key
-								.substring(12));
+						int shaderProgramId = Integer
+								.parseInt(key.substring(7));
 
-						boolean found = false;
+						ShaderProgram program = null;
 						for (ShaderProgram shaderProgram : shaders.values()) {
 							if (shaderProgram.getProgramId() == shaderProgramId) {
-								String shaderFile = key + ".shader";
-								ShaderParser.parseShader(shaderProgram,
-										"./data/shaders/", new FileInputStream(
-												new File(shaderFile)));
-								found = true;
+								program = shaderProgram;
 								break;
 							}
 						}
-						if (!found) {
+						if (program == null) {
 							EngineLogger
 									.warning("Could not find stored shader "
 											+ key);
+						} else {
+							ShaderParser.parseShader(program,
+									"./data/shaders/", new FileInputStream(
+											new File(filePath)));
 						}
 					} catch (NumberFormatException | IOException
 							| ShaderParseException e) {

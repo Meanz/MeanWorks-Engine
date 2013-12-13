@@ -106,6 +106,6 @@ public class Window {
 	 */
 	public void update() {
 		Display.update(false);
-		//Display.sync(250);
+		Display.sync(250);
 	}
 }

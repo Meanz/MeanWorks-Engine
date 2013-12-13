@@ -2,6 +2,8 @@ package org.meanworks.testgame;
 
 import org.meanworks.engine.math.Transform;
 import org.meanworks.engine.model.MWMLoader;
+import org.meanworks.engine.model.ModelLoader;
+import org.meanworks.engine.scene.GeometryNode;
 import org.meanworks.render.geometry.AnimatedModel;
 import org.meanworks.render.geometry.animation.AnimationChannel;
 import org.meanworks.render.geometry.animation.LoopMode;
@@ -27,7 +29,17 @@ import org.meanworks.render.geometry.animation.LoopMode;
 public class Tests {
 
 	public static void doTests(TestGame tg) {
-		doModelTest(tg);
+		//doModelTest(tg);
+		doObjTest(tg);
+	}
+	
+	private static void doObjTest(TestGame tg) {
+		
+		GeometryNode gn = ModelLoader.loadModel("./data/models/tree_1.obj");
+		gn.getTransform().setPosition(4998f, 134f, 5024f);
+		gn.getTransform().setScale(1.0f, 1.0f, 1.0f);
+		tg.getScene().getRootNode().addChild(gn);
+		
 	}
 
 	private static void doModelTest(TestGame tg) {
@@ -75,7 +87,6 @@ public class Tests {
 				final AnimationChannel channel3 = model2.createChannel();
 				channel3.playAnimation(model2.getAnimation("Dance"),
 						LoopMode.LM_LOOP);
-
 
 				tg.getScene().getRootNode().addChild(model2);
 			}

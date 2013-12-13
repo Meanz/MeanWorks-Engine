@@ -76,12 +76,12 @@ public class TestGame extends Application {
 	/*
 	 * 
 	 */
-	private GeometryNode kostjaModel = null;
+	private GeometryNode treeModel;
 
 	/*
 	 * 
 	 */
-	private GeometryNode treeModel;
+	private SceneUi sceneUi;
 
 	/**
 	 * 
@@ -108,6 +108,18 @@ public class TestGame extends Application {
 	public void setup() {
 		Util.loadLWJGL();
 		setWindow(Window.createWindow(1200, 800));
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.meanworks.engine.core.Application#onExit()
+	 */
+	@Override
+	public void onExit() {
+		if (sceneUi != null) {
+			sceneUi.dispose();
+		}
 	}
 
 	/*
@@ -180,12 +192,6 @@ public class TestGame extends Application {
 
 		getCamera().follow(player);
 
-		// Let's try to load a model
-		kostjaModel = MWMLoader.loadModel("./data/models/kostja.mwm");
-		kostjaModel.getTransform().setPosition(5000, 135, 4990);
-		kostjaModel.getTransform().setScale(0.2f, 0.2f, 0.2f);
-		getScene().getRootNode().addChild(kostjaModel);
-
 		/*
 		 * Load our water
 		 */
@@ -201,6 +207,11 @@ public class TestGame extends Application {
 		 * Do tests
 		 */
 		Tests.doTests(this);
+
+		/*
+		 * Setup our scene ui
+		 */
+		// sceneUi = new SceneUi(this);
 	}
 
 	/*

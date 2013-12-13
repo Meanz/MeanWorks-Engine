@@ -4,8 +4,8 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 import org.lwjgl.BufferUtils;
-import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector4f;
+import org.meanworks.engine.math.Vec2;
 import org.meanworks.engine.math.Vec3;
 
 /**
@@ -59,7 +59,7 @@ public class MeshBuffer {
 		buffer.put(w);
 	}
 
-	public void addVec2(Vector2f vec) {
+	public void addVec2(Vec2 vec) {
 		addVec2(vec.x, vec.y);
 	}
 

@@ -2,6 +2,7 @@ package org.meanworks.render.opengl;
 
 import org.lwjgl.opengl.ARBVertexArrayObject;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.util.glu.GLU;
 import org.meanworks.engine.EngineLogger;
 
 public class VertexBufferArray {
@@ -53,7 +54,7 @@ public class VertexBufferArray {
 		int errorCode = GL11.glGetError();
 		if (errorCode != 0) {
 			EngineLogger
-					.error("Could not create vertex array object (VertexBufferArray)");
+					.error("Could not create vertex array object (VertexBufferArray) " + GLU.gluErrorString(errorCode));
 			return false;
 		}
 		return true;

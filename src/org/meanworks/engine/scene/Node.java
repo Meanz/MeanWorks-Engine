@@ -40,6 +40,11 @@ import org.meanworks.render.opengl.ImmediateRenderer;
 public abstract class Node {
 
 	/*
+	 * The name of the node
+	 */
+	private String nodeName;
+
+	/*
 	 * The parent node of this node
 	 */
 	private Node parent;
@@ -83,13 +88,30 @@ public abstract class Node {
 	/**
 	 * Construct a new node
 	 */
-	public Node() {
+	public Node(String nodeName) {
+		this.nodeName = nodeName;
 		cullHint = CullHint.PARENT_CULL;
 		transform = new Transform();
 		nodeInheritance = NodeInheritance.INHERIT_NONE;
 		needsUpdate = true;
 		cullingBox = new BoundingBox();
 		globalTransform = new Matrix4f();
+	}
+
+	/**
+	 * Construct a new node
+	 */
+	public Node() {
+		this("node_" + SceneGraph.getNextNodeId());
+	}
+
+	/**
+	 * Get the name of this node
+	 * 
+	 * @return
+	 */
+	public String getName() {
+		return nodeName;
 	}
 
 	/**
@@ -242,7 +264,7 @@ public abstract class Node {
 	 * Render this node
 	 */
 	public void render() {
-		
+
 	};
 
 	/**
@@ -337,4 +359,12 @@ public abstract class Node {
 		GL11.glVertex3f(maxx, miny, maxz); // V1
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#toString()
+	 */
+	public String toString() {
+		return nodeName == null ? "nullNode" : nodeName;
+	}
 }

@@ -14,6 +14,5 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="D:/FractalStudio/lib/lzma.jar"/>
 	<classpathentry kind="lib" path="D:/FractalStudio/lib/slick.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/JCollada"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

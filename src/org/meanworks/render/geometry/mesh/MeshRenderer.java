@@ -6,6 +6,7 @@ import java.util.LinkedList;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
+import org.lwjgl.util.glu.GLU;
 import org.meanworks.engine.EngineLogger;
 import org.meanworks.engine.RenderState;
 import org.meanworks.render.opengl.VertexBuffer;
@@ -360,6 +361,11 @@ public class MeshRenderer {
 			}
 		}
 		vertexBufferArray.unbind();
+		
+		int error = GL11.glGetError();
+		if(error != 0) {
+			EngineLogger.error("Could not compile Mesh, " + GLU.gluErrorString(error));
+		}
 
 	}
 

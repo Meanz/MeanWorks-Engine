@@ -229,6 +229,7 @@ public abstract class Application {
 	 * A method that can be overridden so we can hook on window close events
 	 */
 	public void onWindowClose() {
+		onExit();
 		stop();
 	}
 
@@ -367,6 +368,11 @@ public abstract class Application {
 			frameTime = (double) (deltaRender * Math.pow(10, -9));
 		}
 	}
+
+	/**
+	 * Called when the application is exited
+	 */
+	public abstract void onExit();
 
 	/**
 	 * Setup the application

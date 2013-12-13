@@ -61,6 +61,9 @@ public class Transform {
 		position = new Vec3();
 		rotation = new Vec3();
 		scale = new Vec3();
+		scale.x = 1.0f;
+		scale.y = 1.0f;
+		scale.z = 1.0f;
 	}
 
 	/**

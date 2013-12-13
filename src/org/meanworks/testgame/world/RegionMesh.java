@@ -502,12 +502,9 @@ public class RegionMesh {
 		 * Setup grass mesh
 		 */
 		if (region.getLodLevel() == 1) {
-			meshRenderer = new MeshRenderer();
+			/*meshRenderer = new MeshRenderer();
 			Mesh grassMesh = new Mesh();
 
-			/*
-			 * Upload grass mesh
-			 */
 			meshRenderer.addIndex(grassBuffer.getFlippedIntBuffer(),
 					grassBuffer.getNumIndices());
 
@@ -526,7 +523,7 @@ public class RegionMesh {
 
 			grassMesh.setMeshRenderer(meshRenderer);
 			regionGeometry.addMesh("region_grass_" + region.getRegionX() + "_"
-					+ region.getRegionY(), grassMesh);
+					+ region.getRegionY(), grassMesh);*/
 		}
 	}
 

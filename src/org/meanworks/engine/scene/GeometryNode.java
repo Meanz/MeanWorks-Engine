@@ -28,6 +28,7 @@ public class GeometryNode extends Node {
 	 * Construct a new geometry node
 	 */
 	public GeometryNode(Geometry geometry) {
+		super("geometryNode_" + SceneGraph.getNextNodeId());
 		this.geometry = geometry;
 	}
 

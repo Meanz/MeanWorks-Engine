@@ -6,6 +6,7 @@ import java.nio.IntBuffer;
 
 import org.lwjgl.opengl.ARBVertexBufferObject;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.util.glu.GLU;
 import org.meanworks.engine.EngineLogger;
 
 public class VertexBuffer {
@@ -148,7 +149,7 @@ public class VertexBuffer {
 		int errorCode = GL11.glGetError();
 
 		if (errorCode != 0) {
-			EngineLogger.error("Could not create vertex buffer.");
+			EngineLogger.error("Could not create vertex buffer. " + GLU.gluErrorString(errorCode));
 			return false;
 		}
 		return true;

@@ -21,6 +21,25 @@ package org.meanworks.engine.scene;
 public class SceneGraph {
 
 	/*
+	 * The scene node number increment
+	 */
+	private static int sceneIncr = 0;
+
+	/**
+	 * Get the next node id for the scene graph!
+	 * 
+	 * @return
+	 */
+	public static int getNextNodeId() {
+		if (Integer.MAX_VALUE == (sceneIncr + 1)) {
+			sceneIncr = 0;
+			return sceneIncr;
+		} else {
+			return sceneIncr++;
+		}
+	}
+
+	/*
 	 * The root node of the scene graph
 	 */
 	private SpatialNode rootNode;
@@ -29,7 +48,41 @@ public class SceneGraph {
 	 * Construct the scene graph
 	 */
 	public SceneGraph() {
-		rootNode = new SpatialNode();
+		rootNode = new SpatialNode("rootNode");
+	}
+
+	/**
+	 * Recursive search function for findNode(string)
+	 * 
+	 * @param searchName
+	 * @param parentNode
+	 * @return
+	 */
+	private Node recursiveFindNode(String searchName, Node parentNode) {
+		if (parentNode.getName().equals(searchName)) {
+			return parentNode;
+		}
+		for (Node child : parentNode.getChildren()) {
+			Node found = recursiveFindNode(searchName, child);
+			if (found != null) {
+				return found;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * This is a super expensive search that looks for a node with the given
+	 * name. And nodes can also have similar names, so it's not a guaranteed
+	 * function!
+	 * 
+	 * TODO: Make a more professional description!
+	 * 
+	 * @param nodeName
+	 * @return
+	 */
+	public Node findNode(String nodeName) {
+		return recursiveFindNode(nodeName, getRootNode());
 	}
 
 	/**

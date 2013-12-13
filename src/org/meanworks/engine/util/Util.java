@@ -2,6 +2,10 @@ package org.meanworks.engine.util;
 
 import java.io.File;
 
+import org.lwjgl.opengl.ATIMeminfo;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.NVXGpuMemoryInfo;
+
 /**
  * Copyright (C) 2013 Steffen Evensen
  * 
@@ -45,6 +49,12 @@ public class Util {
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
+	}
+
+	public static int getNVIDIAMemory() {
+		int nvidia_total_memory = GL11
+				.glGetInteger(NVXGpuMemoryInfo.GL_GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX);
+		return nvidia_total_memory;
 	}
 
 }
