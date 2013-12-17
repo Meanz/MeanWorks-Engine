@@ -1,5 +1,8 @@
 package org.meanworks.engine.scene;
 
+import org.meanworks.engine.EngineLogger;
+import org.meanworks.engine.camera.Camera;
+
 /**
  * Copyright (C) 2013 Steffen Evensen
  * 
@@ -40,6 +43,11 @@ public class SceneGraph {
 	}
 
 	/*
+	 * The camera in the scene
+	 */
+	private Camera camera;
+
+	/*
 	 * The root node of the scene graph
 	 */
 	private SpatialNode rootNode;
@@ -49,6 +57,24 @@ public class SceneGraph {
 	 */
 	public SceneGraph() {
 		rootNode = new SpatialNode("rootNode");
+	}
+
+	/**
+	 * Set the camera of this scene
+	 * 
+	 * @param camera
+	 */
+	public void setCamera(Camera camera) {
+		this.camera = camera;
+	}
+
+	/**
+	 * Get the camera of this scene
+	 * 
+	 * @return
+	 */
+	public Camera getCamera() {
+		return camera;
 	}
 
 	/**
@@ -135,6 +161,11 @@ public class SceneGraph {
 	 * 
 	 */
 	public void update() {
+		if (camera != null) {
+			camera.update();
+		} else {
+			EngineLogger.error("Scene: Camera is null");
+		}
 		doUpdate(rootNode);
 	}
 
@@ -142,6 +173,11 @@ public class SceneGraph {
 	 * 
 	 */
 	public void render() {
+		if (camera != null) {
+			camera.updateCamera();
+		} else {
+			EngineLogger.error("Scene: Camera is null");
+		}
 		doRender(rootNode);
 	}
 

@@ -34,11 +34,6 @@ public abstract class Application {
 	}
 
 	/*
-	 * The camera for this application
-	 */
-	private Camera camera;
-
-	/*
 	 * Whether the application is running or not
 	 */
 	private boolean running = false;
@@ -98,6 +93,18 @@ public abstract class Application {
 	private int targetUps = 50; // Number of updates per second
 
 	/**
+	 * Forward getter from Scene.getCamera
+	 * 
+	 * @return
+	 */
+	public Camera getCamera() {
+		if (scene == null) {
+			return null;
+		}
+		return scene.getCamera();
+	}
+
+	/**
 	 * Get the gui handler of this application
 	 * 
 	 * @return
@@ -134,15 +141,6 @@ public abstract class Application {
 	}
 
 	/**
-	 * Get the camera for this application
-	 * 
-	 * @return
-	 */
-	public Camera getCamera() {
-		return camera;
-	}
-
-	/**
 	 * Get the input handler of this application
 	 * 
 	 * @return
@@ -164,8 +162,6 @@ public abstract class Application {
 	 */
 	public void setWindow(Window window) {
 		this.window = window;
-		camera = new FirstPersonCamera(window.getWidth(), window.getHeight(),
-				60, window.getAspect());
 	}
 
 	/**
@@ -270,6 +266,12 @@ public abstract class Application {
 		 */
 		Material.DEFAULT_MATERIAL = new Material("DEFAULT_MATERIAL",
 				getAssetManager().loadShader("./data/shaders/colorShader"));
+
+		/*
+		 * Set camera details TODO: Cleanup here
+		 */
+		scene.setCamera(new FirstPersonCamera(window.getWidth(), window
+				.getHeight(), 60, window.getAspect()));
 
 		/*
 		 * Preload

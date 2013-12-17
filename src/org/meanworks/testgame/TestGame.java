@@ -211,7 +211,7 @@ public class TestGame extends Application {
 		/*
 		 * Setup our scene ui
 		 */
-		// sceneUi = new SceneUi(this);
+		//sceneUi = new SceneUi(this);
 	}
 
 	/*
@@ -221,12 +221,6 @@ public class TestGame extends Application {
 	 */
 	@Override
 	public void update() {
-
-		/*
-		 * Make the camera follow the player third person wise
-		 */
-		getCamera().update();
-
 		// Update the world
 		world.update((int) (getCamera().getPosition().x / Region.REGION_WIDTH),
 				(int) (getCamera().getPosition().z / Region.REGION_HEIGHT));

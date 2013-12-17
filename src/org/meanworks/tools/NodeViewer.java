@@ -1,6 +1,9 @@
 package org.meanworks.tools;
 
+import java.awt.GridLayout;
+
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 
 import org.meanworks.engine.scene.Node;
 
@@ -28,6 +31,12 @@ public class NodeViewer extends JFrame {
 	 * The node we are viewing
 	 */
 	private Node node;
+	
+	/*
+	 * Components for the ui
+	 */
+	private JLabel lblName;
+	private JLabel txtName;
 
 	/**
 	 * Construct a new node viewer
@@ -45,7 +54,17 @@ public class NodeViewer extends JFrame {
 		setVisible(true);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
+		GridLayout layout = new GridLayout(2, 2);
+		setLayout(layout);
 		
+		lblName = new JLabel("Node Name: ");
+		lblName.setVerticalTextPosition(JLabel.TOP);
+		lblName.setHorizontalAlignment(JLabel.LEFT);
+		txtName = new JLabel(node.getName());
+		lblName.setVerticalAlignment(JLabel.TOP);
+		lblName.setHorizontalAlignment(JLabel.LEFT);
+		add(lblName);
+		add(txtName);
 		
 	}
 

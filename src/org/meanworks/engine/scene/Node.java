@@ -132,7 +132,6 @@ public abstract class Node {
 		if (child != null) {
 			child.setParent(this);
 			children.add(child);
-			System.err.println("Children Size: " + children.size());
 		}
 	}
 
@@ -249,7 +248,7 @@ public abstract class Node {
 	 * Render method called from the Application
 	 */
 	public final void doRender() {
-		renderNodeBox();
+		//renderNodeBox();
 		render();
 	}
 

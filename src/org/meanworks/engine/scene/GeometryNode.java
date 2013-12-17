@@ -69,7 +69,7 @@ public class GeometryNode extends Node {
 				 */
 				geometry.getMaterial().setProperty(
 						"mProjectionView",
-						Application.getApplication().getCamera()
+						Application.getApplication().getScene().getCamera()
 								.getProjectionViewMatrix());
 				geometry.getMaterial().setProperty("mModelMatrix",
 						getGlobalTransform());

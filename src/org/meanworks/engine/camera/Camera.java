@@ -356,6 +356,8 @@ public abstract class Camera {
 	 */
 	public void immediateCameraSetup() {
 		// Setup camera
+		GL11.glMatrixMode(GL11.GL_MODELVIEW);
+		GL11.glLoadIdentity();
 		GL11.glRotatef(rotation.x, 1.0f, 0.0f, 0.0f);
 		GL11.glRotatef(rotation.y, 0.0f, 1.0f, 0.0f);
 		GL11.glTranslatef(-cameraPosition.x, -cameraPosition.y,

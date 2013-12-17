@@ -203,13 +203,13 @@ public class GuiHandler implements KeyListener, MouseListener {
 						fontRenderer
 								.drawString(
 										"Cam("
-												+ application.getCamera()
+												+ application.getScene().getCamera()
 														.getPosition().x
 												+ ", "
-												+ application.getCamera()
+												+ application.getScene().getCamera()
 														.getPosition().y
 												+ ", "
-												+ application.getCamera()
+												+ application.getScene().getCamera()
 														.getPosition().z + ")",
 										10, 40);
 
