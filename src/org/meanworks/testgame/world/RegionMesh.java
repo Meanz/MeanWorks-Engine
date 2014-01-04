@@ -2,22 +2,20 @@ package org.meanworks.testgame.world;
 
 import java.util.Random;
 
-import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.util.vector.Vector2f;
 import org.lwjgl.util.vector.Vector4f;
 import org.meanworks.engine.gui.impl.PerformanceGraph;
+import org.meanworks.engine.math.Vec2;
 import org.meanworks.engine.math.Vec3;
-import org.meanworks.engine.scene.Geometry;
-import org.meanworks.engine.scene.Mesh;
-import org.meanworks.render.geometry.Vertex;
-import org.meanworks.render.geometry.mesh.MeshBuffer;
-import org.meanworks.render.geometry.mesh.MeshRenderer;
-import org.meanworks.render.geometry.mesh.MeshRenderer.BufferEntry;
-import org.meanworks.render.opengl.VertexBuffer;
-import org.meanworks.render.opengl.VertexBuffer.BufferType;
-import org.meanworks.render.opengl.VertexBuffer.BufferUsage;
-import org.meanworks.testgame.TestGame;
+import org.meanworks.engine.render.geometry.Mesh;
+import org.meanworks.engine.render.geometry.Model;
+import org.meanworks.engine.render.geometry.Vertex;
+import org.meanworks.engine.render.geometry.mesh.MeshBuffer;
+import org.meanworks.engine.render.geometry.mesh.renderers.MeshRenderer;
+import org.meanworks.engine.render.geometry.mesh.renderers.MeshRenderer.BufferEntry;
+import org.meanworks.engine.render.opengl.VertexBuffer;
+import org.meanworks.engine.render.opengl.VertexBuffer.BufferType;
+import org.meanworks.engine.render.opengl.VertexBuffer.BufferUsage;
 
 /**
  * Copyright (C) 2013 Steffen Evensen
@@ -52,7 +50,7 @@ public class RegionMesh {
 	/*
 	 * 
 	 */
-	private Geometry regionGeometry;
+	private Model regionGeometry;
 
 	/*
 	 * The data buffer
@@ -396,19 +394,19 @@ public class RegionMesh {
 
 				Vertex p1 = new Vertex(new Vec3((float) _x + Region.TILE_WIDTH
 						* (lodOffset), p1H, (float) _y), calcNormal(_x
-						+ lodOffset, _y), new Vector2f(minTexX, maxTexY));
+						+ lodOffset, _y), new Vec2(minTexX, maxTexY));
 
 				Vertex p2 = new Vertex(new Vec3((float) _x, p2H, (float) _y),
-						calcNormal(_x, _y), new Vector2f(maxTexX, maxTexY));
+						calcNormal(_x, _y), new Vec2(maxTexX, maxTexY));
 
 				Vertex p3 = new Vertex(new Vec3((float) _x, p3H, (float) _y
 						+ Region.TILE_LENGTH * (lodOffset)), calcNormal(_x, _y
-						+ lodOffset), new Vector2f(maxTexX, minTexY));
+						+ lodOffset), new Vec2(maxTexX, minTexY));
 
 				Vertex p4 = new Vertex(new Vec3((float) _x + Region.TILE_WIDTH
 						* (lodOffset), p4H, (float) (float) _y
 						+ Region.TILE_LENGTH * (lodOffset)), calcNormal(_x
-						+ lodOffset, _y + lodOffset), new Vector2f(minTexX,
+						+ lodOffset, _y + lodOffset), new Vec2(minTexX,
 						minTexY));
 
 				Vec3 texp1 = new Vec3(minTexX, maxTexY, myTexId);
@@ -464,8 +462,7 @@ public class RegionMesh {
 	 */
 	public void bufferData() {
 		if (regionGeometry == null) {
-			regionGeometry = new Geometry();
-			regionGeometry.setMaterial(null);
+			regionGeometry = new Model();
 		}
 		regionGeometry.clearMeshes();
 
@@ -502,28 +499,29 @@ public class RegionMesh {
 		 * Setup grass mesh
 		 */
 		if (region.getLodLevel() == 1) {
-			/*meshRenderer = new MeshRenderer();
-			Mesh grassMesh = new Mesh();
-
-			meshRenderer.addIndex(grassBuffer.getFlippedIntBuffer(),
-					grassBuffer.getNumIndices());
-
-			vbData = new VertexBuffer(BufferType.ARRAY_BUFFER,
-					BufferUsage.STATIC_DRAW);
-
-			vbData.bind();
-			vbData.bufferData(grassBuffer.getFlippedFloatBuffer());
-
-			stride = 6 * 4; // 3 floats so far
-			entry = meshRenderer.addVertexBuffer(vbData);
-			entry.addAttribute(0, 3, GL11.GL_FLOAT, false, stride, 0);
-			entry.addAttribute(2, 3, GL11.GL_FLOAT, false, stride, 12);
-
-			meshRenderer.compile();
-
-			grassMesh.setMeshRenderer(meshRenderer);
-			regionGeometry.addMesh("region_grass_" + region.getRegionX() + "_"
-					+ region.getRegionY(), grassMesh);*/
+			/*
+			 * meshRenderer = new MeshRenderer(); Mesh grassMesh = new Mesh();
+			 * 
+			 * meshRenderer.addIndex(grassBuffer.getFlippedIntBuffer(),
+			 * grassBuffer.getNumIndices());
+			 * 
+			 * vbData = new VertexBuffer(BufferType.ARRAY_BUFFER,
+			 * BufferUsage.STATIC_DRAW);
+			 * 
+			 * vbData.bind();
+			 * vbData.bufferData(grassBuffer.getFlippedFloatBuffer());
+			 * 
+			 * stride = 6 * 4; // 3 floats so far entry =
+			 * meshRenderer.addVertexBuffer(vbData); entry.addAttribute(0, 3,
+			 * GL11.GL_FLOAT, false, stride, 0); entry.addAttribute(2, 3,
+			 * GL11.GL_FLOAT, false, stride, 12);
+			 * 
+			 * meshRenderer.compile();
+			 * 
+			 * grassMesh.setMeshRenderer(meshRenderer);
+			 * regionGeometry.addMesh("region_grass_" + region.getRegionX() +
+			 * "_" + region.getRegionY(), grassMesh);
+			 */
 		}
 	}
 

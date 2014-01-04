@@ -1,7 +1,7 @@
 package org.meanworks.engine.asset.impl;
 
 import org.meanworks.engine.asset.Asset;
-import org.meanworks.render.geometry.Model;
+import org.meanworks.engine.render.geometry.Model;
 
 /**
  * Copyright (C) 2013 Steffen Evensen

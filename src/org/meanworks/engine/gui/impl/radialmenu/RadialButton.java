@@ -9,7 +9,7 @@ import static org.lwjgl.opengl.GL11.glDisable;
 import static org.lwjgl.opengl.GL11.glEnd;
 
 import org.meanworks.engine.gui.Component;
-import org.meanworks.engine.gui.FontRenderer;
+import org.meanworks.engine.render.FontRenderer;
 
 /**
  * Copyright (C) 2013 Steffen Evensen
@@ -43,6 +43,10 @@ public class RadialButton extends Component {
 	 * 
 	 */
 	private boolean gray = false;
+	/*
+	 * 
+	 */
+	private boolean isHovered = false;
 
 	/**
 	 * Construct a new radial button
@@ -64,19 +68,31 @@ public class RadialButton extends Component {
 			return;
 		}
 		this.text = text;
-		textWidth = FontRenderer.arial14.getStringWidth(text);
+		textWidth = FontRenderer.arial14_white.getStringWidth(text);
+	}
+
+	@Override
+	public boolean onMouseMove(int mouseX, int mouseY, int mouseDeltaX,
+			int mouseDeltaY) {
+		if (isInside(mouseX, mouseY)) {
+			isHovered = true;
+			return true;
+		} else {
+			isHovered = false;
+			return false;
+		}
 	}
 
 	@Override
 	public boolean onMouseUp(int button, int mouseX, int mouseY) {
-		if(button == 2) {
+		if (button == 2) {
 			System.err.println("Clicked radial button " + getName());
 			onButtonClick();
-			return false; //Don't want to consume it
+			return false; // Don't want to consume it
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Called when the button is clicked
 	 */
@@ -94,7 +110,7 @@ public class RadialButton extends Component {
 		glBegin(GL_QUADS);
 		{
 			// Make border
-			if (isHovered()) {
+			if (isHovered) {
 				glColor4f(0.9f, 0.9f, 0.9f, 0.8f);
 			} else {
 				glColor4f(0.6f, 0.6f, 0.6f, 0.8f);
@@ -108,7 +124,7 @@ public class RadialButton extends Component {
 		glColor3f(0.0f, 0.0f, 0.0f);
 
 		// Center the text
-		FontRenderer.arial14.drawString(text, getX() - (textWidth / 2)
+		FontRenderer.arial14_white.drawString(text, getX() - (textWidth / 2)
 				+ (getWidth() / 2), getY() + 10);
 	}
 

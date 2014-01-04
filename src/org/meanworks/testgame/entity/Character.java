@@ -1,6 +1,6 @@
 package org.meanworks.testgame.entity;
 
-import org.meanworks.engine.scene.Geometry;
+import org.meanworks.engine.render.geometry.Model;
 import org.meanworks.engine.scene.Node;
 
 /**
@@ -26,7 +26,7 @@ public abstract class Character extends Node {
 	/*
 	 * The model of the character, the character does not need to have a model
 	 */
-	private Geometry characterModel;
+	private Model characterModel;
 
 	/**
 	 * Construct a new character
@@ -40,7 +40,7 @@ public abstract class Character extends Node {
 	 * 
 	 * @param geometry
 	 */
-	public final void setGeometry(Geometry geometry) {
+	public final void setGeometry(Model geometry) {
 		characterModel = geometry;
 	}
 

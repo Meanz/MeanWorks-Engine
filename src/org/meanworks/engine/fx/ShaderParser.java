@@ -9,9 +9,9 @@ import java.io.InputStreamReader;
 import java.util.LinkedList;
 
 import org.meanworks.engine.EngineLogger;
-import org.meanworks.render.opengl.shader.Shader;
-import org.meanworks.render.opengl.shader.Shader.ShaderType;
-import org.meanworks.render.opengl.shader.ShaderProgram;
+import org.meanworks.engine.render.opengl.shader.Shader;
+import org.meanworks.engine.render.opengl.shader.ShaderProgram;
+import org.meanworks.engine.render.opengl.shader.Shader.ShaderType;
 
 /**
  * Copyright (C) 2013 Steffen Evensen
@@ -159,10 +159,10 @@ public class ShaderParser {
 				}
 			} else {
 				if (parsingFrag) {
-					fragSource.append(line + "\n");
+					fragSource.append(line + "\r\n");
 				}
 				if (parsingVert) {
-					vertSource.append(line + "\n");
+					vertSource.append(line + "\r\n");
 				}
 			}
 

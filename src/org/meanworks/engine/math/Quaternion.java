@@ -2,7 +2,7 @@ package org.meanworks.engine.math;
 
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector4f;
-import org.meanworks.render.geometry.animation.AnimationNode.QuatKey;
+import org.meanworks.engine.render.geometry.animation.AnimationNode.QuatKey;
 
 /**
  * Copyright (C) 2013 Steffen Evensen

@@ -13,13 +13,35 @@ import static org.lwjgl.opengl.GL11.glLoadIdentity;
 import java.util.HashMap;
 import java.util.LinkedList;
 
+import org.meanworks.engine.EngineConfig;
 import org.meanworks.engine.EngineLogger;
 import org.meanworks.engine.RenderState;
 import org.meanworks.engine.core.Application;
+import org.meanworks.engine.core.KeyListener;
+import org.meanworks.engine.core.MouseListener;
+import org.meanworks.engine.render.FontRenderer;
+import org.meanworks.engine.render.opengl.ImmediateRenderer;
 import org.meanworks.engine.util.NumberFormatter;
-import org.meanworks.render.opengl.ImmediateRenderer;
 import org.meanworks.testgame.world.World;
 
+/**
+ * Copyright (C) 2013 Steffen Evensen
+ * 
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ * 
+ * @author Meanz
+ */
 public class GuiHandler implements KeyListener, MouseListener {
 
 	/*
@@ -40,27 +62,18 @@ public class GuiHandler implements KeyListener, MouseListener {
 	/*
 	 * The list of gui components flagged for deletion
 	 */
-	private LinkedList<String> deleteQueue = new LinkedList<>();
+	private LinkedList<String> deleteQueue = new LinkedList<String>();
 
 	/*
-	 * 
+	 * Whether the input was consumed or not if the input was consumed no other
+	 * components would receive events.
 	 */
 	private boolean consumedInput = false;
 
 	/*
-	 * Whether or there is a input lock active.
+	 * The root component
 	 */
-	private boolean inputLock = false;
-
-	/*
-	 * The component that has input focus
-	 */
-	private Component mouseFocus;
-
-	/*
-	 * The component that has key focus
-	 */
-	private Component keyFocus;
+	private Component rootComponent;
 
 	/**
 	 * Constructor
@@ -70,6 +83,17 @@ public class GuiHandler implements KeyListener, MouseListener {
 	public GuiHandler(Application application) {
 		this.application = application;
 		fontRenderer = new FontRenderer("./data/fonts/arial.ttf", 14);
+
+		/*
+		 * We add components to this root component
+		 */
+		rootComponent = new Component("RootComponent", 0, 0, application
+				.getWindow().getWidth(), application.getWindow().getHeight()) {
+
+			@Override
+			public void render() {
+			}
+		};
 	}
 
 	/**
@@ -92,48 +116,10 @@ public class GuiHandler implements KeyListener, MouseListener {
 	}
 
 	/**
-	 * 
-	 * @param component
-	 * @return
-	 */
-	public boolean mouseLock(Component component) {
-		if (mouseFocus != null) {
-			return false;
-		}
-		mouseFocus = component;
-		return true;
-	}
-
-	/**
-	 * 
-	 * @param component
-	 * @return
-	 */
-	public boolean mouseRelease(Component component) {
-		if (component == mouseFocus) {
-			mouseFocus = null;
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * 
+	 * Update the components 60times/second
 	 */
 	public void update() {
-		consumedInput = false;
-		if (mouseFocus != null || keyFocus != null) {
-			consumedInput = true;
-		}
-		for (int i = components.values().size() - 1; i >= 0; i--) {
-			((Component) components.values().toArray()[i]).fireUpdate();
-		}
-		if (deleteQueue.size() > 0) {
-			for (String key : deleteQueue) {
-				removeComponent(key);
-			}
-			deleteQueue.clear();
-		}
+		rootComponent.fireUpdate();
 	}
 
 	/**
@@ -154,6 +140,7 @@ public class GuiHandler implements KeyListener, MouseListener {
 			return false;
 		}
 		components.put(component.getName(), component);
+		rootComponent.add(component);
 		return true;
 	}
 
@@ -168,6 +155,7 @@ public class GuiHandler implements KeyListener, MouseListener {
 			return false;
 		}
 		if (components.containsKey(componentId)) {
+			rootComponent.remove(components.get(componentId));
 			components.remove(componentId);
 			return true;
 		} else {
@@ -193,25 +181,20 @@ public class GuiHandler implements KeyListener, MouseListener {
 				{
 					glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 					{
-						for (Component component : components.values()) {
-							component.fireRender();
-						}
-						fontRenderer.drawString(
-								"FractalEngine v 0.022 Alpha [DEBUG]", 10, 10);
+						fontRenderer.drawString("FractalEngine v "
+								+ EngineConfig.MW_VERSION + " Alpha [DEBUG]",
+								10, 10);
 						fontRenderer.drawString("FPS: " + application.getFps(),
 								10, 25);
-						fontRenderer
-								.drawString(
-										"Cam("
-												+ application.getScene().getCamera()
-														.getPosition().x
-												+ ", "
-												+ application.getScene().getCamera()
-														.getPosition().y
-												+ ", "
-												+ application.getScene().getCamera()
-														.getPosition().z + ")",
-										10, 40);
+						fontRenderer.drawString("Cam("
+								+ application.getScene().getCamera()
+										.getPosition().x
+								+ ", "
+								+ application.getScene().getCamera()
+										.getPosition().y
+								+ ", "
+								+ application.getScene().getCamera()
+										.getPosition().z + ")", 10, 40);
 
 						fontRenderer
 								.drawString(
@@ -222,17 +205,19 @@ public class GuiHandler implements KeyListener, MouseListener {
 														.freeMemory()) / 1000 / 1000)
 												+ "mb", 10, 55);
 
-						fontRenderer.drawString("Rendered regions: "
-								+ World.renderedRegions, 10, 70);
-
 						fontRenderer
 								.drawString(
 										"Rendered Vertices: "
 												+ NumberFormatter
 														.formatNumber(RenderState
 																.getRenderedVertices()),
-										10, 85);
+										10, 70);
 
+						fontRenderer.drawString("Top Component: "
+								+ rootComponent.getComponents().getFirst()
+										.getName(), 10, 85);
+
+						rootComponent.fireRender();
 					}
 				}
 				glDisable(GL_TEXTURE_2D);
@@ -269,29 +254,15 @@ public class GuiHandler implements KeyListener, MouseListener {
 	@Override
 	public void mousePressed(int key, int x, int y) {
 
-		if (mouseFocus != null) {
-			if (mouseFocus.fireMouseDown(key, x, y)) {
-				return;
-			}
-		}
-
-		for (int i = components.values().size() - 1; i >= 0; i--) {
-			if (((Component) components.values().toArray()[i]).fireMouseDown(
-					key, x, y)) {
-				return;
-			}
-		}
+		rootComponent.fireMouseDown(key, x, y);
 
 		/*
-		 * if (mouseFocus != null) { mouseFocus.actionPerformed(this, new
-		 * MouseEvent( EventType.MOUSE_PRESSED, key, x, y, application
-		 * .getInputHandler().getDX(), application .getInputHandler().getDY()));
-		 * return; } for (Component component : components.values()) { if
-		 * (isInsideComponent(component, x, y)) {
-		 * component.actionPerformed(this, new MouseEvent(
-		 * EventType.MOUSE_PRESSED, key, x, y, application
-		 * .getInputHandler().getDX(), application .getInputHandler().getDY()));
-		 * consumedInput = true; break; } }
+		 * if (mouseFocus != null) { if (mouseFocus.fireMouseDown(key, x, y)) {
+		 * return; } }
+		 * 
+		 * for (int i = components.values().size() - 1; i >= 0; i--) { if
+		 * (((Component) components.values().toArray()[i]).fireMouseDown( key,
+		 * x, y)) { return; } }
 		 */
 	}
 
@@ -303,18 +274,16 @@ public class GuiHandler implements KeyListener, MouseListener {
 	 */
 	@Override
 	public void mouseReleased(int key, int x, int y) {
-		if (mouseFocus != null) {
-			if (mouseFocus.fireMouseUp(key, x, y)) {
-				return;
-			}
-		}
 
-		for (int i = components.values().size() - 1; i >= 0; i--) {
-			if (((Component) components.values().toArray()[i]).fireMouseUp(key,
-					x, y)) {
-				return;
-			}
-		}
+		rootComponent.fireMouseUp(key, x, y);
+		/*
+		 * if (mouseFocus != null) { if (mouseFocus.fireMouseUp(key, x, y)) {
+		 * return; } }
+		 * 
+		 * for (int i = components.values().size() - 1; i >= 0; i--) { if
+		 * (((Component) components.values().toArray()[i]).fireMouseUp(key, x,
+		 * y)) { return; } }
+		 */
 	}
 
 	/*
@@ -325,22 +294,21 @@ public class GuiHandler implements KeyListener, MouseListener {
 	@Override
 	public void mouseMoved(int dx, int dy) {
 
+		rootComponent.fireMouseMove(Component.getMouseX(),
+				Component.getMouseY(), dx, dy);
+
 		// TODO: Revise the method of getting mouse coordinates
 		// TODO: Revise this method, uses a lot of processing.
 
-		if (mouseFocus != null) {
-			if (mouseFocus.fireMouseMove(Component.getMouseX(),
-					Component.getMouseY(), dx, dy)) {
-				return;
-			}
-		}
-
-		for (int i = components.values().size() - 1; i >= 0; i--) {
-			if (((Component) components.values().toArray()[i]).fireMouseMove(
-					Component.getMouseX(), Component.getMouseY(), dx, dy)) {
-				return;
-			}
-		}
+		/*
+		 * if (mouseFocus != null) { if
+		 * (mouseFocus.fireMouseMove(Component.getMouseX(),
+		 * Component.getMouseY(), dx, dy)) { return; } }
+		 * 
+		 * for (int i = components.values().size() - 1; i >= 0; i--) { if
+		 * (((Component) components.values().toArray()[i]).fireMouseMove(
+		 * Component.getMouseX(), Component.getMouseY(), dx, dy)) { return; } }
+		 */
 	}
 
 	/*
@@ -350,18 +318,29 @@ public class GuiHandler implements KeyListener, MouseListener {
 	 */
 	@Override
 	public void keyPressed(int key) {
-		// TODO Auto-generated method stub
 
+		rootComponent.fireKeyDown(key);
+		/*
+		 * if (keyFocus != null) { if (keyFocus.fireKeyDown(key)) { return; } }
+		 * 
+		 * for (int i = components.values().size() - 1; i >= 0; i--) { if
+		 * (((Component) components.values().toArray()[i]).fireKeyDown(key)) {
+		 * return; } }
+		 */
 	}
 
 	/*
-	 * (non-Javadoc)
+	 * Fire key releases to everyone! (non-Javadoc)
 	 * 
 	 * @see org.fractalstudio.engine.gui.KeyListener#keyReleased(int)
 	 */
 	@Override
 	public void keyReleased(int key) {
-		// TODO Auto-generated method stub
-
+		rootComponent.fireKeyUp(key);
+		/*
+		 * for (int i = components.values().size() - 1; i >= 0; i--) { if
+		 * (((Component) components.values().toArray()[i]).fireKeyUp(key)) {
+		 * return; } }
+		 */
 	}
 }

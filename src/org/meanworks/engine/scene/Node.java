@@ -3,21 +3,20 @@ package org.meanworks.engine.scene;
 import static org.lwjgl.opengl.GL11.GL_QUADS;
 import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
 import static org.lwjgl.opengl.GL11.glBegin;
+import static org.lwjgl.opengl.GL11.glColor3f;
 import static org.lwjgl.opengl.GL11.glDisable;
 import static org.lwjgl.opengl.GL11.glEnd;
-import static org.lwjgl.opengl.GL11.glColor3f;
-
-import static org.lwjgl.opengl.GL11.glPushMatrix;
 import static org.lwjgl.opengl.GL11.glPopMatrix;
+import static org.lwjgl.opengl.GL11.glPushMatrix;
 
-import java.util.LinkedList;
 import java.util.List;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Matrix4f;
+import org.meanworks.engine.RenderState;
 import org.meanworks.engine.bounding.BoundingBox;
 import org.meanworks.engine.math.Transform;
-import org.meanworks.render.opengl.ImmediateRenderer;
+import org.meanworks.engine.util.QueuedLinkedList;
 
 /**
  * Copyright (C) 2013 Steffen Evensen
@@ -37,7 +36,7 @@ import org.meanworks.render.opengl.ImmediateRenderer;
  * 
  * @author Meanz
  */
-public abstract class Node {
+public class Node {
 
 	/*
 	 * The name of the node
@@ -52,7 +51,7 @@ public abstract class Node {
 	/*
 	 * The children of this node
 	 */
-	private LinkedList<Node> children = new LinkedList<>();
+	private QueuedLinkedList<Node> children = new QueuedLinkedList<>();
 
 	/*
 	 * Whether or not this node inherits transforms from it's parent
@@ -106,6 +105,24 @@ public abstract class Node {
 	}
 
 	/**
+	 * Get the culling box of this node
+	 * 
+	 * @return
+	 */
+	public BoundingBox getCullingBox() {
+		return cullingBox;
+	}
+
+	/**
+	 * Get the cull hint of this node
+	 * 
+	 * @return
+	 */
+	public CullHint getCullHint() {
+		return cullHint;
+	}
+
+	/**
 	 * Get the name of this node
 	 * 
 	 * @return
@@ -120,7 +137,7 @@ public abstract class Node {
 	 * @return
 	 */
 	public List<Node> getChildren() {
-		return children;
+		return children.list();
 	}
 
 	/**
@@ -132,6 +149,18 @@ public abstract class Node {
 		if (child != null) {
 			child.setParent(this);
 			children.add(child);
+		}
+	}
+
+	/**
+	 * Remvoe a child from this node
+	 * 
+	 * @param child
+	 */
+	public void removeChild(Node child) {
+		if (child != null) {
+			child.setParent(null);
+			children.remove(child);
 		}
 	}
 
@@ -211,6 +240,11 @@ public abstract class Node {
 	public final void doUpdate() {
 
 		/*
+		 * Update the children list
+		 */
+		children.processQueues();
+
+		/*
 		 * Update transform if needed
 		 */
 		updateCullingBox();
@@ -248,8 +282,9 @@ public abstract class Node {
 	 * Render method called from the Application
 	 */
 	public final void doRender() {
-		//renderNodeBox();
+		// renderNodeBox();
 		render();
+		RenderState.addRenderedObject();
 	}
 
 	/**

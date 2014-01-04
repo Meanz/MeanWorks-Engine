@@ -30,13 +30,21 @@ public class Util {
 		try {
 			String osName = System.getProperty("os.name").toLowerCase();
 			boolean isMacOs = osName.startsWith("mac os x");
+			boolean isLinuxOs = osName.startsWith("linux");
 			if (isMacOs) {
 				System.setProperty("java.library.path",
 						System.getProperty("java.library.path") + ";"
 								+ new File("native/macosx").getAbsolutePath());
 				System.setProperty("org.lwjgl.librarypath", new File(
 						"native/macosx").getAbsolutePath());
+			} else if(isLinuxOs) {
+				System.setProperty("java.library.path",
+						System.getProperty("java.library.path") + ";"
+								+ new File("native/linux").getAbsolutePath());
+				System.setProperty("org.lwjgl.librarypath", new File(
+						"native/linux").getAbsolutePath());
 			} else {
+			
 				System.setProperty("java.library.path",
 						System.getProperty("java.library.path")
 								+ ";"

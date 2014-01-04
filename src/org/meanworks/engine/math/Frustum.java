@@ -205,7 +205,7 @@ public class Frustum {
 	 * @param size
 	 * @return
 	 */
-	public FrustumResult cubeInFrustum(Vector3f min, Vector3f max) {
+	public FrustumResult cubeInFrustum(Vec3 min, Vec3 max) {
 		int p;
 		int c;
 		int c2 = 0;

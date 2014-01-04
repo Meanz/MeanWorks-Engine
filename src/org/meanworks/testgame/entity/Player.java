@@ -2,13 +2,13 @@ package org.meanworks.testgame.entity;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.util.vector.Vector2f;
+import org.meanworks.engine.asset.model.MWMLoader;
 import org.meanworks.engine.core.Application;
-import org.meanworks.engine.model.MWMLoader;
+import org.meanworks.engine.render.geometry.SkinnedModel;
+import org.meanworks.engine.render.geometry.animation.AnimationChannel;
+import org.meanworks.engine.render.geometry.animation.LoopMode;
 import org.meanworks.engine.scene.Node;
 import org.meanworks.engine.scene.SceneGraph;
-import org.meanworks.render.geometry.AnimatedModel;
-import org.meanworks.render.geometry.animation.AnimationChannel;
-import org.meanworks.render.geometry.animation.LoopMode;
 import org.meanworks.testgame.TestGame;
 
 public class Player extends Node {

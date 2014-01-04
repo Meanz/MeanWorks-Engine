@@ -1,6 +1,7 @@
 package org.meanworks.engine.asset.impl;
 
 import org.meanworks.engine.asset.Asset;
+import org.meanworks.engine.render.material.Material;
 
 /**
  * Copyright (C) 2013 Steffen Evensen
@@ -22,8 +23,25 @@ import org.meanworks.engine.asset.Asset;
  */
 public class AssetMaterial  extends Asset {
 
+	/*
+	 * The Material this asset is holding
+	 */
+	private Material material;
+	
+	/**
+	 * Construct a new Material asset
+	 * @param assetName
+	 */
 	public AssetMaterial(String assetName) {
 		super(assetName);
+	}
+	
+	/**
+	 * Get the material this asset is holding
+	 * @return
+	 */
+	public Material getMaterial() {
+		return material;
 	}
 	
 }

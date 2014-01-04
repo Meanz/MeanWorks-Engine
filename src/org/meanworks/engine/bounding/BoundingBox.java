@@ -51,6 +51,24 @@ public class BoundingBox {
 	}
 
 	/**
+	 * Get the minimum point of the bb
+	 * 
+	 * @return
+	 */
+	public Vec3 getMin() {
+		return min;
+	}
+
+	/**
+	 * Get the maximum point of the bb
+	 * 
+	 * @return
+	 */
+	public Vec3 getMax() {
+		return max;
+	}
+
+	/**
 	 * Update this bounding box
 	 * 
 	 * @param min
@@ -79,4 +97,33 @@ public class BoundingBox {
 		update(min, max);
 	}
 
+	/**
+	 * Tests if the given boxes intersects each other
+	 * 
+	 * @param box1
+	 * @param box2
+	 * @return
+	 */
+	public static boolean intersects(BoundingBox box1, BoundingBox box2) {
+		return (box1.max.x > box2.min.x && box1.min.x < box2.max.x
+				&& box1.max.y > box2.min.y && box1.min.y < box2.max.y
+				&& box1.max.z > box2.min.z && box1.min.z < box2.max.z);
+	}
+
+	/**
+	 * Check if a point is inside the given box
+	 * 
+	 * @param box
+	 * @param point
+	 * @return
+	 */
+	public static boolean isPointInside(BoundingBox box, Vec3 point) {
+		// Check if the point is less than max and greater than min
+		if (point.x > box.min.x && point.x < box.max.x && point.y > box.min.y
+				&& point.y < box.max.y && point.z > box.min.z
+				&& point.z < box.max.z) {
+			return true;
+		}
+		return false;
+	}
 }

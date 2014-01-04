@@ -69,7 +69,6 @@ public class RadialMenu extends Component {
 	@Override
 	public boolean onMouseDown(int button, int mouseX, int mouseY) {
 		if (button == 2) {
-			activateInputLock();
 			showMenu = true;
 			menuOpenX = mouseX;
 			menuOpenY = mouseY;
@@ -87,7 +86,6 @@ public class RadialMenu extends Component {
 	@Override
 	public boolean onMouseUp(int button, int mouseX, int mouseY) {
 		if (button == 2) {
-			deactivateInputLock();
 			showMenu = false;
 			setVisible(false);
 			return true;

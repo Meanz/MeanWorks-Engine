@@ -14,6 +14,24 @@ import org.meanworks.engine.math.Vec3;
 import org.meanworks.engine.math.VectorMath;
 import org.meanworks.engine.scene.Node;
 
+/**
+ * Copyright (C) 2013 Steffen Evensen
+ * 
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ * 
+ * @author Meanz
+ */
 public abstract class Camera {
 
 	/*
@@ -57,19 +75,19 @@ public abstract class Camera {
 	 */
 	private Vec3 rotation;
 	/*
-	 * 
+	 * The x vector or left vector
 	 */
 	private static Vec3 xVector = new Vec3(1.0f, 0.0f, 0.0f);
 	/*
-	 * 
+	 * The forward vector or z vector
 	 */
 	private static Vec3 zVector = new Vec3(0.0f, 0.0f, 1.0f);
 	/*
-	 * 
+	 * The up vector
 	 */
 	private static Vec3 upVector = new Vec3(0.0f, 1.0f, 0.0f);
 	/*
-	 * 
+	 * Whether or not free camera is enabled
 	 */
 	private boolean isFlying = false;
 	/*
@@ -249,7 +267,7 @@ public abstract class Camera {
 	/**
 	 * Updates the camera matrices
 	 */
-	public void updateCamera() {
+	public void updateMatrices() {
 		/*
 		 * viewMatrix = lookAt(cameraPosition, forward(cameraPosition,
 		 * rotation)); projectionViewMatrix = Matrix4f.mul(projectionMatrix,
@@ -304,7 +322,7 @@ public abstract class Camera {
 		Matrix4f.mul(projectionMatrix, viewMatrix, projectionViewMatrix);
 
 		cameraFrustum.createFrustrum(projectionMatrix, viewMatrix);
-		
+
 		immediateCameraSetup();
 	}
 

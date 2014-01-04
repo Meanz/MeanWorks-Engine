@@ -5,18 +5,17 @@ import java.util.LinkedList;
 import org.lwjgl.util.vector.Matrix4f;
 import org.lwjgl.util.vector.Vector3f;
 import org.meanworks.engine.core.Application;
-import org.meanworks.engine.gui.impl.PerformanceGraph;
 import org.meanworks.engine.gui.impl.Toast;
 import org.meanworks.engine.math.FrustumResult;
 import org.meanworks.engine.math.Ray;
+import org.meanworks.engine.math.Vec3;
 import org.meanworks.engine.math.VectorMath;
-import org.meanworks.engine.scene.Geometry;
-import org.meanworks.engine.scene.GeometryNode;
+import org.meanworks.engine.render.geometry.Model;
+import org.meanworks.engine.render.material.Material;
+import org.meanworks.engine.render.texture.Texture;
+import org.meanworks.engine.render.texture.TextureArray;
+import org.meanworks.engine.render.texture.TextureLoader;
 import org.meanworks.engine.util.PerlinNoise;
-import org.meanworks.render.material.Material;
-import org.meanworks.render.texture.Texture;
-import org.meanworks.render.texture.TextureArray;
-import org.meanworks.render.texture.TextureLoader;
 
 public class World {
 
@@ -69,7 +68,7 @@ public class World {
 	/*
 	 * 
 	 */
-	private GeometryNode treeModel;
+	private Model treeModel;
 
 	/*
 	 * 
@@ -79,7 +78,7 @@ public class World {
 	/*
 	 * 
 	 */
-	private LinkedList<Geometry> trees = new LinkedList<Geometry>();
+	private LinkedList<Model> trees = new LinkedList<Model>();
 
 	/**
 	 * Construct a new
@@ -119,7 +118,7 @@ public class World {
 		 * Load the region shader
 		 */
 		material = new Material("worldMaterial", Application.getApplication()
-				.getAssetManager().loadShader(("./data/shaders/terrain")));
+				.getAssetManager().loadShader(("./data/shaders/150terrain")));
 
 		/*
 		 * Load the tree
@@ -489,11 +488,11 @@ public class World {
 								.getCamera()
 								.getFrustum()
 								.cubeInFrustum(
-										new Vector3f(currRegion.getRegionX()
+										new Vec3(currRegion.getRegionX()
 												* Region.REGION_WIDTH, 50.0f,
 												currRegion.getRegionY()
 														* Region.REGION_HEIGHT),
-										new Vector3f(currRegion.getRegionX()
+										new Vec3(currRegion.getRegionX()
 												* Region.REGION_WIDTH
 												+ Region.REGION_WIDTH, 200.0f,
 												currRegion.getRegionY()

@@ -1,7 +1,11 @@
 package org.meanworks.engine.scene;
 
+import org.lwjgl.opengl.GL11;
+import org.meanworks.engine.EngineConfig;
 import org.meanworks.engine.EngineLogger;
 import org.meanworks.engine.camera.Camera;
+import org.meanworks.engine.core.Application;
+import org.meanworks.engine.math.FrustumResult;
 
 /**
  * Copyright (C) 2013 Steffen Evensen
@@ -50,13 +54,13 @@ public class SceneGraph {
 	/*
 	 * The root node of the scene graph
 	 */
-	private SpatialNode rootNode;
+	private Node rootNode;
 
 	/**
 	 * Construct the scene graph
 	 */
 	public SceneGraph() {
-		rootNode = new SpatialNode("rootNode");
+		rootNode = new Node("rootNode");
 	}
 
 	/**
@@ -102,7 +106,7 @@ public class SceneGraph {
 	 * name. And nodes can also have similar names, so it's not a guaranteed
 	 * function!
 	 * 
-	 * TODO: Make a more professional description!
+	 * TODO: Update description
 	 * 
 	 * @param nodeName
 	 * @return
@@ -116,7 +120,7 @@ public class SceneGraph {
 	 * 
 	 * @return
 	 */
-	public SpatialNode getRootNode() {
+	public Node getRootNode() {
 		return rootNode;
 	}
 
@@ -151,14 +155,37 @@ public class SceneGraph {
 	 * @param node
 	 */
 	private void doRender(Node node) {
-		node.doRender();
+		/*
+		 * Determine if this object should be displayed, test culling
+		 */
+		boolean didCull = false;
+		FrustumResult result = Application
+				.getApplication()
+				.getCamera()
+				.getFrustum()
+				.cubeInFrustum(node.getCullingBox().getMin(),
+						node.getCullingBox().getMax());
+		if (result == FrustumResult.INSIDE
+				|| result == FrustumResult.PARTIALLY_INSIDE) {
+			didCull = false;
+		}
+		if (!didCull) {
+			node.doRender();
+		}
 		for (Node child : node.getChildren()) {
-			doRender(child);
+			if (child.getCullHint() == CullHint.PARENT_CULL && didCull) {
+				continue;
+			} else if (child.getCullHint() == CullHint.ALWAYS_CULL) {
+				doRender(child);
+			} else {
+				doRender(child);
+			}
+
 		}
 	}
 
 	/**
-	 * 
+	 * Update all the nodes in this scene graph
 	 */
 	public void update() {
 		if (camera != null) {
@@ -170,15 +197,26 @@ public class SceneGraph {
 	}
 
 	/**
-	 * 
+	 * Render all the nodes in this scene graph
 	 */
 	public void render() {
 		if (camera != null) {
-			camera.updateCamera();
+			camera.updateMatrices();
 		} else {
 			EngineLogger.error("Scene: Camera is null");
 		}
+		if (EngineConfig.wireframeScene) {
+			GL11.glPolygonMode(GL11.GL_FRONT, GL11.GL_LINE);
+			GL11.glPolygonMode(GL11.GL_BACK, GL11.GL_LINE);
+		} else {
+			GL11.glPolygonMode(GL11.GL_FRONT, GL11.GL_FILL);
+			GL11.glPolygonMode(GL11.GL_BACK, GL11.GL_FILL);
+		}
 		doRender(rootNode);
+		if (EngineConfig.wireframeScene) {
+			GL11.glPolygonMode(GL11.GL_FRONT, GL11.GL_FILL);
+			GL11.glPolygonMode(GL11.GL_BACK, GL11.GL_FILL);
+		}
 	}
 
 }

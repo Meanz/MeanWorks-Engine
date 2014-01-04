@@ -1,6 +1,6 @@
 package org.meanworks.testgame.entity;
 
-import org.meanworks.engine.scene.Geometry;
+import org.meanworks.engine.render.geometry.Model;
 
 /**
  * Copyright (C) 2013 Steffen Evensen
@@ -34,7 +34,7 @@ public class NonPlayerCharacter extends Character {
 	 * 
 	 * @param geometry
 	 */
-	public void setModel(Geometry geometry) {
+	public void setModel(Model geometry) {
 		this.setGeometry(geometry);
 	}
 

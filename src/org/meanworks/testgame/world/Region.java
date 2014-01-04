@@ -1,24 +1,7 @@
 package org.meanworks.testgame.world;
 
-import java.util.Random;
-
-import org.lwjgl.input.Keyboard;
-import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector2f;
-import org.lwjgl.util.vector.Vector4f;
-import org.meanworks.engine.gui.impl.PerformanceGraph;
-import org.meanworks.engine.math.Vec3;
-import org.meanworks.engine.scene.Geometry;
-import org.meanworks.engine.scene.GeometryNode;
-import org.meanworks.engine.scene.Mesh;
-import org.meanworks.render.geometry.Vertex;
-import org.meanworks.render.geometry.mesh.MeshBuffer;
-import org.meanworks.render.geometry.mesh.MeshRenderer;
-import org.meanworks.render.geometry.mesh.MeshRenderer.BufferEntry;
-import org.meanworks.render.opengl.VertexBuffer;
-import org.meanworks.render.opengl.VertexBuffer.BufferType;
-import org.meanworks.render.opengl.VertexBuffer.BufferUsage;
-import org.meanworks.testgame.TestGame;
+import org.meanworks.engine.render.geometry.Model;
 
 /**
  * A class that defines a region in the world
@@ -26,7 +9,7 @@ import org.meanworks.testgame.TestGame;
  * @author meanz
  * 
  */
-public class Region extends GeometryNode {
+public class Region extends Model {
 
 	/*
 	 * Static variables for defining region size

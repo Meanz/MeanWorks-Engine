@@ -1,14 +1,34 @@
 package org.meanworks.engine.gui;
 
-import static org.lwjgl.opengl.GL11.glVertex2f;
-
 import java.util.LinkedList;
 
 import org.lwjgl.input.Mouse;
-import org.lwjgl.opengl.GL11;
 import org.meanworks.engine.core.Application;
 
-public abstract class Component {
+/**
+ * Copyright (C) 2013 Steffen Evensen
+ * 
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ * 
+ * @author Meanz
+ */
+public abstract class Component extends Surface {
+
+	/*
+	 * The gui handler
+	 */
+	private static GuiHandler guiHandler;
 
 	/*
 	 * The next available id for a component
@@ -37,21 +57,35 @@ public abstract class Component {
 	 */
 	private String name;
 	/*
-	 * 
-	 */
-	private boolean inputLock;
-	/*
-	 * 
+	 * Whether or not this component is visible
 	 */
 	private boolean visible;
 	/*
-	 * 
+	 * The list of components in under this component
 	 */
 	private LinkedList<Component> components = new LinkedList<>();
 	/*
-	 * 
+	 * A list of components that will be sent to the front on the next update
+	 * tick
 	 */
-	private boolean hovered;
+	private LinkedList<Component> toFront = new LinkedList<>();
+	/*
+	 * A list of components that will be sent to the back on the next update
+	 * tick
+	 */
+	private LinkedList<Component> toBack = new LinkedList<>();
+	/*
+	 * The list of components that needs a notification when focus is lost
+	 */
+	private LinkedList<Component> focusNotifications = new LinkedList<>();
+	/*
+	 * Whether or not focus was lost under this component
+	 */
+	private boolean focusLost;
+	/*
+	 * The parent of this component
+	 */
+	private Component parent;
 
 	/**
 	 * Construct a new component
@@ -63,23 +97,74 @@ public abstract class Component {
 	 * @param height
 	 */
 	public Component(String name, int x, int y, int width, int height) {
+		if (guiHandler == null) {
+			guiHandler = Application.getApplication().getGui();
+		}
 		this.name = name == null ? "UntitledComponent" : name;
 		this.x = x;
 		this.y = y;
 		this.width = width;
 		this.height = height;
-		this.inputLock = false;
 		this.visible = true;
-		this.hovered = false;
+		focusLost = false;
+		parent = null;
 	}
 
 	/**
-	 * Check whether this component is hovered or not
+	 * Request a focus notification for the given component
 	 * 
-	 * @return
+	 * @param c
 	 */
-	public boolean isHovered() {
-		return hovered;
+	public void requestFocusNotification(Component c) {
+		focusNotifications.add(c);
+	}
+
+	/**
+	 * Request a focus notification for this component
+	 */
+	public void requestFocusNotification() {
+		// Ask our parent for a focus notification
+		if (parent != null) {
+			parent.requestFocusNotification(this);
+		}
+	}
+
+	/**
+	 * Send this component to the front of the list in the next update
+	 */
+	public void toFront() {
+		if (parent == null) {
+			return;
+		}
+		parent.toFront(this);
+	}
+
+	/**
+	 * Send this component to the back of the list in the next updateF
+	 */
+	public void toBack() {
+		if (parent == null) {
+			return;
+		}
+		parent.toBack(this);
+	}
+
+	/**
+	 * Send the given component to the front of the list in the next update
+	 * 
+	 * @param c
+	 */
+	public void toFront(Component c) {
+		toFront.add(c);
+	}
+
+	/**
+	 * Send the given component to the back of the list in the next update
+	 * 
+	 * @param c
+	 */
+	public void toBack(Component c) {
+		toBack.add(c);
 	}
 
 	/**
@@ -150,8 +235,10 @@ public abstract class Component {
 	 * 
 	 * @param component
 	 */
-	public void add(Component component) {
+	public Component add(Component component) {
+		component.parent = this;
 		components.add(component);
+		return component;
 	}
 
 	/**
@@ -162,29 +249,6 @@ public abstract class Component {
 	 */
 	public boolean remove(Component component) {
 		return component.remove(component);
-	}
-
-	/**
-	 * Check whether this component has input lock or not
-	 * 
-	 * @return
-	 */
-	public boolean hasInputLock() {
-		return inputLock;
-	}
-
-	/**
-	 * Activate input lock on this component
-	 */
-	public void activateInputLock() {
-		inputLock = true;
-	}
-
-	/**
-	 * Deactivate the input lock on this component
-	 */
-	public void deactivateInputLock() {
-		inputLock = false;
 	}
 
 	/**
@@ -269,6 +333,10 @@ public abstract class Component {
 	 * New input system yet again
 	 */
 
+	public void onFocusLost() {
+
+	}
+
 	/**
 	 * Called when this component is hovered
 	 * 
@@ -325,6 +393,26 @@ public abstract class Component {
 	}
 
 	/**
+	 * Called when a key was pressed
+	 * 
+	 * @param key
+	 * @return
+	 */
+	public boolean onKeyDown(int key) {
+		return false;
+	}
+
+	/**
+	 * Called when a key was released
+	 * 
+	 * @param key
+	 * @return
+	 */
+	public boolean onKeyUp(int key) {
+		return false;
+	}
+
+	/**
 	 * Check whether the given point is inside this components bounds
 	 * 
 	 * @param _x
@@ -339,6 +427,34 @@ public abstract class Component {
 	}
 
 	/**
+	 * Fire a focus lost event to all the children components, including self
+	 */
+	public final void fireFocusLost() {
+		for (Component c : components) {
+			// c.fireFocusLost();
+			// c.onFocusLost();
+		}
+	}
+
+	/**
+	 * Called when a mouse button is pressed
+	 * 
+	 * @param button
+	 * @param mouseX
+	 * @param mouseY
+	 * @return
+	 */
+	public final boolean fireMouseDown(int button, int mouseX, int mouseY) {
+		for (Component c : components) {
+			if (c.fireMouseDown(button, mouseX, mouseY)) {
+				focusLost = true;
+				return true;
+			}
+		}
+		return onMouseDown(button, mouseX, mouseY);
+	}
+
+	/**
 	 * Called when a mouse button is released
 	 * 
 	 * @param button
@@ -347,22 +463,12 @@ public abstract class Component {
 	 * @return
 	 */
 	public final boolean fireMouseUp(int button, int mouseX, int mouseY) {
-		// If the mouse is inside the bounds of this component pass the action
-		// on
-		// Or if this component has input lock also pass it on
-		if (!isInside(mouseX, mouseY) && !hasInputLock()) {
-			return false;
-		}
-
-		/*
-		 * Start from the bottom and up
-		 */
-		for (int i = components.size() - 1; i >= 0; i--) {
-			if (components.get(i).fireMouseUp(button, mouseX, mouseY)) {
+		for (Component c : components) {
+			if (c.fireMouseUp(button, mouseX, mouseY)) {
+				focusLost = true;
 				return true;
 			}
 		}
-
 		return onMouseUp(button, mouseX, mouseY);
 	}
 
@@ -376,62 +482,50 @@ public abstract class Component {
 	 */
 	public final boolean fireMouseMove(int mouseX, int mouseY, int mouseDeltaX,
 			int mouseDeltaY) {
-
-		// If the mouse is inside the bounds of this component pass the action
-		// on
-		// Or if this component has input lock also pass it on
-		if (!isInside(mouseX, mouseY)) {
-			if (isHovered()) {
-				hovered = false;
-			}
-			if (!hasInputLock()) {
-				return false;
-			}
-		} else {
-			if (!isHovered()) {
-				hovered = true;
-			}
-		}
-
-		/*
-		 * Start from the bottom and up
-		 */
-		for (int i = components.size() - 1; i >= 0; i--) {
-			if (components.get(i).fireMouseMove(mouseX, mouseY, mouseDeltaX,
-					mouseDeltaY)) {
+		for (Component c : components) {
+			if (c.fireMouseMove(mouseX, mouseY, mouseDeltaX, mouseDeltaY)) {
+				focusLost = true;
 				return true;
 			}
 		}
-
 		return onMouseMove(mouseX, mouseY, mouseDeltaX, mouseDeltaY);
 	}
 
 	/**
-	 * Called when a mouse button is pressed
+	 * Called when a key is pressed
 	 * 
-	 * @param button
-	 * @param mouseX
-	 * @param mouseY
+	 * @param key
 	 * @return
 	 */
-	public final boolean fireMouseDown(int button, int mouseX, int mouseY) {
-		// If the mouse is inside the bounds of this component pass the action
-		// on
-		// Or if this component has input lock also pass it on
-		if (!isInside(mouseX, mouseY) && !hasInputLock()) {
-			return false;
+	public final boolean fireKeyDown(int key) {
+		for (Component c : components) {
+			if (c.onKeyDown(key)) {
+				focusLost = true;
+				return true;
+			}
 		}
+		return onKeyDown(key);
+	}
+
+	/**
+	 * Called when a key is released
+	 * 
+	 * @param key
+	 * @return
+	 * 
+	 */
+	public final boolean fireKeyUp(int key) {
 
 		/*
 		 * Start from the bottom and up
 		 */
-		for (int i = components.size() - 1; i >= 0; i--) {
-			if (components.get(i).fireMouseDown(button, mouseX, mouseY)) {
+		for (Component c : components) {
+			if (c.onKeyUp(key)) {
+				focusLost = true;
 				return true;
 			}
 		}
-
-		return onMouseDown(button, mouseX, mouseY);
+		return onKeyUp(key);
 	}
 
 	/**
@@ -441,10 +535,10 @@ public abstract class Component {
 		if (!isVisible()) {
 			return;
 		}
-		for (Component component : components) {
-			component.render();
-		}
 		render();
+		for (int i = components.size() - 1; i >= 0; i--) {
+			components.get(i).fireRender();
+		}
 	}
 
 	/**
@@ -456,6 +550,27 @@ public abstract class Component {
 	 * 
 	 */
 	public final void fireUpdate() {
+		if (toFront.size() > 0) {
+			for (Component c : toFront) {
+				components.remove(c);
+				components.addFirst(c);
+			}
+			toFront.clear();
+		}
+		if (toBack.size() > 0) {
+			for (Component c : toBack) {
+				components.remove(c);
+				components.addLast(c);
+			}
+			toBack.clear();
+		}
+		if (focusLost) {
+			for (Component c : focusNotifications) {
+				c.fireFocusLost();
+			}
+			focusNotifications.clear();
+			focusLost = false;
+		}
 		for (Component component : components) {
 			component.update();
 		}
@@ -472,19 +587,4 @@ public abstract class Component {
 	/**
 	 * Helper functions
 	 */
-	public void drawLine(int x1, int y1, int x2, int y2) {
-		GL11.glBegin(GL11.GL_LINES);
-		{
-			glVertex2f(x1, y1);
-			glVertex2f(x2, y2);
-		}
-		GL11.glEnd();
-	}
-
-	public static void drawQuad(float _x, float _y, float _width, float _height) {
-		glVertex2f(_x, _y + _height);
-		glVertex2f(_x + _width, _y + _height);
-		glVertex2f(_x + _width, _y);
-		glVertex2f(_x, _y);
-	}
 }

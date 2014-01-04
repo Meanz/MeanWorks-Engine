@@ -5,19 +5,39 @@ import static org.lwjgl.opengl.GL11.glDisable;
 import static org.lwjgl.opengl.GL11.glEnable;
 
 import org.lwjgl.opengl.Display;
+import org.lwjgl.opengl.GL11;
+import org.meanworks.engine.EngineConfig;
 import org.meanworks.engine.RenderState;
 import org.meanworks.engine.asset.AssetManager;
 import org.meanworks.engine.camera.Camera;
 import org.meanworks.engine.camera.FirstPersonCamera;
 import org.meanworks.engine.gui.GuiHandler;
-import org.meanworks.engine.gui.InputHandler;
+import org.meanworks.engine.gui.impl.Console;
 import org.meanworks.engine.gui.impl.PerformanceGraph;
+import org.meanworks.engine.render.material.Material;
+import org.meanworks.engine.render.opengl.GLWindow;
 import org.meanworks.engine.scene.SceneGraph;
+import org.meanworks.engine.scripts.ScriptHandler;
 import org.meanworks.engine.util.Timer;
-import org.meanworks.render.material.Material;
-import org.meanworks.render.opengl.Renderer;
-import org.meanworks.render.opengl.Window;
 
+/**
+ * Copyright (C) 2013 Steffen Evensen
+ * 
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ * 
+ * @author Meanz
+ */
 public abstract class Application {
 
 	/*
@@ -41,12 +61,7 @@ public abstract class Application {
 	/*
 	 * The application window
 	 */
-	private Window window = null;
-
-	/*
-	 * The renderer for the application
-	 */
-	private Renderer renderer = null;
+	private GLWindow window = null;
 
 	/*
 	 * The input handler for the application
@@ -74,6 +89,16 @@ public abstract class Application {
 	private Timer timer;
 
 	/*
+	 * 
+	 */
+	private Console console;
+
+	/*
+	 * 
+	 */
+	private ScriptHandler scriptHandler;
+
+	/*
 	 * Statistics
 	 */
 	private int fps = 0;
@@ -91,6 +116,15 @@ public abstract class Application {
 	 * Application settings
 	 */
 	private int targetUps = 50; // Number of updates per second
+
+	/**
+	 * Get the script handler of this application
+	 * 
+	 * @return
+	 */
+	public ScriptHandler getScriptHandler() {
+		return scriptHandler;
+	}
 
 	/**
 	 * Forward getter from Scene.getCamera
@@ -152,7 +186,7 @@ public abstract class Application {
 	/**
 	 * @return the window
 	 */
-	public Window getWindow() {
+	public GLWindow getWindow() {
 		return window;
 	}
 
@@ -160,23 +194,17 @@ public abstract class Application {
 	 * @param window
 	 *            the window to set
 	 */
-	public void setWindow(Window window) {
+	public void setWindow(GLWindow window) {
 		this.window = window;
 	}
 
 	/**
-	 * @return the renderer
+	 * Get the console of this application
+	 * 
+	 * @return
 	 */
-	public Renderer getRenderer() {
-		return renderer;
-	}
-
-	/**
-	 * @param renderer
-	 *            the renderer to set
-	 */
-	public void setRenderer(Renderer renderer) {
-		this.renderer = renderer;
+	public Console getConsole() {
+		return console;
 	}
 
 	/**
@@ -248,30 +276,60 @@ public abstract class Application {
 
 		int savedUps = 0;
 
+		/*
+		 * Parse what version we are using
+		 */
+		String s = GL11.glGetString(GL11.GL_VERSION);
+		if (s.startsWith("2")) {
+			// We have to use old
+			EngineConfig.usingModernOpenGL = false;
+		} else if (s.startsWith("3") || s.startsWith("4")) {
+			EngineConfig.usingModernOpenGL = true;
+		}
+
 		// Create the timer
 		timer = new Timer();
 
 		/*
 		 * Create the input handler
 		 */
+		guiHandler = new GuiHandler(this);
+		/**
+		 * Add a console to the application
+		 */
+		getGui().addComponent((console = new Console()));
+
 		inputHandler = new InputHandler();
 		assetManager = new AssetManager();
 		scene = new SceneGraph();
-		guiHandler = new GuiHandler(this);
+
 		getInputHandler().addKeyListener(guiHandler);
 		getInputHandler().addMouseListener(guiHandler);
 
 		/*
 		 * Setup the default material
 		 */
-		Material.DEFAULT_MATERIAL = new Material("DEFAULT_MATERIAL",
-				getAssetManager().loadShader("./data/shaders/colorShader"));
+		Material.DEFAULT_MATERIAL = null;
+
+		if (EngineConfig.usingModernOpenGL) {
+			Material.DEFAULT_MATERIAL = new Material("DEFAULT_MATERIAL",
+					getAssetManager().loadShader("./data/shaders/colorShader"));
+		} else {
+			Material.DEFAULT_MATERIAL = new Material("DEFAULT_MATERIAL",
+					getAssetManager().loadShader(
+							"./data/shaders/150colorShader"));
+		}
 
 		/*
 		 * Set camera details TODO: Cleanup here
 		 */
 		scene.setCamera(new FirstPersonCamera(window.getWidth(), window
 				.getHeight(), 60, window.getAspect()));
+
+		/*
+		 * Create our script handler
+		 */
+		scriptHandler = new ScriptHandler();
 
 		/*
 		 * Preload

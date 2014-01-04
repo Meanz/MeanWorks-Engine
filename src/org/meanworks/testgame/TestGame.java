@@ -11,6 +11,7 @@ import static org.lwjgl.opengl.GL11.glEnable;
 
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
+import org.meanworks.engine.asset.model.MWMLoader;
 import org.meanworks.engine.core.Application;
 import org.meanworks.engine.gui.Button;
 import org.meanworks.engine.gui.impl.PerformanceGraph;
@@ -19,22 +20,17 @@ import org.meanworks.engine.gui.impl.radialmenu.RadialButton;
 import org.meanworks.engine.gui.impl.radialmenu.RadialMenu;
 import org.meanworks.engine.math.Ray;
 import org.meanworks.engine.math.Vec3;
-import org.meanworks.engine.model.MWMLoader;
-import org.meanworks.engine.scene.GeometryNode;
+import org.meanworks.engine.render.geometry.Model;
+import org.meanworks.engine.render.geometry.Vertex;
+import org.meanworks.engine.render.opengl.GLWindow;
+import org.meanworks.engine.render.opengl.ImmediateRenderer;
+import org.meanworks.engine.render.opengl.shader.ShaderProgram;
+import org.meanworks.engine.render.texture.Texture;
 import org.meanworks.engine.util.Util;
-import org.meanworks.render.geometry.AnimatedModel;
-import org.meanworks.render.geometry.Vertex;
-import org.meanworks.render.geometry.animation.AnimationChannel;
-import org.meanworks.render.geometry.animation.LoopMode;
-import org.meanworks.render.opengl.ImmediateRenderer;
-import org.meanworks.render.opengl.Window;
-import org.meanworks.render.opengl.shader.ShaderProgram;
-import org.meanworks.render.texture.Texture;
 import org.meanworks.testgame.entity.Player;
 import org.meanworks.testgame.world.Region;
 import org.meanworks.testgame.world.Tile;
 import org.meanworks.testgame.world.World;
-import org.meanworks.tools.SceneUi;
 
 public class TestGame extends Application {
 
@@ -76,12 +72,7 @@ public class TestGame extends Application {
 	/*
 	 * 
 	 */
-	private GeometryNode treeModel;
-
-	/*
-	 * 
-	 */
-	private SceneUi sceneUi;
+	private Model treeModel;
 
 	/**
 	 * 
@@ -107,7 +98,7 @@ public class TestGame extends Application {
 	@Override
 	public void setup() {
 		Util.loadLWJGL();
-		setWindow(Window.createWindow(1200, 800));
+		setWindow(GLWindow.createWindow(1200, 800));
 	}
 
 	/*
@@ -117,9 +108,6 @@ public class TestGame extends Application {
 	 */
 	@Override
 	public void onExit() {
-		if (sceneUi != null) {
-			sceneUi.dispose();
-		}
 	}
 
 	/*
@@ -211,7 +199,7 @@ public class TestGame extends Application {
 		/*
 		 * Setup our scene ui
 		 */
-		//sceneUi = new SceneUi(this);
+		// sceneUi = new SceneUi(this);
 	}
 
 	/*
@@ -272,7 +260,7 @@ public class TestGame extends Application {
 		glEnable(GL_DEPTH_TEST);
 
 		glEnable(GL_CULL_FACE);
-		getCamera().updateCamera();
+		getCamera().updateMatrices();
 
 		// Draw the world
 		world.render();

@@ -1,7 +1,8 @@
 package org.meanworks.engine;
 
-import org.meanworks.render.opengl.shader.ShaderProgram;
-import org.meanworks.render.texture.Texture;
+import org.lwjgl.util.vector.Matrix4f;
+import org.meanworks.engine.render.opengl.shader.ShaderProgram;
+import org.meanworks.engine.render.texture.Texture;
 
 /**
  * Copyright (C) 2013 Steffen Evensen
@@ -36,7 +37,70 @@ public class RenderState {
 	/*
 	 * Holds information about how many vertices is being rendered
 	 */
-	private static int renderedVertices;
+	private static int renderedVertices = 0;
+
+	/*
+	 * Holds information about how many objects is being rendered
+	 */
+	private static int renderedObjects = 0;
+
+	/*
+	 * The matrices that we are going to use for the next rendering call
+	 */
+	private static Matrix4f projectionMatrix;
+	private static Matrix4f transformMatrix;
+
+	/**
+	 * Get the projection matrix that will be used the next draw call
+	 * 
+	 * @return
+	 */
+	public static Matrix4f getProjectionMatrix() {
+		return projectionMatrix;
+	}
+
+	/**
+	 * Get the transformation matrix that will be used the next draw call
+	 * 
+	 * @return
+	 */
+	public static Matrix4f getTransformMatrix() {
+		return transformMatrix;
+	}
+
+	/**
+	 * Set the projection matrix that will be used the next draw call
+	 * 
+	 * @param projectionMatrix
+	 */
+	public static void setProjectionMatrix(Matrix4f projectionMatrix) {
+		RenderState.projectionMatrix = projectionMatrix;
+	}
+
+	/**
+	 * Set the transform matrix that will be used the next draw call
+	 * 
+	 * @param transformMatrix
+	 */
+	public static void setTransformMatrix(Matrix4f transformMatrix) {
+		RenderState.transformMatrix = transformMatrix;
+	}
+
+	/**
+	 * Increment the number of rendered objects
+	 */
+	public static void addRenderedObject() {
+		renderedObjects += 1;
+	}
+
+	/**
+	 * Get the number of rendered objects
+	 * 
+	 * @return
+	 */
+	public static int getRenderedObjects() {
+		return renderedObjects;
+	}
 
 	/**
 	 * Get the number of rendered vertices
@@ -52,6 +116,7 @@ public class RenderState {
 	 */
 	public static void clearRenderedVertices() {
 		renderedVertices = 0;
+		renderedObjects = 0;
 	}
 
 	/**
@@ -62,6 +127,15 @@ public class RenderState {
 	 */
 	public static void addRenderedVertices(int amt) {
 		renderedVertices += amt;
+	}
+
+	/**
+	 * Sets the given texture unit as active
+	 * 
+	 * @param texture
+	 */
+	public static void activeTexture(int textureUnit) {
+		// Ignore for now
 	}
 
 	/**

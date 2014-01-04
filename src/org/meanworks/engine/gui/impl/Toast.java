@@ -11,7 +11,7 @@ import java.util.LinkedList;
 
 import org.meanworks.engine.core.Application;
 import org.meanworks.engine.gui.Component;
-import org.meanworks.engine.gui.FontRenderer;
+import org.meanworks.engine.render.FontRenderer;
 
 /**
  * Copyright (C) 2013 Steffen Evensen
@@ -58,7 +58,7 @@ public class Toast extends Component {
 		}
 		Toast toast = new Toast(message, Application.getApplication()
 				.getWindow().getWidth()
-				/ 2 - FontRenderer.arial14.getStringWidth(message) / 2, 0,
+				/ 2 - FontRenderer.arial14_white.getStringWidth(message) / 2, 0,
 				topToasts.size());
 		topToasts.add(toast);
 		Application.getApplication().getGui().addComponent(toast);
@@ -114,10 +114,10 @@ public class Toast extends Component {
 	 * 
 	 */
 	private Toast(String message, int x, int y, int toastIdx) {
-		super("Toast_" + Component.getNextId(), x, y, FontRenderer.arial14
+		super("Toast_" + Component.getNextId(), x, y, FontRenderer.arial14_white
 				.getStringWidth(message) + 20, 35);
 		this.message = message;
-		this.textWidth = FontRenderer.arial14.getStringWidth(message);
+		this.textWidth = FontRenderer.arial14_white.getStringWidth(message);
 		this.toastIdx = toastIdx;
 	}
 
@@ -158,7 +158,7 @@ public class Toast extends Component {
 		glEnd();
 		glColor4f(1.0f, 1.0f, 1.0f, transp);
 		// Center the text
-		FontRenderer.arial14.drawString(message + " " + toastIdx, getX()
+		FontRenderer.arial14_white.drawString(message + " " + toastIdx, getX()
 				- (textWidth / 2) + (getWidth() / 2), drawY + 10);
 
 		// Reset

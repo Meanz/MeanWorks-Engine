@@ -1,12 +1,12 @@
 package org.meanworks.testgame;
 
+import org.meanworks.engine.asset.model.MWMLoader;
+import org.meanworks.engine.asset.model.ModelLoader;
 import org.meanworks.engine.math.Transform;
-import org.meanworks.engine.model.MWMLoader;
-import org.meanworks.engine.model.ModelLoader;
-import org.meanworks.engine.scene.GeometryNode;
-import org.meanworks.render.geometry.AnimatedModel;
-import org.meanworks.render.geometry.animation.AnimationChannel;
-import org.meanworks.render.geometry.animation.LoopMode;
+import org.meanworks.engine.render.geometry.Model;
+import org.meanworks.engine.render.geometry.SkinnedModel;
+import org.meanworks.engine.render.geometry.animation.AnimationChannel;
+import org.meanworks.engine.render.geometry.animation.LoopMode;
 
 /**
  * Copyright (C) 2013 Steffen Evensen
@@ -35,7 +35,7 @@ public class Tests {
 	
 	private static void doObjTest(TestGame tg) {
 		
-		GeometryNode gn = ModelLoader.loadModel("./data/models/tree_1.obj");
+		Model gn = ModelLoader.loadModel("./data/models/tree_1.obj");
 		gn.getTransform().setPosition(4998f, 134f, 5024f);
 		gn.getTransform().setScale(1.0f, 1.0f, 1.0f);
 		tg.getScene().getRootNode().addChild(gn);
@@ -43,7 +43,7 @@ public class Tests {
 	}
 
 	private static void doModelTest(TestGame tg) {
-		AnimatedModel model = MWMLoader
+		SkinnedModel model = MWMLoader
 				.loadAnimatedModel("./data/models/Sinbad/Sinbad_mesh.mwm");
 
 		/*
@@ -77,7 +77,7 @@ public class Tests {
 		 */
 		for (int x = 0; x < 10; x++) {
 			for (int y = 0; y < 10; y++) {
-				AnimatedModel model2 = model.shallowCopy();
+				SkinnedModel model2 = model.shallowCopy();
 
 				final Transform model2Transform = model2.getTransform();
 				model2Transform.setScale(0.2f, 0.2f, 0.2f);

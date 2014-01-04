@@ -1,6 +1,6 @@
 package org.meanworks.testgame.entity;
 
-import org.meanworks.engine.scene.Geometry;
+import org.meanworks.engine.render.geometry.Model;
 import org.meanworks.engine.scene.Node;
 
 /**
@@ -26,7 +26,7 @@ public class WorldObject extends Node {
 	/*
 	 * The model of this world object
 	 */
-	private Geometry model;
+	private Model model;
 	
 	/**
 	 * Construct a new WorldObject

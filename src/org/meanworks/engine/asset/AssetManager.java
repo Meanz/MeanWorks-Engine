@@ -6,18 +6,43 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
 import org.meanworks.engine.EngineConfig;
 import org.meanworks.engine.EngineLogger;
+import org.meanworks.engine.asset.model.ModelLoader;
 import org.meanworks.engine.fx.ShaderParseException;
 import org.meanworks.engine.fx.ShaderParser;
-import org.meanworks.render.material.Material;
-import org.meanworks.render.opengl.shader.Shader;
-import org.meanworks.render.opengl.shader.Shader.ShaderType;
-import org.meanworks.render.opengl.shader.ShaderHelper;
-import org.meanworks.render.opengl.shader.ShaderProgram;
-import org.meanworks.render.texture.Texture;
-import org.meanworks.render.texture.TextureLoader;
+import org.meanworks.engine.render.geometry.Model;
+import org.meanworks.engine.render.material.Material;
+import org.meanworks.engine.render.opengl.shader.ShaderHelper;
+import org.meanworks.engine.render.opengl.shader.ShaderProgram;
+import org.meanworks.engine.render.texture.Texture;
+import org.meanworks.engine.render.texture.TextureLoader;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
+/**
+ * Copyright (C) 2013 Steffen Evensen
+ * 
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ * 
+ * @author Meanz
+ */
 public class AssetManager implements AssetListener {
 
 	/**
@@ -26,7 +51,7 @@ public class AssetManager implements AssetListener {
 	 * @author meanz
 	 * 
 	 */
-	class ModifiedFile {
+	private class ModifiedFile {
 
 		String key;
 		String path;
@@ -76,6 +101,113 @@ public class AssetManager implements AssetListener {
 	}
 
 	/**
+	 * Load a model into the engine, for now it's just a redirection function
+	 * 
+	 * @param modelPath
+	 * @return
+	 */
+	public Model loadModel(String modelPath) {
+		return ModelLoader.loadModel(modelPath);
+	}
+
+	/**
+	 * Load a material from the given path
+	 * 
+	 * @param materialPath
+	 * @return
+	 */
+	public Material loadMaterial(String materialPath) {
+
+		/*
+		 * Read the material XML
+		 */
+		try {
+			File xmlFile = new File(materialPath);
+
+			DocumentBuilderFactory dbFactory = DocumentBuilderFactory
+					.newInstance();
+			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+			Document doc = dBuilder.parse(xmlFile);
+
+			// optional, but recommended
+			// read this -
+			// http://stackoverflow.com/questions/13786607/normalization-in-dom-parsing-with-java-how-does-it-work
+			doc.getDocumentElement().normalize();
+
+			System.out.println("Root element :"
+					+ doc.getDocumentElement().getNodeName());
+
+			/*
+			 * Load vertex shaders
+			 */
+			NodeList vertList = doc.getElementsByTagName("vert");
+			for (int temp = 0; temp < vertList.getLength(); temp++) {
+				Node vertNode = vertList.item(temp);
+				if (vertNode.getNodeType() == Node.ELEMENT_NODE) {
+					Element vertElement = (Element) vertNode;
+					NodeList shaderList = vertElement
+							.getElementsByTagName("shader");
+					for (int j = 0; j < shaderList.getLength(); j++) {
+						Node shaderNode = shaderList.item(j);
+						if (shaderNode.getNodeType() == Node.ELEMENT_NODE) {
+							if (shaderNode.getNodeName().equals("shader")) {
+								Element shaderElement = (Element) shaderNode;
+
+								String shaderSrc = shaderElement
+										.getAttribute("src");
+
+							} else {
+								EngineLogger
+										.warning("\tMaterial Loader: Expected \"shader\" tag got \""
+												+ shaderNode.getNodeName()
+												+ "\"");
+							}
+						}
+
+					}
+				}
+			}
+
+			/*
+			 * Load fragment shaders
+			 */
+			NodeList fragList = doc.getElementsByTagName("frag");
+			for (int i = 0; i < fragList.getLength(); i++) {
+				Node fragNode = fragList.item(i);
+				if (fragNode.getNodeType() == Node.ELEMENT_NODE) {
+					Element vertElement = (Element) fragNode;
+					NodeList shaderList = vertElement
+							.getElementsByTagName("shader");
+					for (int j = 0; j < shaderList.getLength(); j++) {
+						Node shaderNode = shaderList.item(j);
+						if (shaderNode.getNodeType() == Node.ELEMENT_NODE) {
+							if (shaderNode.getNodeName().equals("shader")) {
+								Element shaderElement = (Element) shaderNode;
+
+								String shaderSrc = shaderElement
+										.getAttribute("src");
+
+							} else {
+								EngineLogger
+										.warning("\tMaterial Loader: Expected \"shader\" tag got \""
+												+ shaderNode.getNodeName()
+												+ "\"");
+							}
+						}
+
+					}
+				}
+			}
+
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			EngineLogger.warning("Could not load material \"" + materialPath
+					+ "\"");
+		}
+		return null;
+	}
+
+	/**
 	 * Load a shader from the given path
 	 * 
 	 * @param shaderPath
@@ -113,72 +245,7 @@ public class AssetManager implements AssetListener {
 		// Add the shader program to our store list
 		shaders.put(shaderPath.toLowerCase(), shaderProgram);
 
-		if (true) {
-			return shaderProgram;
-		}
-		/*
-		 * Old code
-		 */
-		// ShaderProgram shaderProgram = shaders.get(shaderPath.toLowerCase());
-		if (shaderProgram != null) {
-			return shaderProgram;
-		}
-
-		String vertexShaderFile = shaderPath.toLowerCase() + ".vert";
-		String fragmentShaderFile = shaderPath.toLowerCase() + ".frag";
-		try {
-			/*
-			 * Create vertex shader
-			 */
-			Shader vertexShader = new Shader(ShaderType.VERTEX_SHADER);
-			if (!vertexShader.create()) {
-				return null;
-			}
-			vertexShader.readShaderData(new File(vertexShaderFile));
-
-			/*
-			 * Create fragment shader
-			 */
-			Shader fragmentShader = new Shader(ShaderType.FRAGMENT_SHADER);
-			if (!fragmentShader.create()) {
-				vertexShader.delete();
-				return null;
-			}
-			fragmentShader.readShaderData(new File(fragmentShaderFile));
-
-			/*
-			 * Create shader program
-			 */
-			shaderProgram = new ShaderProgram();
-			if (!shaderProgram.create()) {
-				vertexShader.delete();
-				fragmentShader.delete();
-				return null;
-			}
-			shaderProgram.attach(vertexShader);
-			shaderProgram.attach(fragmentShader);
-			if (!shaderProgram.compile()) {
-				return null;
-			}
-
-			// Add the vertex shader file to our watch list
-			assetWatcher.watchFile(
-					"shader_vert_" + shaderProgram.getProgramId(),
-					vertexShaderFile.toLowerCase());
-
-			// Add the fragment shader file to our watch list
-			assetWatcher.watchFile(
-					"shader_frag_" + shaderProgram.getProgramId(),
-					fragmentShaderFile.toLowerCase());
-
-			// Add the shader program to our store list
-			shaders.put(shaderPath.toLowerCase(), shaderProgram);
-
-			return shaderProgram;
-		} catch (IOException iex) {
-			iex.printStackTrace();
-		}
-		return null;
+		return shaderProgram;
 	}
 
 	/**
@@ -312,96 +379,12 @@ public class AssetManager implements AssetListener {
 							ShaderParser.parseShader(program,
 									"./data/shaders/", new FileInputStream(
 											new File(filePath)));
+							EngineLogger.info("Updated shader " + key);
 						}
 					} catch (NumberFormatException | IOException
 							| ShaderParseException e) {
 						e.printStackTrace();
 					}
-
-					if (false) {
-						// Old dead code
-						try {
-							int shaderProgramId = Integer.parseInt(key
-									.substring(12));
-
-							boolean found = false;
-							for (ShaderProgram shaderProgram : shaders.values()) {
-								if (shaderProgram.getProgramId() == shaderProgramId) {
-
-									String shaderPath = key
-											.startsWith("shader_vert") ? filePath
-											.toLowerCase().split(".vert")[0]
-											: filePath.toLowerCase().split(
-													".frag")[0];
-									String vertexShaderFile = shaderPath
-											+ ".vert";
-									String fragmentShaderFile = shaderPath
-											+ ".frag";
-
-									/*
-									 * Create vertex shader
-									 */
-									Shader vertexShader = new Shader(
-											ShaderType.VERTEX_SHADER);
-									if (!vertexShader.create()) {
-										break;
-									}
-									vertexShader.readShaderData(new File(
-											vertexShaderFile));
-
-									/*
-									 * Create fragment shader
-									 */
-									Shader fragmentShader = new Shader(
-											ShaderType.FRAGMENT_SHADER);
-									if (!fragmentShader.create()) {
-										vertexShader.delete();
-										break;
-									}
-									fragmentShader.readShaderData(new File(
-											fragmentShaderFile));
-
-									// If we have come this far let's go on to
-									// fixing up the shader
-									LinkedList<Shader> shaders = shaderProgram
-											.detatchAll();
-
-									shaderProgram.attach(vertexShader);
-									shaderProgram.attach(fragmentShader);
-
-									if (!shaderProgram.compile()) {
-										vertexShader.delete();
-										fragmentShader.delete();
-										shaderProgram.detatchAll();
-										for (Shader shader : shaders) {
-											shaderProgram.attach(shader);
-										}
-										if (!shaderProgram.compile()) {
-											EngineLogger
-													.error("Something odd happened here, what now ?");
-										}
-									} else {
-										// Delete the old shaders
-										for (Shader shader : shaders) {
-											shader.delete();
-										}
-									}
-									found = true;
-									break;
-								}
-							}
-							if (!found) {
-								EngineLogger
-										.warning("Could not find stored shader "
-												+ key);
-							}
-
-						} catch (Exception ex) {
-							ex.printStackTrace();
-						}
-
-					}
-
 				}
 			}
 			modifiedFiles.clear();
