@@ -4,6 +4,7 @@ import static org.lwjgl.opengl.GL11.GL_CULL_FACE;
 import static org.lwjgl.opengl.GL11.glDisable;
 import static org.lwjgl.opengl.GL11.glEnable;
 
+import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.meanworks.engine.EngineConfig;
@@ -38,7 +39,7 @@ import org.meanworks.engine.util.Timer;
  * 
  * @author Meanz
  */
-public abstract class Application {
+public abstract class Application implements Runnable {
 
 	/*
 	 * The singleton for the application
@@ -79,22 +80,23 @@ public abstract class Application {
 	private SceneGraph scene;
 
 	/*
-	 * 
+	 * The gui handler for this application
 	 */
 	private GuiHandler guiHandler;
 
 	/*
-	 * 
-	 */
-	private Timer timer;
-
-	/*
-	 * 
+	 * The console for this application, it's an extension of the gui handler
 	 */
 	private Console console;
 
 	/*
-	 * 
+	 * Not used at the moment
+	 */
+	private Timer timer;
+
+	/*
+	 * The script handler for this application, used for external scripts like
+	 * JavaScript
 	 */
 	private ScriptHandler scriptHandler;
 
@@ -106,7 +108,7 @@ public abstract class Application {
 	private double frameTime = 0.0d;
 
 	/**
-	 * 
+	 * Construct a new application
 	 */
 	public Application() {
 		application = this;
@@ -234,16 +236,21 @@ public abstract class Application {
 	}
 
 	/**
-	 * 
+	 * Start this application
 	 */
 	public void start() {
+		/*
+		 * Setup
+		 */
 		setup();
+
+		
 		running = true;
-		loop();
+		run();
 	}
 
 	/**
-	 * 
+	 * Stops this application
 	 */
 	public void stop() {
 		running = false;
@@ -260,7 +267,7 @@ public abstract class Application {
 	/**
 	 * The core application loop
 	 */
-	public void loop() {
+	public void run() {
 		/*
 		 * Game Loop
 		 */

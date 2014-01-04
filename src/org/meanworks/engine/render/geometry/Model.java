@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.meanworks.engine.RenderState;
 import org.meanworks.engine.core.Application;
+import org.meanworks.engine.render.material.Material;
 import org.meanworks.engine.scene.Node;
 
 /**
@@ -57,6 +58,17 @@ public class Model extends Node {
 	 */
 	public Model shallowCopy() {
 		return new Model(getMeshes());
+	}
+
+	/**
+	 * Set this material to all the meshes connected to this model
+	 * 
+	 * @param material
+	 */
+	public void setMaterial(Material material) {
+		for (Mesh mesh : meshes.values()) {
+			mesh.setMaterial(material);
+		}
 	}
 
 	/**

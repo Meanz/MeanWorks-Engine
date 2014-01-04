@@ -64,12 +64,30 @@ public class SceneGraph {
 	}
 
 	/**
+	 * Internal function for getting the scene graph reference
+	 * 
+	 * @return
+	 */
+	private static SceneGraph getScene() {
+		return Application.getApplication().getScene();
+	}
+
+	/**
+	 * Add a child to the scene graph
+	 * 
+	 * @param node
+	 */
+	public static void add(Node node) {
+		getScene().getRootNode().addChild(node);
+	}
+
+	/**
 	 * Set the camera of this scene
 	 * 
 	 * @param camera
 	 */
-	public void setCamera(Camera camera) {
-		this.camera = camera;
+	public static void setCamera(Camera camera) {
+		getScene().camera = camera;
 	}
 
 	/**
@@ -77,8 +95,8 @@ public class SceneGraph {
 	 * 
 	 * @return
 	 */
-	public Camera getCamera() {
-		return camera;
+	public static Camera getCamera() {
+		return getScene().camera;
 	}
 
 	/**

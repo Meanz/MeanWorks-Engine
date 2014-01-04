@@ -12,6 +12,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.meanworks.engine.EngineConfig;
 import org.meanworks.engine.EngineLogger;
 import org.meanworks.engine.asset.model.ModelLoader;
+import org.meanworks.engine.core.Application;
 import org.meanworks.engine.fx.ShaderParseException;
 import org.meanworks.engine.fx.ShaderParser;
 import org.meanworks.engine.render.geometry.Model;
@@ -101,12 +102,21 @@ public class AssetManager implements AssetListener {
 	}
 
 	/**
+	 * Internal function for ease
+	 * 
+	 * @return
+	 */
+	private static AssetManager getAssetManager() {
+		return Application.getApplication().getAssetManager();
+	}
+
+	/**
 	 * Load a model into the engine, for now it's just a redirection function
 	 * 
 	 * @param modelPath
 	 * @return
 	 */
-	public Model loadModel(String modelPath) {
+	public static Model loadModel(String modelPath) {
 		return ModelLoader.loadModel(modelPath);
 	}
 
@@ -116,7 +126,7 @@ public class AssetManager implements AssetListener {
 	 * @param materialPath
 	 * @return
 	 */
-	public Material loadMaterial(String materialPath) {
+	public static Material loadMaterial(String materialPath) {
 
 		/*
 		 * Read the material XML
@@ -213,10 +223,10 @@ public class AssetManager implements AssetListener {
 	 * @param shaderPath
 	 * @return
 	 */
-	public ShaderProgram loadShader(String shaderPath) {
+	public static ShaderProgram loadShader(String shaderPath) {
 
 		// Don't know how much I like this but okay
-		ShaderProgram shaderProgram = shaders.get(shaderPath.toLowerCase());
+		ShaderProgram shaderProgram = getAssetManager().shaders.get(shaderPath.toLowerCase());
 		if (shaderProgram != null) {
 			return shaderProgram;
 		}
@@ -240,10 +250,10 @@ public class AssetManager implements AssetListener {
 		}
 
 		// Add the vertex shader file to our watch list
-		assetWatcher.watchFile("shader_" + shaderProgram.getProgramId(),
+		getAssetManager().assetWatcher.watchFile("shader_" + shaderProgram.getProgramId(),
 				shaderFile.toLowerCase());
 		// Add the shader program to our store list
-		shaders.put(shaderPath.toLowerCase(), shaderProgram);
+		getAssetManager().shaders.put(shaderPath.toLowerCase(), shaderProgram);
 
 		return shaderProgram;
 	}
@@ -254,7 +264,7 @@ public class AssetManager implements AssetListener {
 	 * @param path
 	 * @return
 	 */
-	public Texture loadTexture(String path) {
+	public static Texture loadTexture(String path) {
 		return loadTexture(path, false);
 	}
 
@@ -267,8 +277,8 @@ public class AssetManager implements AssetListener {
 	 *            Whether to create mip maps or not
 	 * @return
 	 */
-	public Texture loadTexture(String path, boolean mipMapping) {
-		Texture outTexture = textures.get(path.toLowerCase());
+	public static Texture loadTexture(String path, boolean mipMapping) {
+		Texture outTexture = getAssetManager().textures.get(path.toLowerCase());
 		if (outTexture != null) {
 			return outTexture;
 		}
@@ -279,10 +289,10 @@ public class AssetManager implements AssetListener {
 		}
 
 		// Add the texture to our watch list
-		assetWatcher.watchFile("tex_" + outTexture.getId(), path.toLowerCase());
+		getAssetManager().assetWatcher.watchFile("tex_" + outTexture.getId(), path.toLowerCase());
 
 		// Add the texture to our store list
-		textures.put(path.toLowerCase(), outTexture);
+		getAssetManager().textures.put(path.toLowerCase(), outTexture);
 		return outTexture;
 	}
 

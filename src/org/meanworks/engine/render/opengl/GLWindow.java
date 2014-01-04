@@ -52,12 +52,28 @@ public class GLWindow {
 	}
 
 	/**
-	 * Create a window
+	 * Create a window with the given dimensions
+	 * 
+	 * @param width
+	 * @param height
+	 * @return
+	 */
+	public static GLWindow createWindow(int width, int height) {
+
+		int monWidth = java.awt.Toolkit.getDefaultToolkit().getScreenSize().width;
+		int monHeight = java.awt.Toolkit.getDefaultToolkit().getScreenSize().height;
+
+		return createWindow(width, height, monWidth / 2 - width / 2, monHeight
+				/ 2 - height / 2);
+	}
+
+	/**
+	 * Create a window with the given dimensions at the specified position
 	 * 
 	 * @param width
 	 * @param height
 	 */
-	public static GLWindow createWindow(int width, int height) {
+	public static GLWindow createWindow(int width, int height, int x, int y) {
 		windowInstance = new GLWindow();
 		windowInstance.pixelFormat = new PixelFormat(0, 8, 0);
 		windowInstance.displayMode = new DisplayMode(width, height);
@@ -65,6 +81,7 @@ public class GLWindow {
 		windowInstance.windowHeight = height;
 		try {
 			Display.setDisplayMode(windowInstance.displayMode);
+			Display.setLocation(x, y);
 			Display.create(windowInstance.pixelFormat);
 			return windowInstance;
 		} catch (LWJGLException e) {
