@@ -1,5 +1,6 @@
 package org.meanworks.engine.bounding;
 
+import org.meanworks.engine.math.Ray;
 import org.meanworks.engine.math.Vec3;
 
 /**
@@ -20,7 +21,7 @@ import org.meanworks.engine.math.Vec3;
  * 
  * @author Meanz
  */
-public class BoundingBox {
+public class AABoundingBox {
 
 	/*
 	 * The minimum values of the bounds
@@ -38,7 +39,7 @@ public class BoundingBox {
 	 * @param min
 	 * @param max
 	 */
-	public BoundingBox(Vec3 min, Vec3 max) {
+	public AABoundingBox(Vec3 min, Vec3 max) {
 		this.min = min;
 		this.max = max;
 	}
@@ -46,7 +47,7 @@ public class BoundingBox {
 	/**
 	 * Create a new empty bounding box
 	 */
-	public BoundingBox() {
+	public AABoundingBox() {
 		this(new Vec3(), new Vec3());
 	}
 
@@ -98,13 +99,62 @@ public class BoundingBox {
 	}
 
 	/**
+	 * 
+	 * @param r
+	 * @return
+	 */
+	public static boolean intersects(AABoundingBox box, Ray r) {
+
+		float tmin = (box.min.x - r.origin.x) / r.direction.x;
+		float tmax = (box.max.x - r.origin.x) / r.direction.x;
+		if (tmin > tmax) {
+			float temp = tmin;
+			tmin = tmax;
+			tmax = temp;
+		}
+		float tymin = (box.min.y - r.origin.y) / r.direction.y;
+		float tymax = (box.max.y - r.origin.y) / r.direction.y;
+		if (tymin > tymax) {
+			float temp = tymin;
+			tymin = tymax;
+			tymax = temp;
+		}
+		if ((tmin > tymax) || (tymin > tmax)) {
+			return false;
+		}
+		if (tymin > tmin) {
+			tmin = tymin;
+		}
+		if (tymax < tmax) {
+			tmax = tymax;
+		}
+		float tzmin = (box.min.z - r.origin.z) / r.direction.z;
+		float tzmax = (box.max.z - r.origin.z) / r.direction.z;
+		if (tzmin > tzmax) {
+			float temp = tzmin;
+			tzmin = tzmax;
+			tzmax = temp;
+		}
+		if ((tmin > tzmax) || (tzmin > tmax)) {
+			return false;
+		}
+		if (tzmin > tmin) {
+			tmin = tzmin;
+		}
+		if (tzmax < tmax) {
+			tmax = tzmax;
+		}
+		return true;
+	}
+
+	/**
 	 * Tests if the given boxes intersects each other
 	 * 
 	 * @param box1
 	 * @param box2
 	 * @return
 	 */
-	public static boolean intersects(BoundingBox box1, BoundingBox box2) {
+	public static boolean intersects(AABoundingBox box1, AABoundingBox box2) {
 		return (box1.max.x > box2.min.x && box1.min.x < box2.max.x
 				&& box1.max.y > box2.min.y && box1.min.y < box2.max.y
 				&& box1.max.z > box2.min.z && box1.min.z < box2.max.z);
@@ -117,7 +167,7 @@ public class BoundingBox {
 	 * @param point
 	 * @return
 	 */
-	public static boolean isPointInside(BoundingBox box, Vec3 point) {
+	public static boolean isPointInside(AABoundingBox box, Vec3 point) {
 		// Check if the point is less than max and greater than min
 		if (point.x > box.min.x && point.x < box.max.x && point.y > box.min.y
 				&& point.y < box.max.y && point.z > box.min.z

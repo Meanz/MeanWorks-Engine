@@ -20,7 +20,7 @@ import org.meanworks.engine.render.geometry.animation.AnimationNode.QuatKey;
 import org.meanworks.engine.render.geometry.animation.AnimationNode.Vec3Key;
 import org.meanworks.engine.render.geometry.animation.Bone;
 import org.meanworks.engine.render.geometry.animation.Skeleton;
-import org.meanworks.engine.render.geometry.mesh.renderers.MeshRenderer;
+import org.meanworks.engine.render.geometry.mesh.renderers.VAOMeshRenderer;
 
 /**
  * Copyright (C) 2013 Steffen Evensen
@@ -230,7 +230,7 @@ public class MWMLoader {
 						indices.flip();
 
 						// Let's build a mesh out of this hehe
-						MeshRenderer meshRenderer = new MeshRenderer();
+						VAOMeshRenderer meshRenderer = new VAOMeshRenderer();
 						Mesh mesh = new Mesh();
 						mesh.setMeshRenderer(meshRenderer);
 

@@ -1,9 +1,21 @@
 package org.meanworks.engine.render.geometry;
 
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+
+import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Vector4f;
 import org.meanworks.engine.EngineLogger;
 import org.meanworks.engine.RenderState;
+import org.meanworks.engine.bounding.AABoundingBox;
+import org.meanworks.engine.math.Ray;
+import org.meanworks.engine.math.RayResult;
+import org.meanworks.engine.math.Vec3;
+import org.meanworks.engine.render.geometry.mesh.renderers.ImmediateRenderer;
 import org.meanworks.engine.render.geometry.mesh.renderers.MeshRenderer;
+import org.meanworks.engine.render.geometry.mesh.renderers.VAOMeshRenderer;
+import org.meanworks.engine.render.geometry.mesh.renderers.VAOMeshRenderer.BufferEntryType;
 import org.meanworks.engine.render.material.Material;
 import org.meanworks.engine.render.texture.Texture;
 
@@ -39,6 +51,16 @@ public class Mesh {
 	private MeshRenderer meshRenderer;
 
 	/*
+	 * The mesh data
+	 */
+	public float[] positions;
+	public float[] normals;
+	public float[] uvs;
+	public float[] tangents;
+	public float[] bitangents;
+	public int[] triangles;
+
+	/*
 	 * The material for this mesh
 	 */
 	private Material meshMaterial;
@@ -47,6 +69,11 @@ public class Mesh {
 	 * The texture for this mesh Temporary solution
 	 */
 	private Texture meshTexture;
+
+	/*
+	 * The axis aligned bounding box of this mesh
+	 */
+	private AABoundingBox aaBoundingBox;
 
 	/**
 	 * Constructor
@@ -57,14 +84,55 @@ public class Mesh {
 	}
 
 	/**
+	 * Set the mesh renderer of this mesh
+	 * 
+	 * @param meshRenderer
+	 */
+	public void setMeshRenderer(VAOMeshRenderer meshRenderer) {
+		this.meshRenderer = meshRenderer;
+	}
+
+	/**
+	 * Delete this mesh
+	 */
+	public void delete() {
+		meshRenderer.delete();
+	}
+
+	/**
+	 * Cast a ray on this mesh
+	 * 
+	 * @param castPosition
+	 * @param castDirection
+	 */
+	public RayResult castRay(Ray ray) {
+		// Just search all tiles and look for an intersection hehe
+		boolean didHit = false;
+		Vec3 hitPoint = null;
+
+		// We need to construct the geometry here
+		if (ray != null) {
+			if (aaBoundingBox != null) {
+				if (AABoundingBox.intersects(aaBoundingBox, ray)) {
+					// Perform geometry tests
+				}
+			}
+		}
+		return new RayResult(didHit, hitPoint);
+	}
+
+	/**
 	 * Deep copy this mesh
 	 * 
 	 * @return
 	 */
 	public Mesh deepCopy() {
 		Mesh newMesh = new Mesh();
-		MeshRenderer newMeshRenderer = meshRenderer.deepCopy();
-		newMesh.setMeshRenderer(newMeshRenderer);
+		if (meshRenderer instanceof VAOMeshRenderer) {
+			VAOMeshRenderer newMeshRenderer = ((VAOMeshRenderer) meshRenderer)
+					.deepCopy();
+			newMesh.meshRenderer = newMeshRenderer;
+		}
 		newMesh.setTexture(meshTexture);
 		newMesh.setMaterial(meshMaterial);
 		return newMesh;
@@ -102,27 +170,62 @@ public class Mesh {
 	}
 
 	/**
-	 * Set the mesh renderer for this mesh
-	 * 
-	 * @param meshRenderer
+	 * This function uploads the data to the graphics card
 	 */
-	public void setMeshRenderer(MeshRenderer meshRenderer) {
-		this.meshRenderer = meshRenderer;
-	}
+	public boolean compile() {
 
-	/**
-	 * Get the mesh renderer for this mesh
-	 * 
-	 * @return
-	 */
-	public MeshRenderer getMeshRenderer() {
-		return meshRenderer;
+		/*
+		 * Let's create an immediate renderer for giggles
+		 */
+		if (false) {
+			meshRenderer = new ImmediateRenderer(this);
+			return true;
+		}
+
+		/*
+		 * Check if the mesh has any triangles at all
+		 */
+		if (triangles == null || triangles.length == 0) {
+			EngineLogger.error("Tried to compile Mesh with no triangles.");
+			return false;
+		}
+
+		// Create the mesh renderer
+		VAOMeshRenderer renderer = new VAOMeshRenderer();
+		meshRenderer = renderer;
+		
+		if (positions != null) {
+			FloatBuffer fb = BufferUtils.createFloatBuffer(positions.length);
+			fb.put(positions);
+			fb.flip();
+			renderer.addBuffer(fb, BufferEntryType.POSITION);
+		}
+		if (normals != null) {
+			FloatBuffer fb = BufferUtils.createFloatBuffer(normals.length);
+			fb.put(normals);
+			fb.flip();
+			renderer.addBuffer(fb, BufferEntryType.NORMAL);
+		}
+		if (uvs != null) {
+			FloatBuffer fb = BufferUtils.createFloatBuffer(uvs.length);
+			fb.put(uvs);
+			fb.flip();
+			renderer.addBuffer(fb, BufferEntryType.UV);
+		}
+
+		IntBuffer ib = BufferUtils.createIntBuffer(triangles.length);
+		ib.put(triangles);
+		ib.flip();
+		renderer.addIndex(ib, triangles.length);
+		
+		return renderer.compile();
 	}
 
 	/**
 	 * Render this mesh
 	 */
 	public void render() {
+
 		if (meshMaterial != null && meshRenderer != null) {
 
 			/*
@@ -138,12 +241,12 @@ public class Mesh {
 			/*
 			 * Apply material
 			 */
-			meshMaterial.apply();
 			if (meshTexture != null) {
 				meshMaterial.setProperty("tColorMap", 0);
 				RenderState.activeTexture(0);
 				meshTexture.bind();
 			}
+
 			// We can apply custom material properties here
 			// Dispatch the render call to the mesh renderer
 			meshRenderer.render(meshMaterial);

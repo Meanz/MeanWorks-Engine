@@ -4,7 +4,6 @@ import static org.lwjgl.opengl.GL11.GL_CULL_FACE;
 import static org.lwjgl.opengl.GL11.glDisable;
 import static org.lwjgl.opengl.GL11.glEnable;
 
-import org.lwjgl.LWJGLException;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.GL11;
 import org.meanworks.engine.EngineConfig;
@@ -17,7 +16,7 @@ import org.meanworks.engine.gui.impl.Console;
 import org.meanworks.engine.gui.impl.PerformanceGraph;
 import org.meanworks.engine.render.material.Material;
 import org.meanworks.engine.render.opengl.GLWindow;
-import org.meanworks.engine.scene.SceneGraph;
+import org.meanworks.engine.scene.Scene;
 import org.meanworks.engine.scripts.ScriptHandler;
 import org.meanworks.engine.util.Timer;
 
@@ -77,7 +76,7 @@ public abstract class Application implements Runnable {
 	/*
 	 * The scene graph for this application
 	 */
-	private SceneGraph scene;
+	private Scene scene;
 
 	/*
 	 * The gui handler for this application
@@ -92,7 +91,7 @@ public abstract class Application implements Runnable {
 	/*
 	 * Not used at the moment
 	 */
-	private Timer timer;
+	//private Timer timer;
 
 	/*
 	 * The script handler for this application, used for external scripts like
@@ -137,7 +136,7 @@ public abstract class Application implements Runnable {
 		if (scene == null) {
 			return null;
 		}
-		return scene.getCamera();
+		return Scene.getCamera();
 	}
 
 	/**
@@ -154,7 +153,7 @@ public abstract class Application implements Runnable {
 	 * 
 	 * @return
 	 */
-	public SceneGraph getScene() {
+	public Scene getScene() {
 		return scene;
 	}
 
@@ -244,7 +243,6 @@ public abstract class Application implements Runnable {
 		 */
 		setup();
 
-		
 		running = true;
 		run();
 	}
@@ -295,7 +293,7 @@ public abstract class Application implements Runnable {
 		}
 
 		// Create the timer
-		timer = new Timer();
+		//timer = new Timer();
 
 		/*
 		 * Create the input handler
@@ -308,7 +306,7 @@ public abstract class Application implements Runnable {
 
 		inputHandler = new InputHandler();
 		assetManager = new AssetManager();
-		scene = new SceneGraph();
+		scene = new Scene();
 
 		getInputHandler().addKeyListener(guiHandler);
 		getInputHandler().addMouseListener(guiHandler);
@@ -320,17 +318,16 @@ public abstract class Application implements Runnable {
 
 		if (EngineConfig.usingModernOpenGL) {
 			Material.DEFAULT_MATERIAL = new Material("DEFAULT_MATERIAL",
-					getAssetManager().loadShader("./data/shaders/colorShader"));
+					AssetManager.loadShader("./data/shaders/colorShader"));
 		} else {
 			Material.DEFAULT_MATERIAL = new Material("DEFAULT_MATERIAL",
-					getAssetManager().loadShader(
-							"./data/shaders/150colorShader"));
+					AssetManager.loadShader("./data/shaders/150colorShader"));
 		}
 
 		/*
 		 * Set camera details TODO: Cleanup here
 		 */
-		scene.setCamera(new FirstPersonCamera(window.getWidth(), window
+		Scene.setCamera(new FirstPersonCamera(window.getWidth(), window
 				.getHeight(), 60, window.getAspect()));
 
 		/*

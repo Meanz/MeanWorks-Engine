@@ -1,6 +1,6 @@
-package org.meanworks.engine.render.geometry.mesh.renderers;
+package org.meanworks.engine.render.geometry.mesh.render;
 
-import org.meanworks.engine.render.material.Material;
+import org.lwjgl.opengl.GL11;
 
 /**
  * Copyright (C) 2013 Steffen Evensen
@@ -20,18 +20,31 @@ import org.meanworks.engine.render.material.Material;
  * 
  * @author Meanz
  */
-public interface MeshRenderer {
-	
-	/**
-	 * Called the clear the data this renderer might contain
+public enum DrawMode {
+
+	TRIANGLES(GL11.GL_TRIANGLES), QUADS(GL11.GL_QUADS);
+
+	/*
+	 * The OpenGL op code
 	 */
-	public void delete();
+	private int op;
 
 	/**
-	 * Render the mesh
+	 * Constructor for the DrawMode enum
 	 * 
-	 * @param material
+	 * @param op
 	 */
-	public void render(Material material);
+	private DrawMode(int op) {
+		this.op = op;
+	}
+
+	/**
+	 * Get the OpenGL opcode
+	 * 
+	 * @return
+	 */
+	public int getOp() {
+		return op;
+	}
 
 }

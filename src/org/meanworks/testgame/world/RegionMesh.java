@@ -11,8 +11,8 @@ import org.meanworks.engine.render.geometry.Mesh;
 import org.meanworks.engine.render.geometry.Model;
 import org.meanworks.engine.render.geometry.Vertex;
 import org.meanworks.engine.render.geometry.mesh.MeshBuffer;
-import org.meanworks.engine.render.geometry.mesh.renderers.MeshRenderer;
-import org.meanworks.engine.render.geometry.mesh.renderers.MeshRenderer.BufferEntry;
+import org.meanworks.engine.render.geometry.mesh.renderers.VAOMeshRenderer;
+import org.meanworks.engine.render.geometry.mesh.renderers.VAOMeshRenderer.BufferEntry;
 import org.meanworks.engine.render.opengl.VertexBuffer;
 import org.meanworks.engine.render.opengl.VertexBuffer.BufferType;
 import org.meanworks.engine.render.opengl.VertexBuffer.BufferUsage;
@@ -469,7 +469,7 @@ public class RegionMesh {
 		/*
 		 * Setup the terrain mesh
 		 */
-		MeshRenderer meshRenderer = new MeshRenderer();
+		VAOMeshRenderer meshRenderer = new VAOMeshRenderer();
 		Mesh regionMesh = new Mesh();
 
 		/*

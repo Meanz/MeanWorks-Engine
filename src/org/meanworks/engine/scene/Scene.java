@@ -25,7 +25,7 @@ import org.meanworks.engine.math.FrustumResult;
  * 
  * @author Meanz
  */
-public class SceneGraph {
+public class Scene {
 
 	/*
 	 * The scene node number increment
@@ -59,7 +59,7 @@ public class SceneGraph {
 	/**
 	 * Construct the scene graph
 	 */
-	public SceneGraph() {
+	public Scene() {
 		rootNode = new Node("rootNode");
 	}
 
@@ -68,7 +68,7 @@ public class SceneGraph {
 	 * 
 	 * @return
 	 */
-	private static SceneGraph getScene() {
+	private static Scene getScene() {
 		return Application.getApplication().getScene();
 	}
 

@@ -2,24 +2,21 @@ package org.meanworks.engine.asset.model;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.lwjgl.opengl.GL11;
+import org.lwjgl.BufferUtils;
 import org.meanworks.engine.EngineLogger;
-import org.meanworks.engine.core.Application;
+import org.meanworks.engine.asset.AssetManager;
 import org.meanworks.engine.math.Vec2;
 import org.meanworks.engine.math.Vec3;
 import org.meanworks.engine.render.geometry.Mesh;
 import org.meanworks.engine.render.geometry.Model;
 import org.meanworks.engine.render.geometry.mesh.MeshBuffer;
-import org.meanworks.engine.render.geometry.mesh.renderers.MeshRenderer;
-import org.meanworks.engine.render.geometry.mesh.renderers.MeshRenderer.BufferEntry;
 import org.meanworks.engine.render.material.Material;
-import org.meanworks.engine.render.opengl.VertexBuffer;
-import org.meanworks.engine.render.opengl.VertexBuffer.BufferType;
-import org.meanworks.engine.render.opengl.VertexBuffer.BufferUsage;
 
 /**
  * Copyright (C) 2013 Steffen Evensen
@@ -160,31 +157,106 @@ public class OBJLoader {
 				}
 			}
 
-			Model geo = new Model();
+			Model model = new Model();
 
-			MeshRenderer mr = new MeshRenderer();
 			Mesh mesh = new Mesh();
-			mesh.setMeshRenderer(mr);
-			geo.addMesh("mesh_0", mesh);
 
-			mesh.setMaterial(new Material("DEFAULT_MATERIAL", Application
-					.getApplication().getAssetManager()
+			FloatBuffer meshBuffer = mb.getFlippedFloatBuffer();
+			IntBuffer meshIdxBuffer = mb.getFlippedIntBuffer();
+
+			// Fill Tri's
+			int[] tris = new int[meshIdxBuffer.capacity()];
+			meshIdxBuffer.get(tris);
+
+			FloatBuffer posBuffer = BufferUtils.createFloatBuffer(vertices
+					.size() * 3);
+			FloatBuffer norBuffer = hasNormals ? BufferUtils
+					.createFloatBuffer(vertices.size() * 3) : null;
+			FloatBuffer uvsBuffer = hasUVs ? BufferUtils
+					.createFloatBuffer(vertices.size() * 2) : null;
+
+			for (int i = 0; i < vertices.size(); i++) {
+
+				Vec3 vertex = vertices.get(i);
+				posBuffer.put(new float[] {
+						vertex.x, vertex.y, vertex.z
+				});
+
+				if (hasNormals) {
+					Vec3 normal = fixedNormals.get(i);
+					norBuffer.put(new float[] {
+							normal.x, normal.y, normal.z
+					});
+				}
+				if (hasUVs) {
+					Vec2 uv = fixedUVs.get(i);
+					uvsBuffer.put(new float[] {
+							uv.x, uv.y,
+					});
+				}
+			}
+
+			posBuffer.flip();
+			if (norBuffer != null)
+				norBuffer.flip();
+			if (uvsBuffer != null)
+				uvsBuffer.flip();
+
+			float[] posF = new float[vertices.size() * 3];
+			float[] norF = new float[vertices.size() * 3];
+			float[] uvsF = new float[vertices.size() * 2];
+
+			posBuffer.get(posF);
+			if (hasNormals)
+				norBuffer.get(norF);
+			if (hasUVs)
+				uvsBuffer.get(uvsF);
+
+			// If there are no normals or uvs, fake them
+			if (!hasNormals) {
+				// Ignore, there be no need for normals they are all inited at 0
+				// now
+			}
+			if (!hasUVs) {
+				// Also ignore, there be no need.
+			}
+
+			mesh.setMaterial(new Material("DEFAULT_MATERIAL", AssetManager
 					.loadShader("./data/shaders/colorShader")));
+			mesh.positions = posF;
+			mesh.normals = norF;
+			mesh.uvs = uvsF;
+			mesh.triangles = tris;
+			if (!mesh.compile()) {
+				EngineLogger.error("Could not compile OBJ model.");
+			} else {
+				EngineLogger.info("OBJ Model seemingly compiled.");
+			}
 
-			mr.addIndex(mb.getFlippedIntBuffer(), mb.getNumIndices());
+			model.addMesh("modMesh_0", mesh);
 
-			VertexBuffer vb = new VertexBuffer(BufferType.ARRAY_BUFFER,
-					BufferUsage.STATIC_DRAW);
-
-			vb.bufferData(mb.getFlippedFloatBuffer());
-			BufferEntry be = mr.addVertexBuffer(vb);
-			int stride = 8 * 4;
-			be.addAttribute(0, 3, GL11.GL_FLOAT, false, stride, 0);
-			be.addAttribute(1, 3, GL11.GL_FLOAT, false, stride, 12);
-			be.addAttribute(2, 2, GL11.GL_FLOAT, false, stride, 24);
-
-			mr.compile();
-			return geo;
+			/*
+			 * MeshRenderer mr = new MeshRenderer(); Mesh mesh = new Mesh();
+			 * mesh.setMeshRenderer(mr); geo.addMesh("mesh_0", mesh);
+			 * 
+			 * mesh.setMaterial(new Material("DEFAULT_MATERIAL", Application
+			 * .getApplication().getAssetManager()
+			 * .loadShader("./data/shaders/colorShader")));
+			 * 
+			 * mr.addIndex(mb.getFlippedIntBuffer(), mb.getNumIndices());
+			 * 
+			 * VertexBuffer vb = new VertexBuffer(BufferType.ARRAY_BUFFER,
+			 * BufferUsage.STATIC_DRAW);
+			 * 
+			 * vb.bufferData(mb.getFlippedFloatBuffer()); BufferEntry be =
+			 * mr.addVertexBuffer(vb); int stride = 8 * 4; be.addAttribute(0, 3,
+			 * GL11.GL_FLOAT, false, stride, 0); be.addAttribute(1, 3,
+			 * GL11.GL_FLOAT, false, stride, 12); be.addAttribute(2, 2,
+			 * GL11.GL_FLOAT, false, stride, 24);
+			 * 
+			 * mr.compile();
+			 */
+			return model;
 
 		} catch (Exception ex) {
 			EngineLogger.error("Could not load model " + modelFile);

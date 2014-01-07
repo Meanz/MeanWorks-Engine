@@ -18,6 +18,11 @@ public class Ray {
 	 * The ray direction
 	 */
 	public Vector3f direction;
+	/*
+	 * The minimum and maximum length of the ray
+	 */
+	private float minLength = 0.0f;
+	private float maxLength = 1000.0f;
 
 	/**
 	 * Construct a new ray
@@ -28,6 +33,24 @@ public class Ray {
 	public Ray(Vector3f origin, Vector3f direction) {
 		this.origin = origin;
 		this.direction = direction;
+	}
+
+	/**
+	 * Get the minimum length of the ray
+	 * 
+	 * @return
+	 */
+	public float getMinLength() {
+		return minLength;
+	}
+
+	/**
+	 * Get the max length of the ray
+	 * 
+	 * @return
+	 */
+	public float getMaxLength() {
+		return maxLength;
 	}
 
 	/**

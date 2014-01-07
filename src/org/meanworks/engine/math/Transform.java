@@ -29,27 +29,27 @@ public class Transform {
 	private Matrix4f transformMatrix;
 
 	/*
-	 * 
+	 * The position of this transform
 	 */
 	private Vec3 position;
 
 	/*
-	 * 
+	 * The rotation of this transform
 	 */
 	private Vec3 rotation;
 
 	/*
-	 * 
+	 * The scale of this transform
 	 */
 	private Vec3 scale;
 
 	/*
-	 * 
+	 * Whether this transform needs an update or not
 	 */
 	private boolean needsUpdate = false;
 
 	/*
-	 * 
+	 * Whether this transform has changed or not
 	 */
 	private boolean isChanged = true;
 
@@ -216,7 +216,7 @@ public class Transform {
 	}
 
 	/**
-	 * 
+	 * Calculates the transform matrix
 	 */
 	public void calculateTransformMatrix() {
 		transformMatrix.setIdentity();

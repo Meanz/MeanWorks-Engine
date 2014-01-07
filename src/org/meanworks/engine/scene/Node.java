@@ -14,7 +14,7 @@ import java.util.List;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Matrix4f;
 import org.meanworks.engine.RenderState;
-import org.meanworks.engine.bounding.BoundingBox;
+import org.meanworks.engine.bounding.AABoundingBox;
 import org.meanworks.engine.math.Transform;
 import org.meanworks.engine.util.QueuedLinkedList;
 
@@ -66,7 +66,7 @@ public class Node {
 	/*
 	 * The culling box for this node
 	 */
-	private BoundingBox cullingBox;
+	private AABoundingBox cullingBox;
 
 	/*
 	 * The transform of this node
@@ -93,7 +93,7 @@ public class Node {
 		transform = new Transform();
 		nodeInheritance = NodeInheritance.INHERIT_NONE;
 		needsUpdate = true;
-		cullingBox = new BoundingBox();
+		cullingBox = new AABoundingBox();
 		globalTransform = new Matrix4f();
 	}
 
@@ -101,7 +101,7 @@ public class Node {
 	 * Construct a new node
 	 */
 	public Node() {
-		this("node_" + SceneGraph.getNextNodeId());
+		this("node_" + Scene.getNextNodeId());
 	}
 
 	/**
@@ -109,7 +109,7 @@ public class Node {
 	 * 
 	 * @return
 	 */
-	public BoundingBox getCullingBox() {
+	public AABoundingBox getCullingBox() {
 		return cullingBox;
 	}
 

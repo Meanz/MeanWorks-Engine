@@ -72,14 +72,22 @@ public class Model extends Node {
 	}
 
 	/**
-	 * Clear the meshes contained in this model
+	 * Clear the meshes contained in this model, (WARNING: THIS DOES NOT DELETE
+	 * THE MESHES)
 	 */
 	public void clearMeshes() {
+		meshes.clear();
+	}
+
+	/**
+	 * Clear the meshes contained in this model
+	 */
+	public void deleteMeshes() {
 		/*
 		 * TODO: Improve mesh destroying
 		 */
 		for (Mesh mesh : meshes.values()) {
-			mesh.getMeshRenderer().clear();
+			mesh.delete();
 		}
 		meshes.clear();
 	}

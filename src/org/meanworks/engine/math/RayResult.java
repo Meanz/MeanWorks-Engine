@@ -1,6 +1,4 @@
-package org.meanworks.engine.render.geometry.mesh.renderers;
-
-import org.meanworks.engine.render.material.Material;
+package org.meanworks.engine.math;
 
 /**
  * Copyright (C) 2013 Steffen Evensen
@@ -20,18 +18,45 @@ import org.meanworks.engine.render.material.Material;
  * 
  * @author Meanz
  */
-public interface MeshRenderer {
-	
-	/**
-	 * Called the clear the data this renderer might contain
+public class RayResult {
+
+	/*
+	 * Whether or not the ray hit
 	 */
-	public void delete();
+	public boolean hit;
+
+	/*
+	 * The point where the ray hit
+	 */
+	public Vec3 hitPoint;
 
 	/**
-	 * Render the mesh
+	 * Construct a new RayResult
 	 * 
-	 * @param material
+	 * @param hit
+	 * @param hitPoint
 	 */
-	public void render(Material material);
+	public RayResult(boolean hit, Vec3 hitPoint) {
+		this.hit = hit;
+		this.hitPoint = hitPoint;
+	}
+
+	/**
+	 * Whether this ray result was successful or not
+	 * 
+	 * @return
+	 */
+	public boolean didHit() {
+		return hit;
+	}
+
+	/**
+	 * Get the point in space the ray collided with
+	 * 
+	 * @return
+	 */
+	public Vec3 getHitPoint() {
+		return hitPoint;
+	}
 
 }

@@ -8,7 +8,7 @@ import org.meanworks.engine.render.geometry.SkinnedModel;
 import org.meanworks.engine.render.geometry.animation.AnimationChannel;
 import org.meanworks.engine.render.geometry.animation.LoopMode;
 import org.meanworks.engine.scene.Node;
-import org.meanworks.engine.scene.SceneGraph;
+import org.meanworks.engine.scene.Scene;
 import org.meanworks.testgame.TestGame;
 
 public class Player extends Node {
@@ -22,7 +22,7 @@ public class Player extends Node {
 	 * 
 	 */
 	public Player() {
-		super("playerNode_" + SceneGraph.getNextNodeId());
+		super("playerNode_" + Scene.getNextNodeId());
 	}
 
 	/**
