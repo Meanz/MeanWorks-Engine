@@ -13,11 +13,11 @@ public class Ray {
 	/*
 	 * The ray origin
 	 */
-	public Vector3f origin;
+	public Vec3 origin;
 	/*
 	 * The ray direction
 	 */
-	public Vector3f direction;
+	public Vec3 direction;
 	/*
 	 * The minimum and maximum length of the ray
 	 */
@@ -30,7 +30,7 @@ public class Ray {
 	 * @param origin
 	 * @param direction
 	 */
-	public Ray(Vector3f origin, Vector3f direction) {
+	public Ray(Vec3 origin, Vec3 direction) {
 		this.origin = origin;
 		this.direction = direction;
 	}
@@ -58,7 +58,7 @@ public class Ray {
 	 * 
 	 * @return The origin point of this ray
 	 */
-	public Vector3f getOrigin() {
+	public Vec3 getOrigin() {
 		return origin;
 	}
 
@@ -67,7 +67,7 @@ public class Ray {
 	 * 
 	 * @return The direction of this ray
 	 */
-	public Vector3f getDirection() {
+	public Vec3 getDirection() {
 		return direction;
 	}
 

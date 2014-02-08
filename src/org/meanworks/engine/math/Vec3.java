@@ -1,6 +1,6 @@
 package org.meanworks.engine.math;
 
-import org.lwjgl.util.vector.Vector3f;
+import org.lwjgl.util.vector.Matrix4f;
 
 /**
  * Copyother (C) 2013 Steffen Evensen
@@ -113,6 +113,16 @@ public class Vec3 {
 	public Vec3 translate(Vec3 other) {
 		return add(other.x, other.y, other.z);
 	}
+	
+	/**
+	 * Translate this vector by the given matrix
+	 * 
+	 * @param other
+	 */
+	public Vec3 translate(Matrix4f other) {
+		return add(other.m30, other.m31, other.m32);
+	}
+
 
 	/**
 	 * Subtract this vector by the given values
@@ -290,5 +300,14 @@ public class Vec3 {
 			dls = 1.0f;
 		return (float) Math.acos(dls);
 	}
+	
+	
+	public Vec3 copy() {
+		return new Vec3(x, y, z);
+	}
 
+	@Override
+	public String toString() {
+		return "Vec3(" + x + ", " + y + ", " + z + ")";
+	}
 }

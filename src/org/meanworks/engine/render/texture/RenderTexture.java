@@ -1,7 +1,4 @@
-package org.meanworks.engine.asset.model;
-
-import org.meanworks.engine.EngineLogger;
-import org.meanworks.engine.render.geometry.Model;
+package org.meanworks.engine.render.texture;
 
 /**
  * Copyright (C) 2014 Steffen Evensen
@@ -21,19 +18,6 @@ import org.meanworks.engine.render.geometry.Model;
  *
  * @author Meanz
  */
-public class ModelLoader {
+public class RenderTexture {
 
-	public static Model loadModel(String modelFile) {
-		
-		if(modelFile.endsWith(".mwm")) {
-			return MWMLoader.loadModel(modelFile);
-		} else if(modelFile.endsWith(".obj")) {
-			return OBJLoader.loadModel(modelFile);
-		} else {
-			EngineLogger.error("Tried to load unknown model type " + modelFile);
-			return null;
-		}
-		
-	}
-	
 }

@@ -1,23 +1,39 @@
 package org.meanworks.engine.render.geometry;
 
+import static org.lwjgl.opengl.GL11.GL_LINES;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
+import static org.lwjgl.opengl.GL11.glBegin;
+import static org.lwjgl.opengl.GL11.glColor3f;
+import static org.lwjgl.opengl.GL11.glDisable;
+import static org.lwjgl.opengl.GL11.glEnd;
+import static org.lwjgl.opengl.GL11.glPopMatrix;
+import static org.lwjgl.opengl.GL11.glPushMatrix;
+import static org.lwjgl.opengl.GL11.glVertex3f;
+
+import java.math.BigDecimal;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 import org.lwjgl.BufferUtils;
+import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.util.vector.Vector4f;
+import org.lwjgl.util.vector.Matrix4f;
 import org.meanworks.engine.EngineLogger;
 import org.meanworks.engine.RenderState;
 import org.meanworks.engine.bounding.AABoundingBox;
+import org.meanworks.engine.core.Application;
+import org.meanworks.engine.gui.GuiHandler;
 import org.meanworks.engine.math.Ray;
 import org.meanworks.engine.math.RayResult;
 import org.meanworks.engine.math.Vec3;
+import org.meanworks.engine.math.VectorMath;
 import org.meanworks.engine.render.geometry.mesh.renderers.ImmediateRenderer;
 import org.meanworks.engine.render.geometry.mesh.renderers.MeshRenderer;
 import org.meanworks.engine.render.geometry.mesh.renderers.VAOMeshRenderer;
 import org.meanworks.engine.render.geometry.mesh.renderers.VAOMeshRenderer.BufferEntryType;
 import org.meanworks.engine.render.material.Material;
-import org.meanworks.engine.render.texture.Texture;
+import org.meanworks.engine.render.opengl.shader.ShaderProgram;
+import org.meanworks.engine.scene.Scene;
 
 /**
  * Copyright (C) 2013 Steffen Evensen
@@ -66,11 +82,6 @@ public class Mesh {
 	private Material meshMaterial;
 
 	/*
-	 * The texture for this mesh Temporary solution
-	 */
-	private Texture meshTexture;
-
-	/*
 	 * The axis aligned bounding box of this mesh
 	 */
 	private AABoundingBox aaBoundingBox;
@@ -80,7 +91,53 @@ public class Mesh {
 	 */
 	public Mesh() {
 		setMaterial(null);
-		setTexture(null);
+	}
+
+	/**
+	 * Calculate the bounding box of this Mesh
+	 */
+	public void calculateBoundingBox() {
+
+		Vec3 min = null;
+		Vec3 max = null;
+
+		for (int i = 0; i < positions.length / 3; i++) {
+
+			float x = positions[i * 3];
+			float y = positions[i * 3 + 1];
+			float z = positions[i * 3 + 2];
+
+			if (min == null || max == null) {
+
+				min = new Vec3(x, y, z);
+				max = new Vec3(x, y, z);
+
+				continue;
+			}
+
+			if (x < min.x) {
+				min.x = x;
+			}
+			if (y < min.y) {
+				min.y = y;
+			}
+			if (z < min.z) {
+				min.z = z;
+			}
+
+			if (x > max.x) {
+				max.x = x;
+			}
+			if (y > max.y) {
+				max.y = y;
+			}
+			if (z > max.z) {
+				max.z = z;
+			}
+		}
+
+		aaBoundingBox = new AABoundingBox(min, max);
+
 	}
 
 	/**
@@ -108,17 +165,116 @@ public class Mesh {
 	public RayResult castRay(Ray ray) {
 		// Just search all tiles and look for an intersection hehe
 		boolean didHit = false;
-		Vec3 hitPoint = null;
+		Vec3 hitPoint = new Vec3();
+		Triangle hitTriangle = null;
 
 		// We need to construct the geometry here
 		if (ray != null) {
-			if (aaBoundingBox != null) {
-				if (AABoundingBox.intersects(aaBoundingBox, ray)) {
+			//if (aaBoundingBox != null) {
+				
+				//if (AABoundingBox.intersects(aaBoundingBox, ray)) {
 					// Perform geometry tests
-				}
-			}
+					if (triangles != null) {
+
+						for (int i = 0; i < triangles.length; i += 3) {
+							// Construct triangles
+
+							//
+							int idx = triangles[i] * 3;
+
+							Vec3 p1 = new Vec3(positions[idx],
+									positions[idx + 1], positions[idx + 2]);
+
+							//
+							idx = triangles[i + 1] * 3;
+
+							Vec3 p2 = new Vec3(positions[idx],
+									positions[idx + 1], positions[idx + 2]);
+
+							//
+							idx = triangles[i + 2] * 3;
+
+							Vec3 p3 = new Vec3(positions[idx],
+									positions[idx + 1], positions[idx + 2]);
+							
+							
+							Matrix4f thisTransform = RenderState.getTransformMatrix();
+							
+							p1.translate(thisTransform);
+							p2.translate(thisTransform);
+							p3.translate(thisTransform);
+							
+							Matrix4f transform = Scene.getCamera().getModelMatrix();
+							
+							p1.translate(transform);
+							p2.translate(transform);
+							p3.translate(transform);
+							
+
+							Vec3 hitPos = VectorMath.intersectsTriangle(ray,
+									p1, p2, p3);
+							if (hitPos != null) {
+
+								didHit = true;
+
+								// Find the orientation of the triangle
+								
+								if (p1.x - p2.x > 0) {
+									
+									//Z-Forward
+									hitPoint.x = p1.x - (p1.x - p2.x)
+											* hitPos.x;
+									hitPoint.z = p1.z - (p1.z - p3.z)
+											* hitPos.y;
+									hitPoint.y = VectorMath
+											.getInterpolatedTriangleHeight(p1,
+													p3, p2, p1.x - hitPos.x,
+													p1.z + hitPos.y);
+								} else if(p2.z - p1.z > 0) {
+
+									//X-Forward
+									hitPoint.x = p3.x + ((p2.x - p3.x) * (1.0f - hitPos.y));
+									hitPoint.z = p1.z + ((p3.z - p1.z) * ((hitPos.x + hitPos.y) ));
+									hitPoint.y = VectorMath
+											.getInterpolatedTriangleHeight(
+													p1, p3, p2, 
+													p3.x - (1.0f - hitPos.y),
+													p1.z + (hitPos.x + hitPos.y));
+								} else if(p1.x - p2.x < 0) {
+									
+									//-Z-Forward
+									hitPoint.x = p1.x - (p1.x - p2.x)
+											* hitPos.x;
+									hitPoint.z = p1.z - (p1.z - p3.z)
+											* hitPos.y;
+									
+									
+									hitPoint.y = VectorMath
+											.getInterpolatedTriangleHeight(p1,
+													p3, p2, 
+													p1.x + hitPos.x,
+													p1.z - hitPos.y);
+								} else if(p1.z - p2.z < 0) {
+								
+									//-X-Forward
+									hitPoint.x = p3.x + ((p2.x - p3.x) * (1.0f - hitPos.y));
+									hitPoint.z = p1.z + ((p3.z - p1.z) * ((hitPos.x + hitPos.y) ));
+									hitPoint.y = VectorMath
+											.getInterpolatedTriangleHeight(
+													p1, p3, p2, 
+													p3.x - (1.0f - hitPos.y),
+													p1.z + (hitPos.x + hitPos.y));
+								}
+
+								break;
+							}
+						}
+
+					}
+				//}
+			//}
 		}
-		return new RayResult(didHit, hitPoint);
+		return new RayResult(didHit, hitPoint, hitTriangle);
 	}
 
 	/**
@@ -133,7 +289,6 @@ public class Mesh {
 					.deepCopy();
 			newMesh.meshRenderer = newMeshRenderer;
 		}
-		newMesh.setTexture(meshTexture);
 		newMesh.setMaterial(meshMaterial);
 		return newMesh;
 	}
@@ -161,15 +316,6 @@ public class Mesh {
 	}
 
 	/**
-	 * Set the texture of this mesh
-	 * 
-	 * @param texture
-	 */
-	public void setTexture(Texture texture) {
-		this.meshTexture = texture;
-	}
-
-	/**
 	 * This function uploads the data to the graphics card
 	 */
 	public boolean compile() {
@@ -190,10 +336,12 @@ public class Mesh {
 			return false;
 		}
 
+		calculateBoundingBox();
+
 		// Create the mesh renderer
 		VAOMeshRenderer renderer = new VAOMeshRenderer();
 		meshRenderer = renderer;
-		
+
 		if (positions != null) {
 			FloatBuffer fb = BufferUtils.createFloatBuffer(positions.length);
 			fb.put(positions);
@@ -217,8 +365,126 @@ public class Mesh {
 		ib.put(triangles);
 		ib.flip();
 		renderer.addIndex(ib, triangles.length);
-		
+
 		return renderer.compile();
+	}
+
+	/**
+	 * Round to certain number of decimals
+	 * 
+	 * @param d
+	 * @param decimalPlace
+	 * @return
+	 */
+	public static float round(float d, int decimalPlace) {
+		BigDecimal bd = new BigDecimal(Float.toString(d));
+		bd = bd.setScale(decimalPlace, BigDecimal.ROUND_HALF_UP);
+		return bd.floatValue();
+	}
+
+	/**
+	 * 
+	 */
+	public void renderBoundingBox() {
+		if (aaBoundingBox == null) {
+			System.err.println("AABB null");
+			return;
+		}
+
+		glDisable(GL11.GL_BLEND);
+		glDisable(GL11.GL_ALPHA_TEST);
+		glDisable(GL_TEXTURE_2D);
+		glColor3f(1.0f, 1.0f, 1.0f);
+
+		// Unbind any possible shaders
+		ShaderProgram.bindNone();
+
+		glPushMatrix();
+		{
+
+			org.meanworks.engine.render.opengl.ImmediateRenderer
+					.setupPerspective(Application.getApplication().getWindow()
+							.getWidth(), Application.getApplication()
+							.getWindow().getHeight(), 60);
+
+			// Move camera
+			Application.getApplication().getCamera().immediateCameraSetup();
+
+			Matrix4f matrix = RenderState.getTransformMatrix();
+			// FloatBuffer mat = BufferUtils.createFloatBuffer(16);
+			// matrix.store(mat);
+			// mat.flip();
+			// GL11.glMultMatrix(mat);
+
+			Vec3 min = aaBoundingBox.getMin();
+			Vec3 max = aaBoundingBox.getMax();
+
+			// Get the pick ray
+			Ray pickRay = Application.getApplication().getCamera()
+					.getPickRay(Mouse.getX(), Mouse.getY());
+
+			RayResult rr = castRay(pickRay);
+
+			if (rr.didHit()) {
+				glColor3f(1.0f, 0.0f, 0.0f);
+
+				Vec3 hitPoint = new Vec3(pickRay.origin.x
+						+ (pickRay.direction.x + rr.hitPoint.z),
+						pickRay.origin.y
+								+ (pickRay.direction.y + rr.hitPoint.z),
+						pickRay.origin.y
+								+ (pickRay.direction.z + rr.hitPoint.z)
+
+				);
+
+				org.meanworks.engine.render.opengl.ImmediateRenderer.drawPlane(
+						rr.hitPoint.x - 0.05f, rr.hitPoint.y - 0.05f,
+						rr.hitPoint.z - 0.05f, 0.1f, 0.1f);
+			}
+
+			glBegin(GL_LINES);
+			{
+				// min -> min.x + max.x
+				glVertex3f(min.x, min.y, min.z);
+				glVertex3f(max.x, min.y, min.z);
+				// min -> min.z + max.z
+				glVertex3f(min.x, min.y, min.z);
+				glVertex3f(min.x, min.y, max.z);
+				// min -> min.y + max.y
+				glVertex3f(min.x, min.y, min.z);
+				glVertex3f(min.x, max.y, min.z);
+
+				glVertex3f(min.x, max.y, min.z);
+				glVertex3f(max.x, max.y, min.z);
+
+				glVertex3f(min.x, max.y, min.z);
+				glVertex3f(min.x, max.y, max.z);
+
+				glVertex3f(max.x, max.y, min.z);
+				glVertex3f(max.x, max.y, max.z);
+
+				glVertex3f(min.x, max.y, max.z);
+				glVertex3f(max.x, max.y, max.z);
+
+				glVertex3f(max.x, min.y, max.z);
+				glVertex3f(max.x, max.y, max.z);
+
+				glVertex3f(max.x, min.y, max.z);
+				glVertex3f(min.x, min.y, max.z);
+
+				glVertex3f(max.x, min.y, max.z);
+				glVertex3f(max.x, min.y, min.z);
+
+				glVertex3f(min.x, min.y, max.z);
+				glVertex3f(min.x, max.y, max.z);
+
+				glVertex3f(max.x, min.y, min.z);
+				glVertex3f(max.x, max.y, min.z);
+			}
+			glEnd();
+
+		}
+		glPopMatrix();
 	}
 
 	/**
@@ -226,26 +492,17 @@ public class Mesh {
 	 */
 	public void render() {
 
+		// Immediate render the bounding box!!
+
+		calculateBoundingBox();
+
+		renderBoundingBox();
+
 		if (meshMaterial != null && meshRenderer != null) {
-
-			/*
-			 * TODO: Fix to suit the new material solution
-			 */
-			getMaterial().setProperty("vAmbientColor",
-					new Vector4f(0.5f, 0.5f, 0.5f, 1.0f));
-			getMaterial().setProperty("vDiffuseColor",
-					new Vector4f(1.0f, 1.0f, 1.0f, 1.0f));
-			getMaterial().setProperty("fSpecularIntensity", 30.0f);
-			getMaterial().setProperty("tColorMap", 0);
-
 			/*
 			 * Apply material
 			 */
-			if (meshTexture != null) {
-				meshMaterial.setProperty("tColorMap", 0);
-				RenderState.activeTexture(0);
-				meshTexture.bind();
-			}
+			getMaterial().apply();
 
 			// We can apply custom material properties here
 			// Dispatch the render call to the mesh renderer

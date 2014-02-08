@@ -10,6 +10,7 @@ import java.util.LinkedList;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.util.vector.Matrix4f;
+import org.meanworks.engine.asset.AssetManager;
 import org.meanworks.engine.core.Application;
 import org.meanworks.engine.render.geometry.Mesh;
 import org.meanworks.engine.render.geometry.Model;
@@ -23,7 +24,7 @@ import org.meanworks.engine.render.geometry.animation.Skeleton;
 import org.meanworks.engine.render.geometry.mesh.renderers.VAOMeshRenderer;
 
 /**
- * Copyright (C) 2013 Steffen Evensen
+ * Copyright (C) 2014 Steffen Evensen
  * 
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
@@ -254,9 +255,7 @@ public class MWMLoader {
 							// Find the root dir
 							System.err.println("Loaded texture " + textureFile);
 							File modelFile = new File(fileName);
-							mesh.setTexture(Application
-									.getApplication()
-									.getAssetManager()
+							mesh.getMaterial().setTexture(AssetManager
 									.loadTexture(
 											modelFile.getParentFile()
 													.toString()

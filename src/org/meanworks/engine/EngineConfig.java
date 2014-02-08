@@ -23,7 +23,7 @@ public class EngineConfig {
 	/*
 	 * The engine version
 	 */
-	public final static double MW_VERSION = 0.303d;
+	public final static double MW_VERSION = 0.401d;
 
 	/*
 	 * The max number of texture units available

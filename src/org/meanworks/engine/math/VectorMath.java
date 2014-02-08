@@ -55,53 +55,165 @@ public class VectorMath {
 		return Vector3f.cross(p1, p2, null);
 	}
 
-	public static boolean intersectsPlane(Ray ray, Vector3f planeNormal,
-			Vector3f intersectionPoint) {
-		float vdotn = dot(ray.direction, planeNormal);
+	public static boolean intersectsPlane(Ray ray, Vec3 planeNormal,
+			Vec3 intersectionPoint) {
+		float vdotn = ray.direction.dot(planeNormal);
 		if (vdotn == 0)
 			return false;
-		float t = -dot(ray.origin, planeNormal) / vdotn;
+		float t = -ray.origin.dot(planeNormal) / vdotn;
 		if (t > 0) {
-			intersectionPoint = add(ray.origin, mulLocal(ray.direction, t));
+			intersectionPoint = Vec3.add(ray.origin, ray.direction.scale(t));
 			return true;
 		} else
 			return false;
 	}
 
-	public static boolean intersectsTriangle(Ray ray, Vector3f p1, Vector3f p2,
-			Vector3f p3, Vector3f hitPoint) {
+	/**
+	 * 
+	 * @param p1
+	 * @param p2
+	 * @param p3
+	 * @param x
+	 * @param z
+	 * @return
+	 */
+	public static float getInterpolatedTriangleHeight(Vec3 p1, Vec3 p2, Vec3 p3, float x, float z) {
+		float det = (p2.z - p3.z) * (p1.x - p3.x) + (p3.x - p2.x)
+				* (p1.z - p3.z);
+
+		float l1 = ((p2.z - p3.z) * (x - p3.x) + (p3.x - p2.x) * (z - p3.z))
+				/ det;
+		float l2 = ((p3.z - p1.z) * (x - p3.x) + (p1.x - p3.x) * (z - p3.z))
+				/ det;
+		float l3 = 1.0f - l1 - l2;
+
+		return l1 * p1.y + l2 * p2.y + l3 * p3.y;
+	}
+
+	/**
+	 * Get the interpolated height value from the given x and y positions
+	 * 
+	 * @param xPos
+	 * @param zPos
+	 * @return
+	 */
+	public static float getInterpolatedQuadHeight(float xPos, float zPos, Vec3 p1,
+			Vec3 p2, Vec3 p3, Vec3 p4) {
+		float scaleFactor = 1.0f;
+		int x = (int) (xPos / scaleFactor);
+		int z = (int) (zPos / scaleFactor);
+		float triZ0 = (p2.y);
+		float triZ1 = (p1.y);
+		float triZ2 = (p3.y);
+		float triZ3 = (p4.y);
+		float height = 0.0f;
+		float sqX = (xPos / scaleFactor) - x;
+		float sqZ = (zPos / scaleFactor) - z;
+		if ((sqX + sqZ) < 1) {
+			height = triZ0;
+			height += (triZ1 - triZ0) * sqX;
+			height += (triZ2 - triZ0) * sqZ;
+		} else {
+			height = triZ3;
+			height += (triZ1 - triZ3) * (1.0f - sqZ);
+			height += (triZ2 - triZ3) * (1.0f - sqX);
+		}
+		return height;
+	}
+
+	public static Vec3 intersectsTriangle(Ray ray, Vec3 p1, Vec3 p2, Vec3 p3) {
+		Vec3 hitPoint = new Vec3();
+		float epsilon = 0.000001f;
+
+		Vec3 edge1 = Vec3.sub(p2, p1);
+		Vec3 edge2 = Vec3.sub(p3, p1);
+
+		Vec3 pvec = Vec3.cross(ray.direction, edge2);
+
+		//
+		// Check X
+		//
+		float det = edge1.dot(pvec);
+
+		if (det < epsilon)
+			return null;
+
+		Vec3 tvec = Vec3.sub(ray.origin, p1);
+
+		hitPoint.x = tvec.dot(pvec);
+
+		//
+		// Check Y
+		//
+		if (hitPoint.x < 0.0f || hitPoint.x > det)
+			return null;
+
+		Vec3 qvec = Vec3.cross(tvec, edge1);
+
+		hitPoint.y = ray.direction.dot(qvec);
+
+		if (hitPoint.y < 0.0f || hitPoint.x + hitPoint.y > det)
+			return null;
+
+		//
+		// Find Z
+		//
+		hitPoint.z = edge2.dot(qvec);
+
+		// Calculate hit position
+		float inv_det = 1.0f / det;
+		hitPoint.x *= inv_det;
+		hitPoint.y *= inv_det;
+		hitPoint.z *= inv_det;
+
+		return hitPoint;
+
+	}
+
+	/**
+	 * Checks whether the given ray intersects the given triangle
+	 * 
+	 * @param ray
+	 * @param p1
+	 * @param p2
+	 * @param p3
+	 * @param hitPoint
+	 * @return
+	 */
+	public static boolean intersectsTriangle(Ray ray, Vec3 p1, Vec3 p2,
+			Vec3 p3, Vec3 hitPoint) {
 		boolean HIT = true;
 		boolean MISS = false;
 		float epsilon = 0.000001f;
 		float det, inv_det;
 
-		Vector3f edge1, edge2, tvec, pvec, qvec;
+		Vec3 edge1, edge2, tvec, pvec, qvec;
 
-		edge1 = sub(p2, p1);
-		edge2 = sub(p3, p1);
+		edge1 = Vec3.sub(p2, p1);
+		edge2 = Vec3.sub(p3, p1);
 
-		pvec = cross(ray.direction, edge2);
+		pvec = Vec3.cross(ray.direction, edge2);
 
-		det = dot(edge1, pvec);
+		det = edge1.dot(pvec);
 
 		if (det < epsilon)
 			return MISS;
 
-		tvec = sub(ray.origin, p1);
+		tvec = Vec3.sub(ray.origin, p1);
 
-		hitPoint.x = dot(tvec, pvec);
+		hitPoint.x = tvec.dot(pvec);
 
 		if (hitPoint.x < 0.0f || hitPoint.x > det)
 			return MISS;
 
-		qvec = cross(tvec, edge1);
+		qvec = Vec3.cross(tvec, edge1);
 
-		hitPoint.y = dot(ray.direction, qvec);
+		hitPoint.y = ray.direction.dot(qvec);
 
 		if (hitPoint.y < 0.0f || hitPoint.x + hitPoint.y > det)
 			return MISS;
 
-		hitPoint.z = dot(edge2, qvec);
+		hitPoint.z = edge2.dot(qvec);
 		inv_det = 1.0f / det;
 		hitPoint.x *= inv_det;
 		hitPoint.y *= inv_det;

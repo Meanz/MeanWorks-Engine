@@ -3,7 +3,7 @@ package org.meanworks.engine.render.lighting;
 import org.lwjgl.util.vector.Vector3f;
 
 /**
- * Copyright (C) 2013 Steffen Evensen
+ * Copyright (C) 2014 Steffen Evensen
  * 
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software

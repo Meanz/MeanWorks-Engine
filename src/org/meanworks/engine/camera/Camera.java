@@ -155,12 +155,12 @@ public abstract class Camera {
 	 */
 	public Ray getWindowRay() {
 		float factor = (float) Math.cos(Math.toRadians(getPitch()));
-		Vector3f forward = new Vector3f();
+		Vec3 forward = new Vec3();
 		forward.x = (float) Math.sin(Math.toRadians(getYaw())) * factor;
 		forward.y = (float) Math.sin(Math.toRadians(-getPitch()));
 		forward.z = (float) -Math.cos(Math.toRadians(getYaw())) * factor;
-		forward.normalise();
-		return new Ray(new Vector3f(getPosition().x, getPosition().y,
+		forward.normalize();
+		return new Ray(new Vec3(getPosition().x, getPosition().y,
 				getPosition().z), forward);
 	}
 
@@ -409,9 +409,9 @@ public abstract class Camera {
 		// Create a forward vector
 		float factor = (float) Math.cos(Math.toRadians(rotation.x));
 		Vec3 forward = new Vec3((float) Math.sin(Math
-				.toRadians(rotation.y + 180.0f)) * factor,
+				.toRadians(rotation.y)) * factor,
 				(float) Math.sin(Math.toRadians(-rotation.x)),
-				(float) -Math.cos(Math.toRadians(rotation.y + 180.0f)) * factor);
+				(float) -Math.cos(Math.toRadians(rotation.y)) * factor);
 		forward.scale(100);
 		Vec3 center = new Vec3(cameraPosition.x + forward.x, cameraPosition.y
 				+ forward.y, cameraPosition.z + forward.z);
@@ -425,10 +425,10 @@ public abstract class Camera {
 		dirVec.add(zaxis);
 
 		float absLength = (float) Math.abs(dirVec.getLength());
-		Vector3f rayDirection = new Vector3f(dirVec.x / absLength, dirVec.y
+		Vec3 rayDirection = new Vec3(dirVec.x / absLength, dirVec.y
 				/ absLength, dirVec.z / absLength);
 
-		return new Ray(new Vector3f(eye.x, eye.y, eye.z), rayDirection);
+		return new Ray(new Vec3(eye.x, eye.y, eye.z), rayDirection);
 	}
 
 	/**

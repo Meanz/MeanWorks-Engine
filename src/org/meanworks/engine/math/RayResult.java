@@ -1,5 +1,7 @@
 package org.meanworks.engine.math;
 
+import org.meanworks.engine.render.geometry.Triangle;
+
 /**
  * Copyright (C) 2013 Steffen Evensen
  * 
@@ -29,6 +31,11 @@ public class RayResult {
 	 * The point where the ray hit
 	 */
 	public Vec3 hitPoint;
+	
+	/*
+	 * The hit triangle
+	 */
+	public Triangle hitTriangle;
 
 	/**
 	 * Construct a new RayResult
@@ -36,9 +43,10 @@ public class RayResult {
 	 * @param hit
 	 * @param hitPoint
 	 */
-	public RayResult(boolean hit, Vec3 hitPoint) {
+	public RayResult(boolean hit, Vec3 hitPoint, Triangle hitTriangle) {
 		this.hit = hit;
 		this.hitPoint = hitPoint;
+		this.hitTriangle = hitTriangle;
 	}
 
 	/**

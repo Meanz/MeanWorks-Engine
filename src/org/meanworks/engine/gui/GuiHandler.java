@@ -44,6 +44,25 @@ import org.meanworks.testgame.world.World;
  */
 public class GuiHandler implements KeyListener, MouseListener {
 
+	/**
+	 * 
+	 * @author Meanz
+	 *
+	 */
+	private static class GuiString {
+		
+		public String text;
+		public int x;
+		public int y;
+		
+		public GuiString(String text, int x, int y) {
+			this.text = text;
+			this.x = x;
+			this.y = y;
+		}
+		
+	}
+	
 	/*
 	 * Reference to the application controlling this gui handler
 	 */
@@ -74,6 +93,11 @@ public class GuiHandler implements KeyListener, MouseListener {
 	 * The root component
 	 */
 	private Component rootComponent;
+	
+	/**
+	 * The GuiStrings 
+	 */
+	private LinkedList<GuiString> guiStrings = new LinkedList<GuiString>();
 
 	/**
 	 * Constructor
@@ -162,6 +186,16 @@ public class GuiHandler implements KeyListener, MouseListener {
 			return false;
 		}
 	}
+	
+	/**
+	 * 
+	 * @param s
+	 * @param x
+	 * @param y
+	 */
+	public static void drawString(String s, int x, int y) {
+		Application.getApplication().getGui().guiStrings.add(new GuiString(s, x, y));
+	}
 
 	/**
 	 * The render function for the gui handler
@@ -181,6 +215,12 @@ public class GuiHandler implements KeyListener, MouseListener {
 				{
 					glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 					{
+						
+						for(GuiString string : guiStrings) {
+							fontRenderer.drawString(string.text, string.x, string.y);
+						}
+						guiStrings.clear();
+						
 						fontRenderer.drawString("FractalEngine v "
 								+ EngineConfig.MW_VERSION + " Alpha [DEBUG]",
 								10, 10);
