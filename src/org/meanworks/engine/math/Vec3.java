@@ -122,6 +122,15 @@ public class Vec3 {
 	public Vec3 translate(Matrix4f other) {
 		return add(other.m30, other.m31, other.m32);
 	}
+	
+	/**
+	 * Translate this vector by the given matrix
+	 * 
+	 * @param other
+	 */
+	public Vec3 translateN(Matrix4f other) {
+		return add(-other.m30, -other.m31, -other.m32);
+	}
 
 
 	/**

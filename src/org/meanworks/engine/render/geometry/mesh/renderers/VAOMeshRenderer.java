@@ -20,7 +20,7 @@ import org.meanworks.engine.EngineLogger;
 import org.meanworks.engine.RenderState;
 import org.meanworks.engine.core.Application;
 import org.meanworks.engine.render.material.Material;
-import org.meanworks.engine.render.opengl.ImmediateRenderer;
+import org.meanworks.engine.render.opengl.GLImmediate;
 import org.meanworks.engine.render.opengl.VertexBuffer;
 import org.meanworks.engine.render.opengl.VertexBuffer.BufferType;
 import org.meanworks.engine.render.opengl.VertexBuffer.BufferUsage;

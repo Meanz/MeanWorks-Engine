@@ -1,5 +1,6 @@
 package org.meanworks.engine.bounding;
 
+import org.lwjgl.util.vector.Vector3f;
 import org.meanworks.engine.math.Ray;
 import org.meanworks.engine.math.Vec3;
 
@@ -67,6 +68,17 @@ public class AABoundingBox {
 	 */
 	public Vec3 getMax() {
 		return max;
+	}
+
+	/**
+	 * Get a translated version of this bounding box
+	 * 
+	 * @return
+	 */
+	public AABoundingBox getTranslated(Vector3f translation) {
+		return new AABoundingBox(new Vec3(min.x + translation.x, min.y
+				+ translation.y, min.z + translation.z), new Vec3(max.x
+				+ translation.x, max.y + translation.y, max.z + translation.z));
 	}
 
 	/**

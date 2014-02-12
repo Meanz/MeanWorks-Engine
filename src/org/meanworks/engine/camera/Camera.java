@@ -396,7 +396,7 @@ public abstract class Camera {
 		// First we need to normalize the mouse coordinates
 		// To do that we need to know the height of the viewport
 		float fovy = fovY;
-		float fovx = 60.0f;
+		float fovx = 85.0f;
 		float mx = (float) mouseX;
 		float my = (float) mouseY;
 		float ww = (float) windowWidth;

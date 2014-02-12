@@ -199,6 +199,21 @@ public class Frustum {
 
 	/**
 	 * 
+	 * @param min
+	 * @param max
+	 * @param translation
+	 * @return
+	 */
+	public FrustumResult cubeInFrustumTranslated(Vec3 min, Vec3 max,
+			Matrix4f translation) {
+		return cubeInFrustum(
+		new Vec3(min.x + translation.m30, min.y + translation.m31, min.z
+				+ translation.m32), new Vec3(max.x + translation.m30, max.y
+				+ translation.m31, max.z + translation.m32));
+	}
+
+	/**
+	 * 
 	 * @param x
 	 * @param y
 	 * @param z
@@ -243,8 +258,7 @@ public class Frustum {
 		return (c2 == 6) ? FrustumResult.INSIDE
 				: FrustumResult.PARTIALLY_INSIDE;
 	}
-	
-	
+
 	/**
 	 * 
 	 * @param x

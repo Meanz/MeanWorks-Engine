@@ -20,9 +20,10 @@ import org.meanworks.engine.core.Application;
 import org.meanworks.engine.core.KeyListener;
 import org.meanworks.engine.core.MouseListener;
 import org.meanworks.engine.render.FontRenderer;
-import org.meanworks.engine.render.opengl.ImmediateRenderer;
+import org.meanworks.engine.render.opengl.GLImmediate;
+import org.meanworks.engine.render.opengl.Screen;
+import org.meanworks.engine.scene.Scene;
 import org.meanworks.engine.util.NumberFormatter;
-import org.meanworks.testgame.world.World;
 
 /**
  * Copyright (C) 2013 Steffen Evensen
@@ -47,22 +48,22 @@ public class GuiHandler implements KeyListener, MouseListener {
 	/**
 	 * 
 	 * @author Meanz
-	 *
+	 * 
 	 */
 	private static class GuiString {
-		
+
 		public String text;
 		public int x;
 		public int y;
-		
+
 		public GuiString(String text, int x, int y) {
 			this.text = text;
 			this.x = x;
 			this.y = y;
 		}
-		
+
 	}
-	
+
 	/*
 	 * Reference to the application controlling this gui handler
 	 */
@@ -93,9 +94,9 @@ public class GuiHandler implements KeyListener, MouseListener {
 	 * The root component
 	 */
 	private Component rootComponent;
-	
+
 	/**
-	 * The GuiStrings 
+	 * The GuiStrings
 	 */
 	private LinkedList<GuiString> guiStrings = new LinkedList<GuiString>();
 
@@ -111,8 +112,8 @@ public class GuiHandler implements KeyListener, MouseListener {
 		/*
 		 * We add components to this root component
 		 */
-		rootComponent = new Component("RootComponent", 0, 0, application
-				.getWindow().getWidth(), application.getWindow().getHeight()) {
+		rootComponent = new Component("RootComponent", 0, 0, Screen.getWidth(),
+				Screen.getHeight()) {
 
 			@Override
 			public void render() {
@@ -186,7 +187,7 @@ public class GuiHandler implements KeyListener, MouseListener {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * 
 	 * @param s
@@ -194,7 +195,8 @@ public class GuiHandler implements KeyListener, MouseListener {
 	 * @param y
 	 */
 	public static void drawString(String s, int x, int y) {
-		Application.getApplication().getGui().guiStrings.add(new GuiString(s, x, y));
+		Application.getApplication().getGui().guiStrings.add(new GuiString(s,
+				x, y));
 	}
 
 	/**
@@ -202,8 +204,7 @@ public class GuiHandler implements KeyListener, MouseListener {
 	 */
 	public void render() {
 
-		ImmediateRenderer.setupOrtho(0, application.getWindow().getWidth(), 0,
-				application.getWindow().getHeight());
+		GLImmediate.setupOrtho(0, Screen.getWidth(), 0, Screen.getHeight());
 
 		glLoadIdentity();
 		glDisable(GL_DEPTH_TEST);
@@ -215,26 +216,23 @@ public class GuiHandler implements KeyListener, MouseListener {
 				{
 					glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 					{
-						
-						for(GuiString string : guiStrings) {
-							fontRenderer.drawString(string.text, string.x, string.y);
+
+						for (GuiString string : guiStrings) {
+							fontRenderer.drawString(string.text, string.x,
+									string.y);
 						}
 						guiStrings.clear();
-						
+
 						fontRenderer.drawString("FractalEngine v "
 								+ EngineConfig.MW_VERSION + " Alpha [DEBUG]",
 								10, 10);
 						fontRenderer.drawString("FPS: " + application.getFps(),
 								10, 25);
 						fontRenderer.drawString("Cam("
-								+ application.getScene().getCamera()
-										.getPosition().x
-								+ ", "
-								+ application.getScene().getCamera()
-										.getPosition().y
-								+ ", "
-								+ application.getScene().getCamera()
-										.getPosition().z + ")", 10, 40);
+								+ Scene.getCamera().getPosition().x + ", "
+								+ Scene.getCamera().getPosition().y + ", "
+								+ Scene.getCamera().getPosition().z + ")", 10,
+								40);
 
 						fontRenderer
 								.drawString(

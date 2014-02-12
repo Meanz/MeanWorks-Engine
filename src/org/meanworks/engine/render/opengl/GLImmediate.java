@@ -1,6 +1,7 @@
 package org.meanworks.engine.render.opengl;
 
 import static org.lwjgl.opengl.GL11.GL_BLEND;
+import static org.lwjgl.opengl.GL11.GL_LINES;
 import static org.lwjgl.opengl.GL11.GL_MODELVIEW;
 import static org.lwjgl.opengl.GL11.GL_ONE_MINUS_SRC_ALPHA;
 import static org.lwjgl.opengl.GL11.GL_PROJECTION;
@@ -14,10 +15,10 @@ import static org.lwjgl.opengl.GL11.glEnable;
 import static org.lwjgl.opengl.GL11.glEnd;
 import static org.lwjgl.opengl.GL11.glLoadIdentity;
 import static org.lwjgl.opengl.GL11.glMatrixMode;
+import static org.lwjgl.opengl.GL11.glPushMatrix;
 import static org.lwjgl.opengl.GL11.glTexCoord2f;
 import static org.lwjgl.opengl.GL11.glVertex2f;
 import static org.lwjgl.opengl.GL11.glVertex3f;
-import static org.lwjgl.opengl.GL11.glPushMatrix;
 
 import java.nio.FloatBuffer;
 
@@ -25,10 +26,11 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
 import org.lwjgl.util.vector.Matrix4f;
+import org.meanworks.engine.math.Vec3;
 import org.meanworks.engine.render.geometry.Vertex;
 
 
-public class ImmediateRenderer {
+public class GLImmediate {
 
 	public static void setModelMatrix(Matrix4f matrix) {
 
@@ -38,6 +40,54 @@ public class ImmediateRenderer {
 		matrix.store(mat);
 		mat.flip();
 		GL11.glMultMatrix(mat);
+
+	}
+	
+	public static void color(Vec3 color) {
+		GL11.glColor3f(color.x, color.y, color.z);
+	}
+	
+	public static void lineBox(Vec3 min, Vec3 max) {
+		glBegin(GL_LINES);
+		{
+			// min -> min.x + max.x
+			glVertex3f(min.x, min.y, min.z);
+			glVertex3f(max.x, min.y, min.z);
+			// min -> min.z + max.z
+			glVertex3f(min.x, min.y, min.z);
+			glVertex3f(min.x, min.y, max.z);
+			// min -> min.y + max.y
+			glVertex3f(min.x, min.y, min.z);
+			glVertex3f(min.x, max.y, min.z);
+
+			glVertex3f(min.x, max.y, min.z);
+			glVertex3f(max.x, max.y, min.z);
+
+			glVertex3f(min.x, max.y, min.z);
+			glVertex3f(min.x, max.y, max.z);
+
+			glVertex3f(max.x, max.y, min.z);
+			glVertex3f(max.x, max.y, max.z);
+
+			glVertex3f(min.x, max.y, max.z);
+			glVertex3f(max.x, max.y, max.z);
+
+			glVertex3f(max.x, min.y, max.z);
+			glVertex3f(max.x, max.y, max.z);
+
+			glVertex3f(max.x, min.y, max.z);
+			glVertex3f(min.x, min.y, max.z);
+
+			glVertex3f(max.x, min.y, max.z);
+			glVertex3f(max.x, min.y, min.z);
+
+			glVertex3f(min.x, min.y, max.z);
+			glVertex3f(min.x, max.y, max.z);
+
+			glVertex3f(max.x, min.y, min.z);
+			glVertex3f(max.x, max.y, min.z);
+		}
+		glEnd();
 
 	}
 

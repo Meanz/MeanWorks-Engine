@@ -43,7 +43,7 @@ public class RayResult {
 	 * @param hit
 	 * @param hitPoint
 	 */
-	public RayResult(boolean hit, Vec3 hitPoint, Triangle hitTriangle) {
+	public RayResult(boolean hit, Vec3 hitPoint) {
 		this.hit = hit;
 		this.hitPoint = hitPoint;
 		this.hitTriangle = hitTriangle;

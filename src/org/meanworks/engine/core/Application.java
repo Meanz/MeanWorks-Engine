@@ -15,7 +15,7 @@ import org.meanworks.engine.gui.GuiHandler;
 import org.meanworks.engine.gui.impl.Console;
 import org.meanworks.engine.gui.impl.PerformanceGraph;
 import org.meanworks.engine.render.material.Material;
-import org.meanworks.engine.render.opengl.GLWindow;
+import org.meanworks.engine.render.opengl.Screen;
 import org.meanworks.engine.scene.Scene;
 import org.meanworks.engine.scripts.ScriptHandler;
 import org.meanworks.engine.util.Timer;
@@ -61,7 +61,7 @@ public abstract class Application implements Runnable {
 	/*
 	 * The application window
 	 */
-	private GLWindow window = null;
+	private Screen window = null;
 
 	/*
 	 * The input handler for the application
@@ -187,7 +187,7 @@ public abstract class Application implements Runnable {
 	/**
 	 * @return the window
 	 */
-	public GLWindow getWindow() {
+	public Screen getWindow() {
 		return window;
 	}
 
@@ -195,7 +195,7 @@ public abstract class Application implements Runnable {
 	 * @param window
 	 *            the window to set
 	 */
-	public void setWindow(GLWindow window) {
+	public void setWindow(Screen window) {
 		this.window = window;
 	}
 

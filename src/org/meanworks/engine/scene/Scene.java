@@ -181,11 +181,11 @@ public class Scene {
 				.getApplication()
 				.getCamera()
 				.getFrustum()
-				.cubeInFrustum(node.getCullingBox().getMin(),
-						node.getCullingBox().getMax());
+				.cubeInFrustumTranslated(node.getCullingBox().getMin(),
+						node.getCullingBox().getMax(), node.getGlobalTransform());
 		if (result == FrustumResult.INSIDE
 				|| result == FrustumResult.PARTIALLY_INSIDE) {
-			didCull = false;
+			didCull = true;
 		}
 		if (!didCull) {
 			node.doRender();

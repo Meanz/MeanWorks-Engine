@@ -5,12 +5,12 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.PixelFormat;
 
-public class GLWindow {
+public class Screen {
 
 	/*
 	 * The currently active window instance
 	 */
-	private static GLWindow windowInstance;
+	private static Screen windowInstance;
 
 	/*
 	 * Window size
@@ -29,8 +29,8 @@ public class GLWindow {
 	 * 
 	 * @return
 	 */
-	public int getWidth() {
-		return windowWidth;
+	public static int getWidth() {
+		return windowInstance.windowWidth;
 	}
 
 	/**
@@ -38,8 +38,8 @@ public class GLWindow {
 	 * 
 	 * @return
 	 */
-	public int getHeight() {
-		return windowHeight;
+	public static int getHeight() {
+		return windowInstance.windowHeight;
 	}
 
 	/**
@@ -47,8 +47,8 @@ public class GLWindow {
 	 * 
 	 * @return
 	 */
-	public float getAspect() {
-		return windowWidth / windowHeight;
+	public static float getAspect() {
+		return ((float)windowInstance.windowWidth / windowInstance.windowHeight);
 	}
 
 	/**
@@ -58,7 +58,7 @@ public class GLWindow {
 	 * @param height
 	 * @return
 	 */
-	public static GLWindow createWindow(int width, int height) {
+	public static Screen createWindow(int width, int height) {
 
 		int monWidth = java.awt.Toolkit.getDefaultToolkit().getScreenSize().width;
 		int monHeight = java.awt.Toolkit.getDefaultToolkit().getScreenSize().height;
@@ -73,8 +73,8 @@ public class GLWindow {
 	 * @param width
 	 * @param height
 	 */
-	public static GLWindow createWindow(int width, int height, int x, int y) {
-		windowInstance = new GLWindow();
+	public static Screen createWindow(int width, int height, int x, int y) {
+		windowInstance = new Screen();
 		windowInstance.pixelFormat = new PixelFormat(0, 8, 0);
 		windowInstance.displayMode = new DisplayMode(width, height);
 		windowInstance.windowWidth = width;
@@ -98,10 +98,10 @@ public class GLWindow {
 	 * @param newHeight
 	 * @return
 	 */
-	public boolean resize(int newWidth, int newHeight) {
-		displayMode = new DisplayMode(newWidth, newHeight);
+	public static boolean resize(int newWidth, int newHeight) {
+		windowInstance.displayMode = new DisplayMode(newWidth, newHeight);
 		try {
-			Display.setDisplayMode(displayMode);
+			Display.setDisplayMode(windowInstance.displayMode);
 			return true;
 		} catch (LWJGLException e) {
 			e.printStackTrace();

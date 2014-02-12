@@ -2,7 +2,7 @@ package org.meanworks.engine.gui;
 
 import org.lwjgl.opengl.GL11;
 import org.meanworks.engine.EngineLogger;
-import org.meanworks.engine.render.opengl.ImmediateRenderer;
+import org.meanworks.engine.render.opengl.GLImmediate;
 import org.meanworks.engine.render.texture.Texture;
 import org.meanworks.engine.render.texture.TextureLoader;
 
@@ -76,7 +76,7 @@ public class Image extends Component {
 			GL11.glColor3f(1.0f, 1.0f, 1.0f);
 			GL11.glEnable(GL11.GL_TEXTURE_2D);
 			imageTexture.bind();
-			ImmediateRenderer.drawTexturedQuad(getX(), getY(),
+			GLImmediate.drawTexturedQuad(getX(), getY(),
 					imageTexture.getWidth(), imageTexture.getHeight());
 		}
 	}

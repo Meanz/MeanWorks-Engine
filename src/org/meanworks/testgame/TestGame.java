@@ -22,8 +22,8 @@ import org.meanworks.engine.math.Ray;
 import org.meanworks.engine.math.Vec3;
 import org.meanworks.engine.render.geometry.Model;
 import org.meanworks.engine.render.geometry.Vertex;
-import org.meanworks.engine.render.opengl.GLWindow;
-import org.meanworks.engine.render.opengl.ImmediateRenderer;
+import org.meanworks.engine.render.opengl.Screen;
+import org.meanworks.engine.render.opengl.GLImmediate;
 import org.meanworks.engine.render.opengl.shader.ShaderProgram;
 import org.meanworks.engine.render.texture.Texture;
 import org.meanworks.engine.util.Util;
@@ -98,7 +98,7 @@ public class TestGame extends Application {
 	@Override
 	public void setup() {
 		Util.loadLWJGL();
-		setWindow(GLWindow.createWindow(1200, 800));
+		setWindow(Screen.createWindow(1200, 800));
 	}
 
 	/*
@@ -281,8 +281,8 @@ public class TestGame extends Application {
 
 		// Texture.enable();
 		waterTexture.bind();
-		ImmediateRenderer.enableBlending();
-		ImmediateRenderer.drawPlane(world.getWorldX() * Region.REGION_WIDTH
+		GLImmediate.enableBlending();
+		GLImmediate.drawPlane(world.getWorldX() * Region.REGION_WIDTH
 				- world.VIEW_DISTANCE * Region.REGION_WIDTH, 100.0f,
 				world.getWorldY() * Region.REGION_WIDTH - world.VIEW_DISTANCE
 						* Region.REGION_HEIGHT, world.getWorldX()
@@ -290,7 +290,7 @@ public class TestGame extends Application {
 						* Region.REGION_WIDTH, world.getWorldY()
 						* Region.REGION_WIDTH - world.VIEW_DISTANCE
 						* Region.REGION_HEIGHT);
-		ImmediateRenderer.disableBlending();
+		GLImmediate.disableBlending();
 		waterShader.useNone();
 
 		// Draw the gui
@@ -337,9 +337,9 @@ public class TestGame extends Application {
 		glColor4f(1.0f, 1.0f, 1.0f, 0.4f);
 
 		Texture.disable();
-		ImmediateRenderer.enableBlending();
-		ImmediateRenderer.drawPlane(p1, p2, p3, p4);
-		ImmediateRenderer.disableBlending();
+		GLImmediate.enableBlending();
+		GLImmediate.drawPlane(p1, p2, p3, p4);
+		GLImmediate.disableBlending();
 	}
 
 	/**
