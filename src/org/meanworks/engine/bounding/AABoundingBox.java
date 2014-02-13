@@ -75,7 +75,7 @@ public class AABoundingBox {
 	 * 
 	 * @return
 	 */
-	public AABoundingBox getTranslated(Vector3f translation) {
+	public AABoundingBox getTranslated(Vec3 translation) {
 		return new AABoundingBox(new Vec3(min.x + translation.x, min.y
 				+ translation.y, min.z + translation.z), new Vec3(max.x
 				+ translation.x, max.y + translation.y, max.z + translation.z));

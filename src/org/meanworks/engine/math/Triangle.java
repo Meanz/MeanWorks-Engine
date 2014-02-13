@@ -1,4 +1,4 @@
-package org.meanworks.engine.render.geometry;
+package org.meanworks.engine.math;
 
 import org.lwjgl.opengl.GL11;
 

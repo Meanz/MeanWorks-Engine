@@ -1,8 +1,6 @@
-package org.meanworks.engine.render.geometry;
+package org.meanworks.engine.math;
 
 import org.lwjgl.util.vector.Vector2f;
-import org.meanworks.engine.math.Vec2;
-import org.meanworks.engine.math.Vec3;
 
 public class Vertex {
 

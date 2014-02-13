@@ -185,7 +185,7 @@ public class Scene {
 						node.getCullingBox().getMax(), node.getGlobalTransform());
 		if (result == FrustumResult.INSIDE
 				|| result == FrustumResult.PARTIALLY_INSIDE) {
-			didCull = true;
+			didCull = false;
 		}
 		if (!didCull) {
 			node.doRender();

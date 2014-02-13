@@ -92,6 +92,15 @@ public class Mesh {
 	}
 
 	/**
+	 * Get the bounding box for this mesh
+	 * 
+	 * @return
+	 */
+	public AABoundingBox getAABoundingBox() {
+		return aaBoundingBox;
+	}
+
+	/**
 	 * Calculate the bounding box of this Mesh
 	 */
 	public void calculateBoundingBox() {
@@ -195,13 +204,15 @@ public class Mesh {
 							positions[idx + 2]);
 
 					Matrix4f thisTransform = RenderState.getTransformMatrix();
+					if (thisTransform != null) {
+						p1.translate(thisTransform);
+						p2.translate(thisTransform);
+						p3.translate(thisTransform);
+					}
 
-					p1.translate(thisTransform);
-					p2.translate(thisTransform);
-					p3.translate(thisTransform);
-					
-					Matrix4f cameraTransform = Scene.getCamera().getModelMatrix();
-					
+					Matrix4f cameraTransform = Scene.getCamera()
+							.getModelMatrix();
+
 					p1.translateN(cameraTransform);
 					p2.translateN(cameraTransform);
 					p3.translateN(cameraTransform);
@@ -348,11 +359,11 @@ public class Mesh {
 		glColor3f(1.0f, 1.0f, 1.0f);
 
 		// Unbind any possible shaders
-		ShaderProgram.bindNone();
+		RenderState.clearState();
 
 		glPushMatrix();
 		{
-			
+
 			// Get the pick ray
 			Ray pickRay = Application.getApplication().getCamera()
 					.getPickRay(Mouse.getX(), Mouse.getY());
@@ -375,12 +386,12 @@ public class Mesh {
 						rr.hitPoint.y - 0.05f, rr.hitPoint.z - 0.05f, 0.1f,
 						0.1f);
 			}
-			
-			//Translate
-			Matrix4f mat = RenderState.getTransformMatrix();
-			
-			GL11.glTranslatef(mat.m30, mat.m31, mat.m32);
 
+			// Translate
+			Matrix4f mat = RenderState.getTransformMatrix();
+			if (mat != null) {
+				GL11.glTranslatef(mat.m30, mat.m31, mat.m32);
+			}
 			Vec3 min = aaBoundingBox.getMin();
 			Vec3 max = aaBoundingBox.getMax();
 

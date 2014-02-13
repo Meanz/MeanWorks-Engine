@@ -27,7 +27,7 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
 import org.lwjgl.util.vector.Matrix4f;
 import org.meanworks.engine.math.Vec3;
-import org.meanworks.engine.render.geometry.Vertex;
+import org.meanworks.engine.math.Vertex;
 
 
 public class GLImmediate {

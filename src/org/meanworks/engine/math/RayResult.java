@@ -1,6 +1,5 @@
 package org.meanworks.engine.math;
 
-import org.meanworks.engine.render.geometry.Triangle;
 
 /**
  * Copyright (C) 2013 Steffen Evensen

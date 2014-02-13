@@ -457,7 +457,7 @@ public class VAOMeshRenderer implements MeshRenderer {
 			 * Update matrices
 			 */
 			material.setProperty("mProjectionView",
-					RenderState.getProjectionMatrix());
+					RenderState.getProjectionViewMatrix());
 			material.setProperty("mModelMatrix",
 					RenderState.getTransformMatrix());
 

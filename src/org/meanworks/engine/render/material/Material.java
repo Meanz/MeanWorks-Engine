@@ -2,6 +2,7 @@ package org.meanworks.engine.render.material;
 
 import java.util.HashMap;
 
+import org.lwjgl.opengl.GL11;
 import org.meanworks.engine.EngineConfig;
 import org.meanworks.engine.EngineLogger;
 import org.meanworks.engine.RenderState;
@@ -29,7 +30,7 @@ public class Material {
 	private ShaderProgram shaderProgram = null;
 
 	/**
-	 * The textures for this material 
+	 * The textures for this material
 	 */
 	private Texture[] textures = new Texture[EngineConfig.MAX_TEXTURE_UNITS];
 
@@ -77,13 +78,19 @@ public class Material {
 	 * @param texture
 	 */
 	public void setTexture(int slot, Texture texture) {
-
 		if (slot > textures.length || slot < 0) {
 			throw new RuntimeException(
 					"Material.setTexture(slot, texture) slot out of bounds "
 							+ slot);
 		}
 		textures[slot] = texture;
+	}
+
+	/**
+	 * Clear the properties
+	 */
+	public void clearProperties() {
+		properties.clear();
 	}
 
 	/**
@@ -118,6 +125,7 @@ public class Material {
 
 		for (int i = 0; i < textures.length; i++) {
 			if (textures[i] != null) {
+				GL11.glEnable(GL11.GL_TEXTURE_2D);
 				RenderState.activeTexture(i);
 				textures[i].bind();
 			}

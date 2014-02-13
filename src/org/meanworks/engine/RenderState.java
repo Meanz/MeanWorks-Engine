@@ -47,7 +47,7 @@ public class RenderState {
 	/*
 	 * The matrices that we are going to use for the next rendering call
 	 */
-	private static Matrix4f projectionMatrix;
+	private static Matrix4f projectionViewMatrix;
 	private static Matrix4f transformMatrix;
 
 	/**
@@ -55,8 +55,8 @@ public class RenderState {
 	 * 
 	 * @return
 	 */
-	public static Matrix4f getProjectionMatrix() {
-		return projectionMatrix;
+	public static Matrix4f getProjectionViewMatrix() {
+		return projectionViewMatrix;
 	}
 
 	/**
@@ -68,13 +68,14 @@ public class RenderState {
 		return transformMatrix;
 	}
 
+
 	/**
 	 * Set the projection matrix that will be used the next draw call
 	 * 
-	 * @param projectionMatrix
+	 * @param projectionViewMatrix
 	 */
-	public static void setProjectionMatrix(Matrix4f projectionMatrix) {
-		RenderState.projectionMatrix = projectionMatrix;
+	public static void setProjectionViewMatrix(Matrix4f projectionViewMatrix) {
+		RenderState.projectionViewMatrix = projectionViewMatrix;
 	}
 
 	/**

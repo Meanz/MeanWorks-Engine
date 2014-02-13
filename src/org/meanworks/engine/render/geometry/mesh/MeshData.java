@@ -2,10 +2,10 @@ package org.meanworks.engine.render.geometry.mesh;
 
 import org.lwjgl.util.vector.Vector2f;
 import org.meanworks.engine.EngineLogger;
+import org.meanworks.engine.math.Triangle;
 import org.meanworks.engine.math.Vec2;
 import org.meanworks.engine.math.Vec3;
-import org.meanworks.engine.render.geometry.Triangle;
-import org.meanworks.engine.render.geometry.Vertex;
+import org.meanworks.engine.math.Vertex;
 
 /**
  * A class you can feed to a mesh and it will build a mesh out of the data

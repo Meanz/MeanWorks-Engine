@@ -138,7 +138,7 @@ public class Model extends Node {
 		/*
 		 * Update the render state with this model's transform
 		 */
-		RenderState.setProjectionMatrix(Application.getApplication()
+		RenderState.setProjectionViewMatrix(Application.getApplication()
 				.getCamera().getProjectionViewMatrix());
 		RenderState.setTransformMatrix(getGlobalTransform());
 		/*

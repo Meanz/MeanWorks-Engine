@@ -23,6 +23,20 @@ import org.lwjgl.util.vector.Vector3f;
  */
 public class Transform {
 
+	/**
+	 * 
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @return
+	 */
+	public static Transform fromXYZ(float x, float y, float z) {
+		Transform transform = new Transform();
+		transform.setPosition(x, y, z);
+		transform.calculateTransformMatrix();
+		return transform;
+	}
+
 	/*
 	 * The transform matrix
 	 */
