@@ -98,7 +98,7 @@ public class TerrainMeshGenerator {
 	 * 
 	 * @return
 	 */
-	public boolean generate() {
+	public boolean generate(int lod) {
 
 		if (mesh == null || heightProvider == null) {
 			return false;

@@ -42,9 +42,10 @@ public class TerrainChunk {
 		this.chunkX = chunkX;
 		this.chunkZ = chunkZ;
 	}
-	
+
 	/**
 	 * Get the terrain mesh
+	 * 
 	 * @return
 	 */
 	public Mesh getMesh() {
@@ -86,17 +87,26 @@ public class TerrainChunk {
 
 						@Override
 						public float getHeight(int x, int y) {
-							if(pn == null) {
+							if (pn == null) {
 								this.cX = chunkX;
 								this.cY = chunkZ;
 								pn = new PerlinNoise();
 								pn.setSeed(5555);
 							}
-							return (float)pn.getHeight((double)(cX * terrain.chunkResolution + x), (double)(cY * terrain.chunkResolution + y)) - 100f;
+							return (float) pn
+									.getHeight(
+											(double) (cX
+													* terrain.chunkResolution + x),
+											(double) (cY
+													* terrain.chunkResolution + y)) - 100f;
 						}
 					});
 			tmg.setChunkSize(terrain.chunkResolution, terrain.chunkResolution);
-			if (!tmg.generate()) {
+
+			int lod = (int) terrain.getViewerPosition().dist2D(chunkX * 16,
+					chunkZ * 16);
+
+			if (!tmg.generate(lod > 16 ? lod > 32 ? 2 : 1 : 0)) {
 				throw new RuntimeException("Could not compile terrain mesh["
 						+ chunkX + ", " + chunkZ + "]");
 			}

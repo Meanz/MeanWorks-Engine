@@ -1,14 +1,12 @@
 package org.meanworks.terrain;
 
-import java.util.LinkedList;
-
 import org.lwjgl.util.vector.Matrix4f;
-import org.lwjgl.util.vector.Vector3f;
 import org.meanworks.engine.RenderState;
 import org.meanworks.engine.core.Application;
 import org.meanworks.engine.gui.GuiHandler;
 import org.meanworks.engine.math.FrustumResult;
 import org.meanworks.engine.math.Transform;
+import org.meanworks.engine.math.Vec2i;
 import org.meanworks.engine.math.Vec3;
 import org.meanworks.engine.render.geometry.Mesh;
 import org.meanworks.engine.scene.Node;
@@ -57,15 +55,31 @@ public class Terrain extends Node {
 	/**
 	 * The chunk cache
 	 */
-	private LinkedList<TerrainChunk> chunkCache = new LinkedList<TerrainChunk>();
+	private TerrainChunk[] chunks;
 
 	/**
-	 * 
+	 * The last update coordinates
+	 */
+	private Vec2i chunkOrigo;
+
+	/**
+	 * Construct a new Terrain
 	 */
 	public Terrain() {
 		viewerPosition = new Vec3();
 		viewDistance = 6; // 3 chunks in each direction
-		chunkResolution = 64; // 16 cubic tiles for each chunk 16x16
+		chunkResolution = 32; // 16 cubic tiles for each chunk 16x16
+		chunks = new TerrainChunk[(int) Math.pow(viewDistance * 2, 2)]; // Diameter^2
+		chunkOrigo = new Vec2i(-viewDistance, -viewDistance);
+	}
+
+	/**
+	 * Get the viewer position of this terrain
+	 * 
+	 * @return
+	 */
+	public Vec3 getViewerPosition() {
+		return viewerPosition;
 	}
 
 	/**
@@ -85,20 +99,77 @@ public class Terrain extends Node {
 	 * @return
 	 */
 	private TerrainChunk getChunk(int chunkX, int chunkZ) {
+		// The bottom left corner of the chunks
+		int chunk0X = chunkOrigo.x - viewDistance;
+		int chunk0Z = chunkOrigo.y - viewDistance;
 
-		// Access the chunk cache
-		for (TerrainChunk chunk : chunkCache) {
-			if (chunk != null) {
-				if (chunk.getChunkX() == chunkX && chunk.getChunkZ() == chunkZ) {
-					return chunk;
+		// Check bounds
+		if (chunkX < chunk0X || chunkZ < chunk0Z
+				|| chunkX >= chunk0X + (viewDistance * 2)
+				|| chunkZ >= chunk0Z + (viewDistance * 2)
+				|| chunkX < 0 || chunkZ < 0) {
+
+			// If this chunk is out of bounds, return null,
+			// Because that means it's not loaded
+			return null;
+
+		} else {
+			// Return the ch0nk!
+			return chunks[(chunkX - chunk0X) + ((chunkZ - chunk0Z) * viewDistance * 2)];
+		}
+	}
+
+	/**
+	 * Check if any chunks needs updates
+	 */
+	public void checkForUpdates() {
+
+		// Get the current viewer position
+		int viewerChunkX = (int) (viewerPosition.x / chunkResolution);
+		int viewerChunkZ = (int) (viewerPosition.z / chunkResolution);
+
+		if (viewerChunkX != chunkOrigo.x || viewerChunkZ != chunkOrigo.y) {
+
+			// We need a chunk update!
+
+			// Pos 0 for the chunk cache
+			int chunk0X = viewerChunkX - viewDistance;
+			int chunk0Z = viewerChunkZ - viewDistance;
+
+			// Populate the chunks
+			TerrainChunk[] newChunkCache = new TerrainChunk[(int) Math.pow(
+					viewDistance * 2, 2)];
+
+			for (int x = chunk0X; x < chunk0X + (viewDistance * 2); x++) {
+				for (int z = chunk0Z; z < chunk0Z + (viewDistance * 2); z++) {
+
+					// can we fetch this chunk from the previous cache
+					int arrPos = (x - chunk0X)
+							+ ((z - chunk0Z) * viewDistance * 2);
+
+					TerrainChunk chunk = getChunk(x, z);
+					if (chunk != null) {
+						newChunkCache[arrPos] = chunk;
+					} else {
+						// Create a new chunk
+						newChunkCache[arrPos] = new TerrainChunk(x, z);
+					}
+
 				}
 			}
+
+			// Move arrays
+			chunks = newChunkCache;
+
+			// TODO: Release the graphics card data from the chunks no longer in
+			// use
+
+			System.err.println("Updated chunks.");
 		}
 
-		// This means that no chunk was found, create a new one.
-		TerrainChunk chunk = new TerrainChunk(chunkX, chunkZ);
-		chunkCache.add(chunk);
-		return chunk;
+		chunkOrigo.x = viewerChunkX;
+		chunkOrigo.y = viewerChunkZ;
+
 	}
 
 	/**
@@ -112,6 +183,11 @@ public class Terrain extends Node {
 		renderedChunks = 0;
 
 		/*
+		 * Check for updates
+		 */
+		checkForUpdates();
+
+		/*
 		 * Update the render state with this model's transform
 		 */
 		RenderState.setProjectionViewMatrix(Scene.getCamera()
@@ -120,52 +196,77 @@ public class Terrain extends Node {
 		GuiHandler.drawString("ViewerPosition: " + viewerPosition.x + " / "
 				+ viewerPosition.z, 10, 200);
 
-		for (int x = -viewDistance; x < viewDistance; x++) {
-			for (int y = -viewDistance; y < viewDistance; y++) {
+		GuiHandler.drawString("ChunkPos( " + chunkOrigo.x + " / "
+				+ chunkOrigo.y + " )", 10, 250);
+		GuiHandler.drawString("View distance: " + viewDistance, 10, 275);
 
-				// Calculate chunk
-				int chunkX = (int) ((viewerPosition.x / chunkResolution) + x);
-				int chunkZ = (int) ((viewerPosition.z / chunkResolution) + y);
+		int drawY = 275;
 
+		// Update chunk cache to match accordingly
+		int viewerChunkX = (int) (viewerPosition.x / chunkResolution);
+		int viewerChunkZ = (int) (viewerPosition.z / chunkResolution);
+
+		// Pos 0 for the chunk cache
+		int chunk0X = viewerChunkX - viewDistance;
+		int chunk0Z = viewerChunkZ - viewDistance;
+
+		// Render all chunks
+		for (int x = chunk0X; x < chunk0X + (viewDistance * 2); x++) {
+			for (int z = chunk0Z; z < chunk0Z + (viewDistance * 2); z++) {
 				// For now ignore max boundaries :D
-				if (chunkX >= 0 && chunkZ >= 0) {
+				if (x >= 0 && z >= 0) {
 
 					// Now we need a system to store meshes in
-					TerrainChunk chunk = getChunk(chunkX, chunkZ);
+					TerrainChunk chunk = getChunk(x, z);
 
-					RenderState.setTransformMatrix(Transform.fromXYZ(
-							(chunkX * chunkResolution), 0.0f,
-							(chunkZ * chunkResolution)).getTransformMatrix());
-
+					// If the chunk is null? bugged? or could not load? Anywho,
+					// we can't render it
+					// Another process have to clean this up
 					if (chunk == null) {
 						continue;
 					}
-					
+
+					// Set transformation
+					RenderState.setTransformMatrix(Transform.fromXYZ(
+							(x * chunkResolution), 0.0f, (z * chunkResolution))
+							.getTransformMatrix());
+
+					// Get the mesh from the chunk
 					Mesh mesh = chunk.getMesh();
-					if(mesh == null) {
+					if (mesh == null) {
+						// Render without culling,
+						// Since this process will create the chunk
 						chunk.render(this);
 						renderedChunks++;
 					} else {
 						// Do culling :p
 						Matrix4f mat4 = new Matrix4f();
-						mat4.m30 = (chunkX * chunkResolution);
+						mat4.m30 = (x * chunkResolution);
 						mat4.m31 = 0.0f;
-						mat4.m32 = (chunkZ * chunkResolution);
-								
-						
+						mat4.m32 = (z * chunkResolution);
+
 						FrustumResult result = Application
 								.getApplication()
 								.getCamera()
 								.getFrustum()
 								.cubeInFrustumTranslated(
 										mesh.getAABoundingBox().getMin(),
-										mesh.getAABoundingBox().getMax(),
-										mat4
-										);
+										mesh.getAABoundingBox().getMax(), mat4);
 						if (result == FrustumResult.INSIDE
 								|| result == FrustumResult.PARTIALLY_INSIDE) {
 							chunk.render(this);
 							renderedChunks++;
+
+							// Check if we are hovering any chunks for debugging
+							// purposes
+							if (mesh.castRay().didHit()) {
+
+								//
+								GuiHandler.drawString("Hit Chunk: " + x + " / "
+										+ z, 10, (drawY += 25));
+
+							}
+
 						}
 					}
 

@@ -164,6 +164,18 @@ public class Mesh {
 	}
 
 	/**
+	 * Cast a ray using the camera pick ray
+	 * 
+	 * @return
+	 */
+	public RayResult castRay() {
+		Ray pickRay = Application.getApplication().getCamera()
+				.getPickRay(Mouse.getX(), Mouse.getY());
+
+		return castRay(pickRay);
+	}
+
+	/**
 	 * Cast a ray on this mesh
 	 * 
 	 * @param castPosition

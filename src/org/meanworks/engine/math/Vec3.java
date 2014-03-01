@@ -113,7 +113,7 @@ public class Vec3 {
 	public Vec3 translate(Vec3 other) {
 		return add(other.x, other.y, other.z);
 	}
-	
+
 	/**
 	 * Translate this vector by the given matrix
 	 * 
@@ -122,7 +122,7 @@ public class Vec3 {
 	public Vec3 translate(Matrix4f other) {
 		return add(other.m30, other.m31, other.m32);
 	}
-	
+
 	/**
 	 * Translate this vector by the given matrix
 	 * 
@@ -131,7 +131,6 @@ public class Vec3 {
 	public Vec3 translateN(Matrix4f other) {
 		return add(-other.m30, -other.m31, -other.m32);
 	}
-
 
 	/**
 	 * Subtract this vector by the given values
@@ -309,8 +308,30 @@ public class Vec3 {
 			dls = 1.0f;
 		return (float) Math.acos(dls);
 	}
-	
-	
+
+	/**
+	 * Calculate the euclidean distance between two vectors
+	 * 
+	 * @param other
+	 * @return
+	 */
+	public float dist(Vec3 other) {
+		return (float) Math.sqrt(Math.pow((double) (x - other.x), 2)
+				+ Math.pow((double) (y - other.y), 2)
+				+ Math.pow((double) (z - other.z), 2));
+	}
+
+	/**
+	 * Calculate the euclidean distance between two vectors
+	 * 
+	 * @param other
+	 * @return
+	 */
+	public float dist2D(float w, float h) {
+		return (float) Math.sqrt(Math.pow((double) (x - w), 2)
+				+ Math.pow((double) (z - h), 2));
+	}
+
 	public Vec3 copy() {
 		return new Vec3(x, y, z);
 	}
