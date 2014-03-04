@@ -72,6 +72,10 @@ public class Terrain extends Node {
 		chunks = new TerrainChunk[(int) Math.pow(viewDistance * 2, 2)]; // Diameter^2
 		chunkOrigo = new Vec2i(-viewDistance, -viewDistance);
 	}
+	
+	public Vec2i getChunkOrigo() {
+		return chunkOrigo;
+	}
 
 	/**
 	 * Get the viewer position of this terrain
@@ -106,8 +110,8 @@ public class Terrain extends Node {
 		// Check bounds
 		if (chunkX < chunk0X || chunkZ < chunk0Z
 				|| chunkX >= chunk0X + (viewDistance * 2)
-				|| chunkZ >= chunk0Z + (viewDistance * 2)
-				|| chunkX < 0 || chunkZ < 0) {
+				|| chunkZ >= chunk0Z + (viewDistance * 2) || chunkX < 0
+				|| chunkZ < 0) {
 
 			// If this chunk is out of bounds, return null,
 			// Because that means it's not loaded
@@ -115,7 +119,8 @@ public class Terrain extends Node {
 
 		} else {
 			// Return the ch0nk!
-			return chunks[(chunkX - chunk0X) + ((chunkZ - chunk0Z) * viewDistance * 2)];
+			return chunks[(chunkX - chunk0X)
+					+ ((chunkZ - chunk0Z) * viewDistance * 2)];
 		}
 	}
 
@@ -265,6 +270,14 @@ public class Terrain extends Node {
 								GuiHandler.drawString("Hit Chunk: " + x + " / "
 										+ z, 10, (drawY += 25));
 
+								int lod = (int) getViewerPosition().dist2D(
+										x * chunkResolution,
+										z * chunkResolution);
+
+								int lodLevel = chunk.getLOD(lod, this);
+
+								GuiHandler.drawString("Chunk LOD: " + lodLevel, 10, (drawY += 25));
+								
 							}
 
 						}

@@ -22,4 +22,6 @@ public interface TerrainHeightProvider {
 
 	public float getHeight(int x, int y);
 	
+	public float getInterpolatedHeight(float x, float y, int unitSize);
+	
 }

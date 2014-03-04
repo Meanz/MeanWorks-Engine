@@ -103,7 +103,26 @@ public class Vec2i {
 	public static Vec2i sub(Vec2i v1, Vec2i v2) {
 		return new Vec2i(v1.x - v2.x, v1.y - v2.y);
 	}
+	
+	/**
+	 * Get the distance between this vector and the given coordinates
+	 * @param x2
+	 * @param y2
+	 * @return
+	 */
+	public double dist(int x2, int y2) {
+		return dist(new Vec2i(x2, y2));
+	}
 
+	/**
+	 * Get the distance between this vector and the given vector
+	 * @param other
+	 * @return
+	 */
+	public double dist(Vec2i other) {
+		return Math.sqrt(Math.pow(x - other.x, 2) + Math.pow(y - other.y, 2));
+	}
+	
 	/**
 	 * Check if another object equals this
 	 * 

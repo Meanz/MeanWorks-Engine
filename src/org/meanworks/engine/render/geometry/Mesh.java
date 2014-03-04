@@ -418,7 +418,7 @@ public class Mesh {
 	public void render() {
 
 		// Immediate render the bounding box!!
-		renderBoundingBox();
+		//renderBoundingBox();
 
 		if (meshMaterial != null && meshRenderer != null) {
 			/*
