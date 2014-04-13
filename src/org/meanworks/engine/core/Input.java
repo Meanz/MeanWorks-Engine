@@ -6,11 +6,11 @@ import java.util.LinkedList;
 import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
-import org.lwjgl.opengl.Display;
 import org.meanworks.engine.EngineLogger;
+import org.meanworks.engine.render.opengl.Screen;
 
 /**
- * Copyright (C) 2013 Steffen Evensen
+ * Copyright (C) 2014 Steffen Evensen
  * 
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
@@ -27,7 +27,13 @@ import org.meanworks.engine.EngineLogger;
  * 
  * @author Meanz
  */
-public class InputHandler {
+public class Input {
+	
+	/**
+	 * We are going with the singleton strat
+	 */
+	private static Input singleton;
+	
 	/**
 	 * The mouse and key listeners
 	 */
@@ -47,6 +53,7 @@ public class InputHandler {
 	 */
 	private LinkedList<Integer> mousePressedButtons;
 	private LinkedList<Integer> mouseReleasedButtons;
+	private LinkedList<Integer> mouseHeldButtons;
 	private LinkedList<Integer> keyboardPressedKeys;
 	private LinkedList<Integer> keyboardReleasedKeys;
 
@@ -61,11 +68,16 @@ public class InputHandler {
 	/**
 	 * Initializes a new input manager
 	 */
-	public InputHandler() {
+	public Input() {
+		if(singleton != null) {
+			throw new RuntimeException("Can only have one input handler");
+		}
+		singleton = this;
 		keyListeners = new LinkedList<KeyListener>();
 		mouseListeners = new LinkedList<MouseListener>();
 		mousePressedButtons = new LinkedList<Integer>();
 		mouseReleasedButtons = new LinkedList<Integer>();
+		mouseHeldButtons = new LinkedList<Integer>();
 		keyboardPressedKeys = new LinkedList<Integer>();
 		keyboardReleasedKeys = new LinkedList<Integer>();
 
@@ -120,8 +132,8 @@ public class InputHandler {
 	 * 
 	 * @param mouseListener
 	 */
-	public void addMouseListener(MouseListener mouseListener) {
-		mouseListeners.add(mouseListener);
+	public static void addMouseListener(MouseListener mouseListener) {
+		singleton.mouseListeners.add(mouseListener);
 	}
 
 	/**
@@ -129,8 +141,8 @@ public class InputHandler {
 	 * 
 	 * @param keyListener
 	 */
-	public void addKeyListener(KeyListener keyListener) {
-		keyListeners.add(keyListener);
+	public static void addKeyListener(KeyListener keyListener) {
+		singleton.keyListeners.add(keyListener);
 	}
 
 	/**
@@ -139,9 +151,9 @@ public class InputHandler {
 	 * @param key
 	 * @return
 	 */
-	public char keyToChar(int key) {
-		if (itc.containsKey(key)) {
-			return itc.get(key);
+	public static char keyToChar(int key) {
+		if (singleton.itc.containsKey(key)) {
+			return singleton.itc.get(key);
 		} else {
 			return '0';
 		}
@@ -155,7 +167,7 @@ public class InputHandler {
 		 * Stored mouse delta values
 		 */
 		mouseX = Mouse.getX();
-		mouseY = Display.getHeight() - Mouse.getY();
+		mouseY = Screen.getHeight() - Mouse.getY();
 		// deltaX = mouseX - saveX;
 		// deltaY = saveY - mouseY;
 		deltaX = Mouse.getDX();
@@ -174,6 +186,14 @@ public class InputHandler {
 		/**
 		 * Check if any mouse button was pressed
 		 */
+
+		// Unflag old pressed
+		for (Integer i : mousePressedButtons) {
+			mouseHeldButtons.add(i);
+		}
+		mousePressedButtons.clear();
+		mouseReleasedButtons.clear();
+
 		while (Mouse.next()) {
 			int button = Mouse.getEventButton();
 			if (Mouse.getButtonName(button) == null) {
@@ -188,12 +208,24 @@ public class InputHandler {
 			if (Mouse.isButtonDown(button)) {
 
 				/**
+				 * Update states
+				 */
+				if (!isMouseDown(button)) {
+					mousePressedButtons.add(button);
+				}
+
+				/**
 				 * Fire a mouse pressed event and continue
 				 */
 				for (MouseListener mouseListener : mouseListeners) {
 					mouseListener.mousePressed(button, mouseX, mouseY);
 				}
 			} else {
+
+				// Simple, but may bug out, who cares :p
+				mouseHeldButtons.remove((Object)button);
+				mouseReleasedButtons.add(button);
+
 				/**
 				 * Fire a mouse released event and continue
 				 */
@@ -255,43 +287,55 @@ public class InputHandler {
 		}
 	}
 
-	public boolean isValidKey(int key) {
-		if (allowedKeys.contains("" + keyToChar(key))) {
+	public static boolean isValidKey(int key) {
+		if (singleton.allowedKeys.contains("" + keyToChar(key))) {
 			return true;
 		} else {
 			return false;
 		}
 	}
 
-	public int getSize() {
-		return keysPressed.size() + keysDown.size();
+	public static int getSize() {
+		return singleton.keysPressed.size() + singleton.keysDown.size();
 	}
 
-	public boolean isKeyPressed(int key) {
-		return keysPressed.contains(key);
+	public static boolean isMousePressed(int button) {
+		return singleton.mousePressedButtons.contains(button);
 	}
 
-	public boolean isKeyDown(int key) {
-		return keysDown.contains(key);
+	public static boolean isMouseReleased(int button) {
+		return singleton.mouseReleasedButtons.contains(button);
 	}
 
-	public int getDeltaWheel() {
-		return deltaWheel;
+	public static boolean isMouseDown(int button) {
+		return singleton.mouseHeldButtons.contains(button);
 	}
 
-	public int getDX() {
-		return deltaX;
+	public static boolean isKeyPressed(int key) {
+		return singleton.keysPressed.contains(key);
 	}
 
-	public int getDY() {
-		return deltaY;
+	public static boolean isKeyDown(int key) {
+		return singleton.keysDown.contains(key);
 	}
 
-	public int getMouseX() {
-		return mouseX;
+	public static int getDeltaWheel() {
+		return singleton.deltaWheel;
 	}
 
-	public int getMouseY() {
-		return mouseY;
+	public static int getDX() {
+		return singleton.deltaX;
+	}
+
+	public static int getDY() {
+		return singleton.deltaY;
+	}
+
+	public static int getMouseX() {
+		return singleton.mouseX;
+	}
+
+	public static int getMouseY() {
+		return singleton.mouseY;
 	}
 }

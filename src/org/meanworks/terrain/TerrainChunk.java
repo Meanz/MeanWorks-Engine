@@ -101,6 +101,11 @@ public class TerrainChunk {
 		}
 	}
 
+	/**
+	 * Generates the chunk
+	 * 
+	 * @param terrain
+	 */
 	private void generate(final Terrain terrain) {
 		if (terrainMesh != null) {
 			terrainMesh.delete();
@@ -120,11 +125,14 @@ public class TerrainChunk {
 							this.cX = chunkX;
 							this.cY = chunkZ;
 							pn = new PerlinNoise();
-							pn.setSeed(5555);
+							pn.setSeed(777777);
+							pn.amplitude = 20;
 						}
-						return (float) pn.getHeight((double) (cX
+						float height = (float) pn.getHeight((double) (cX
 								* terrain.chunkResolution + x), (double) (cY
-								* terrain.chunkResolution + y)) - 100f;
+								* terrain.chunkResolution + y));
+
+						return (float) pn.clamp(height, 0f, 32f);
 					}
 
 					@Override
@@ -163,7 +171,14 @@ public class TerrainChunk {
 					+ chunkX + ", " + chunkZ + "]");
 		}
 	}
-	
+
+	/**
+	 * Get the lod for the given distance
+	 * 
+	 * @param dist
+	 * @param terrain
+	 * @return
+	 */
 	public int getLOD(double dist, Terrain terrain) {
 		int lodLevel = 1;
 		if (dist > 2) {
@@ -174,6 +189,9 @@ public class TerrainChunk {
 		}
 		if (dist > 6) {
 			lodLevel = 8;
+		}
+		if (lodLevel > terrain.getMaxLod()) {
+			lodLevel = terrain.getMaxLod();
 		}
 		return lodLevel;
 	}

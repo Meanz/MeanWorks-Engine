@@ -28,7 +28,7 @@ public abstract class Component extends Surface {
 	/*
 	 * The gui handler
 	 */
-	private static GuiHandler guiHandler;
+	private static Gui guiHandler;
 
 	/*
 	 * The next available id for a component
@@ -75,14 +75,6 @@ public abstract class Component extends Surface {
 	 */
 	private LinkedList<Component> toBack = new LinkedList<>();
 	/*
-	 * The list of components that needs a notification when focus is lost
-	 */
-	private LinkedList<Component> focusNotifications = new LinkedList<>();
-	/*
-	 * Whether or not focus was lost under this component
-	 */
-	private boolean focusLost;
-	/*
 	 * The parent of this component
 	 */
 	private Component parent;
@@ -106,27 +98,7 @@ public abstract class Component extends Surface {
 		this.width = width;
 		this.height = height;
 		this.visible = true;
-		focusLost = false;
 		parent = null;
-	}
-
-	/**
-	 * Request a focus notification for the given component
-	 * 
-	 * @param c
-	 */
-	public void requestFocusNotification(Component c) {
-		focusNotifications.add(c);
-	}
-
-	/**
-	 * Request a focus notification for this component
-	 */
-	public void requestFocusNotification() {
-		// Ask our parent for a focus notification
-		if (parent != null) {
-			parent.requestFocusNotification(this);
-		}
 	}
 
 	/**
@@ -427,16 +399,6 @@ public abstract class Component extends Surface {
 	}
 
 	/**
-	 * Fire a focus lost event to all the children components, including self
-	 */
-	public final void fireFocusLost() {
-		for (Component c : components) {
-			// c.fireFocusLost();
-			// c.onFocusLost();
-		}
-	}
-
-	/**
 	 * Called when a mouse button is pressed
 	 * 
 	 * @param button
@@ -445,9 +407,11 @@ public abstract class Component extends Surface {
 	 * @return
 	 */
 	public final boolean fireMouseDown(int button, int mouseX, int mouseY) {
+		if (!isVisible()) {
+			return false;
+		}
 		for (Component c : components) {
 			if (c.fireMouseDown(button, mouseX, mouseY)) {
-				focusLost = true;
 				return true;
 			}
 		}
@@ -463,9 +427,11 @@ public abstract class Component extends Surface {
 	 * @return
 	 */
 	public final boolean fireMouseUp(int button, int mouseX, int mouseY) {
+		if (!isVisible()) {
+			return false;
+		}
 		for (Component c : components) {
 			if (c.fireMouseUp(button, mouseX, mouseY)) {
-				focusLost = true;
 				return true;
 			}
 		}
@@ -484,7 +450,6 @@ public abstract class Component extends Surface {
 			int mouseDeltaY) {
 		for (Component c : components) {
 			if (c.fireMouseMove(mouseX, mouseY, mouseDeltaX, mouseDeltaY)) {
-				focusLost = true;
 				return true;
 			}
 		}
@@ -499,8 +464,7 @@ public abstract class Component extends Surface {
 	 */
 	public final boolean fireKeyDown(int key) {
 		for (Component c : components) {
-			if (c.onKeyDown(key)) {
-				focusLost = true;
+			if (c.fireKeyDown(key)) {
 				return true;
 			}
 		}
@@ -515,13 +479,8 @@ public abstract class Component extends Surface {
 	 * 
 	 */
 	public final boolean fireKeyUp(int key) {
-
-		/*
-		 * Start from the bottom and up
-		 */
 		for (Component c : components) {
-			if (c.onKeyUp(key)) {
-				focusLost = true;
+			if (c.fireKeyUp(key)) {
 				return true;
 			}
 		}
@@ -564,15 +523,8 @@ public abstract class Component extends Surface {
 			}
 			toBack.clear();
 		}
-		if (focusLost) {
-			for (Component c : focusNotifications) {
-				c.fireFocusLost();
-			}
-			focusNotifications.clear();
-			focusLost = false;
-		}
 		for (Component component : components) {
-			component.update();
+			component.fireUpdate();
 		}
 		update();
 	}

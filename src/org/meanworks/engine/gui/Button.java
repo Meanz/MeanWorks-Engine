@@ -283,7 +283,6 @@ public class Button extends Component {
 	public final boolean onMouseDown(int button, int mouseX, int mouseY) {
 		if (isInside(mouseX, mouseY)) {
 			isClicked = true;
-			requestFocusNotification();
 			return true;
 		} else {
 			return false;
@@ -318,12 +317,20 @@ public class Button extends Component {
 	public final boolean onMouseMove(int mouseX, int mouseY, int mouseDeltaX,
 			int mouseDeltaY) {
 		if (isInside(mouseX, mouseY)) {
-			requestFocusNotification();
 			isHovered = true;
 			return true;
-		} else {
+		}
+		return false;
+	}
+
+	/**
+	 * Called every tick to update this button
+	 */
+	@Override
+	public void update() {
+		// Used for hovering
+		if (!isInside(getMouseX(), getMouseY())) {
 			isHovered = false;
-			return false;
 		}
 	}
 
@@ -360,7 +367,7 @@ public class Button extends Component {
 		} else if (centered) {
 			// Center the text
 			FontRenderer.arial14_white.drawString(text, getX()
-					- (textWidth / 2) + (getWidth() / 2), getY() + 10);
+					- (textWidth / 2) + (getWidth() / 2), getY() + (getHeight() / 2) - (14 / 2));
 		} else {
 			FontRenderer.arial14_white.drawString(text, getX() + textXOffset,
 					getY() + textYOffset);

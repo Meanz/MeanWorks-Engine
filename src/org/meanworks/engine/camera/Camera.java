@@ -113,7 +113,7 @@ public abstract class Camera {
 		this.cameraLookAt = new Vec3(1.0f, 1.0f, 1.0f);
 		this.rotation = new Vec3(0.0f, 0.0f, 0.0f);
 
-		projectionMatrix = perspective(fovY, aspect, 0.0f, 1000.0f,
+		projectionMatrix = perspective(fovY, aspect, 0.0f, 100.0f,
 				new Matrix4f());
 		viewMatrix = new Matrix4f();
 		projectionViewMatrix = new Matrix4f();
@@ -279,7 +279,7 @@ public abstract class Camera {
 		 * dest) MatrixHelper.setupMatrices(projectionMatrix, viewMatrix);
 		 */
 
-		perspective(fovY, aspect, 1.0f, 1000.0f, projectionMatrix);
+		perspective(fovY, aspect, 0.1f, 1000.0f, projectionMatrix);
 		// viewMatrix = lookAt(cameraPosition, forward(cameraPosition,
 		// rotation));
 
@@ -397,9 +397,9 @@ public abstract class Camera {
 		// First we need to normalize the mouse coordinates
 		// To do that we need to know the height of the viewport
 		float fovy = fovY;
-		float fovx = 85.0f;
+		float fovx = 80.0f;
 		float mx = (float) mouseX;
-		float my = (float) mouseY;
+		float my = (float) windowHeight - mouseY;
 		float ww = (float) windowWidth;
 		float wh = (float) windowHeight;
 		float nmx = (mx - (ww / 2.0f)) / (ww / 2.0f);

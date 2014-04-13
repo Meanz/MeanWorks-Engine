@@ -261,7 +261,7 @@ public class World {
 
 		int ox = (int) ray.getOrigin().x;
 		int oz = (int) ray.getOrigin().z;
-
+/*
 		for (int x = ox - radius; x < ox + radius; x++) {
 			for (int z = oz - radius; z < oz + radius; z++) {
 
@@ -308,7 +308,7 @@ public class World {
 					return new Vector3f(x, 0.0f, z);
 				}
 			}
-		}
+		}*/
 		return new Vector3f(-1, -1, -1);
 	}
 

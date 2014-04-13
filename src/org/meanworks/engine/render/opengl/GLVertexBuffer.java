@@ -9,7 +9,18 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.GLU;
 import org.meanworks.engine.EngineLogger;
 
-public class VertexBuffer {
+public class GLVertexBuffer {
+	
+	/**
+	 * Create a new opengl vertex buffer
+	 * @param bufferType
+	 * @param bufferUsage
+	 * @return
+	 */
+	public static GLVertexBuffer create(BufferType bufferType, BufferUsage bufferUsage) {
+		return new GLVertexBuffer(bufferType, bufferUsage);
+	}
+	
 	/**
 	 * An enum describing what type of buffer this is
 	 * 
@@ -114,7 +125,7 @@ public class VertexBuffer {
 	 * @param bufferType
 	 * @param bufferUsage
 	 */
-	public VertexBuffer(BufferType bufferType, BufferUsage bufferUsage) {
+	public GLVertexBuffer(BufferType bufferType, BufferUsage bufferUsage) {
 		this.create();
 		this.bufferType = bufferType;
 		this.bufferUsage = bufferUsage;
@@ -242,8 +253,8 @@ public class VertexBuffer {
 	 * 
 	 * @return The deep copied instance of this VertexBuffer
 	 */
-	public VertexBuffer deepCopy() {
-		VertexBuffer vb = new VertexBuffer(bufferType, bufferUsage);
+	public GLVertexBuffer deepCopy() {
+		GLVertexBuffer vb = new GLVertexBuffer(bufferType, bufferUsage);
 		if (!vb.isValid()) {
 			EngineLogger
 					.error("[VertexBuffer] Could not deepCopy VertexBuffer");

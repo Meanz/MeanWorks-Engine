@@ -111,12 +111,21 @@ public class AABoundingBox {
 	}
 
 	/**
+	 * Scale this bounding box
+	 * 
+	 * @param scale
+	 */
+	public void scale(float scale) {
+		min.scale(scale);
+		max.scale(scale);
+	}
+
+	/**
 	 * 
 	 * @param r
 	 * @return
 	 */
 	public static boolean intersects(AABoundingBox box, Ray r) {
-
 		float tmin = (box.min.x - r.origin.x) / r.direction.x;
 		float tmax = (box.max.x - r.origin.x) / r.direction.x;
 		if (tmin > tmax) {
@@ -156,6 +165,63 @@ public class AABoundingBox {
 		if (tzmax < tmax) {
 			tmax = tzmax;
 		}
+		return true;
+	}
+
+	public static void printAABB(AABoundingBox box) {
+
+		System.err.println(" -- Axis Aligned Bounding Box --");
+		System.err.println("Min: " + box.min.toString());
+		System.err.println("Max: " + box.max.toString());
+	}
+
+	/**
+	 * Meep
+	 * @param box
+	 * @param ray
+	 * @param result
+	 * @return
+	 */
+	public static boolean intersects(AABoundingBox box, Ray ray, Vec3 result) {
+		// r.dir is unit direction vector of ray
+		Vec3 dirfrac = new Vec3();
+		dirfrac.x = 1.0f / ray.direction.x; // Normalize it?
+		dirfrac.y = 1.0f / ray.direction.y; // Normalize it?
+		dirfrac.z = 1.0f / ray.direction.z; // Normalize it?
+		// lb is the corner of AABB with minimal coordinates - left bottom, rt
+		// is maximal corner
+		// r.org is origin of ray
+		float t1 = (box.min.x - ray.origin.x) * dirfrac.x;
+		float t2 = (box.max.x - ray.origin.x) * dirfrac.x;
+		float t3 = (box.min.y - ray.origin.y) * dirfrac.y;
+		float t4 = (box.max.y - ray.origin.y) * dirfrac.y;
+		float t5 = (box.min.z - ray.origin.z) * dirfrac.z;
+		float t6 = (box.max.z - ray.origin.z) * dirfrac.z;
+
+		float tmin = Math.max(Math.max(Math.min(t1, t2), Math.min(t3, t4)),
+				Math.min(t5, t6));
+		float tmax = Math.min(Math.min(Math.max(t1, t2), Math.max(t3, t4)),
+				Math.max(t5, t6));
+
+		float t = 0f;
+
+		// if tmax < 0, ray (line) is intersecting AABB, but whole AABB is
+		// behing us
+		if (tmax < 0) {
+			t = tmax;
+			return false;
+		}
+
+		// if tmin > tmax, ray doesn't intersect AABB
+		if (tmin > tmax) {
+			t = tmax;
+			return false;
+		}
+
+		t = tmin;
+		result.x = ray.origin.x + (ray.direction.x * t);
+		result.y = ray.origin.y + (ray.direction.y * t);
+		result.z = ray.origin.z + (ray.direction.z * t);
 		return true;
 	}
 

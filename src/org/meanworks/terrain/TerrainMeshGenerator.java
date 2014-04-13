@@ -1162,9 +1162,9 @@ public class TerrainMeshGenerator {
 			return false;
 		}
 
-		if (true) {
-			return generateLOD2(ci, lod);
-		}
+		//if (true) {
+		//	return generateLOD2(ci, lod);
+		//}
 
 		// Create float mesh buffer
 		FloatMeshBuffer fmb = new FloatMeshBuffer(
@@ -1239,7 +1239,7 @@ public class TerrainMeshGenerator {
 		mesh.setMaterial(new Material("terrainMat", AssetManager
 				.loadShader("./data/shaders/wnrTerrain")));
 		mesh.getMaterial().setTexture(
-				AssetManager.loadTexture("./data/images/terrain/grass.jpg"));
+				AssetManager.loadTexture("./salem/bin/salem-res/res/gfx/tiles/grass1.png"));
 
 		if (compileAfterGen) {
 			return mesh.compile();

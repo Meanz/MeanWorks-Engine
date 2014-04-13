@@ -21,14 +21,14 @@ import org.meanworks.engine.RenderState;
 import org.meanworks.engine.core.Application;
 import org.meanworks.engine.render.material.Material;
 import org.meanworks.engine.render.opengl.GLImmediate;
-import org.meanworks.engine.render.opengl.VertexBuffer;
-import org.meanworks.engine.render.opengl.VertexBuffer.BufferType;
-import org.meanworks.engine.render.opengl.VertexBuffer.BufferUsage;
+import org.meanworks.engine.render.opengl.GLVertexBuffer;
+import org.meanworks.engine.render.opengl.GLVertexBuffer.BufferType;
+import org.meanworks.engine.render.opengl.GLVertexBuffer.BufferUsage;
 import org.meanworks.engine.render.opengl.VertexBufferArray;
 import org.meanworks.engine.scene.Scene;
 
 /**
- * Copyright (C) 2013 Steffen Evensen
+ * Copyright (C) 2014 Steffen Evensen
  * 
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
@@ -100,7 +100,7 @@ public class VAOMeshRenderer implements MeshRenderer {
 		/*
 		 * The buffer of this entry
 		 */
-		VertexBuffer buffer;
+		GLVertexBuffer buffer;
 		/*
 		 * The attributes for this buffer
 		 */
@@ -176,7 +176,7 @@ public class VAOMeshRenderer implements MeshRenderer {
 	/*
 	 * The index buffer for this mesh renderer
 	 */
-	private VertexBuffer indexBuffer = null;
+	private GLVertexBuffer indexBuffer = null;
 
 	/*
 	 * We have the ability to array up the mesh
@@ -216,7 +216,7 @@ public class VAOMeshRenderer implements MeshRenderer {
 		 * Copy the rest of the buffers
 		 */
 		for (BufferEntry be : vertexBuffers) {
-			VertexBuffer vb = be.buffer.deepCopy();
+			GLVertexBuffer vb = be.buffer.deepCopy();
 			BufferEntry newBe = mr.addVertexBuffer(vb);
 			for (BufferAttribute ba : be.bufferAttributes) {
 				newBe.addAttribute(ba.copy());
@@ -248,7 +248,7 @@ public class VAOMeshRenderer implements MeshRenderer {
 	 * @param size
 	 */
 	public void addIndex(IntBuffer buffer, int numIndices) {
-		VertexBuffer vbIndices = new VertexBuffer(BufferType.INDEX_BUFFER,
+		GLVertexBuffer vbIndices = new GLVertexBuffer(BufferType.INDEX_BUFFER,
 				BufferUsage.STATIC_DRAW);
 		vbIndices.bufferData(buffer);
 		setIndexBuffer(vbIndices);
@@ -262,7 +262,7 @@ public class VAOMeshRenderer implements MeshRenderer {
 	 * @param size
 	 */
 	public void addBuffer(FloatBuffer buffer, int index, int size) {
-		VertexBuffer vb = new VertexBuffer(BufferType.ARRAY_BUFFER,
+		GLVertexBuffer vb = new GLVertexBuffer(BufferType.ARRAY_BUFFER,
 				BufferUsage.STATIC_DRAW);
 		vb.bufferData(buffer);
 		BufferEntry be = addVertexBuffer(vb);
@@ -276,7 +276,7 @@ public class VAOMeshRenderer implements MeshRenderer {
 	 * @param size
 	 */
 	public void addBuffer(IntBuffer buffer, int index, int size) {
-		VertexBuffer vb = new VertexBuffer(BufferType.ARRAY_BUFFER,
+		GLVertexBuffer vb = new GLVertexBuffer(BufferType.ARRAY_BUFFER,
 				BufferUsage.STATIC_DRAW);
 		vb.bufferData(buffer);
 		BufferEntry be = addVertexBuffer(vb);
@@ -290,7 +290,7 @@ public class VAOMeshRenderer implements MeshRenderer {
 	 * @param size
 	 */
 	public void addBuffer(FloatBuffer buffer, BufferEntryType bufferEntryType) {
-		VertexBuffer vb = new VertexBuffer(BufferType.ARRAY_BUFFER,
+		GLVertexBuffer vb = new GLVertexBuffer(BufferType.ARRAY_BUFFER,
 				BufferUsage.STATIC_DRAW);
 		vb.bufferData(buffer);
 		BufferEntry be = addVertexBuffer(vb);
@@ -326,7 +326,7 @@ public class VAOMeshRenderer implements MeshRenderer {
 	 * 
 	 * @param vertexBuffer
 	 */
-	public void setIndexBuffer(VertexBuffer vertexBuffer) {
+	public void setIndexBuffer(GLVertexBuffer vertexBuffer) {
 		this.indexBuffer = vertexBuffer;
 	}
 
@@ -335,7 +335,7 @@ public class VAOMeshRenderer implements MeshRenderer {
 	 * 
 	 * @return
 	 */
-	public VertexBuffer getIndexBuffer() {
+	public GLVertexBuffer getIndexBuffer() {
 		return indexBuffer;
 	}
 
@@ -353,14 +353,14 @@ public class VAOMeshRenderer implements MeshRenderer {
 	 * 
 	 * @param vertexBuffer
 	 */
-	public BufferEntry addVertexBuffer(VertexBuffer vertexBuffer) {
+	public BufferEntry addVertexBuffer(GLVertexBuffer vertexBuffer) {
 		if (vertexBuffer == null) {
 			return null;
 		}
 		BufferEntry bufferEntry = new BufferEntry();
 		bufferEntry.buffer = vertexBuffer;
 		vertexBuffers.add(bufferEntry);
-		if (vertexBuffer.getType() == VertexBuffer.BufferType.ARRAY_BUFFER) {
+		if (vertexBuffer.getType() == GLVertexBuffer.BufferType.ARRAY_BUFFER) {
 
 			// This has to be a float buffer
 			// Let's assume every vertex has 3 elements

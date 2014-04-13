@@ -421,6 +421,11 @@ public class Mesh {
 		//renderBoundingBox();
 
 		if (meshMaterial != null && meshRenderer != null) {
+			/**
+			 * Hmm ?
+			 */
+			glEnable(GL_DEPTH_TEST);
+			glDisable(GL_CULL_FACE);
 			/*
 			 * Apply material
 			 */

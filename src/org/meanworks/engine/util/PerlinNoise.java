@@ -20,11 +20,11 @@ package org.meanworks.engine.util;
  */
 public class PerlinNoise {
 
-	private int seed;
-	private double persistence;
-	private double frequency;
-	private double amplitude;
-	private int octaves;
+	public int seed;
+	public double persistence;
+	public double frequency;
+	public double amplitude;
+	public int octaves;
 
 	public PerlinNoise() {
 		seed = 1327;

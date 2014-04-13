@@ -72,50 +72,35 @@ public class Window extends Component {
 	public Window(String title, int x, int y, int width, int height) {
 		super("window" + getNextId(), x, y, width, height);
 		this.title = title;
-		closeButton = new Button(" X", x + width - 5 - 16, y + 5, 16, 16, false);
+
+		final Window window = this;
+		closeButton = new Button(" X", x + width - 5 - 16, y + 5, 16, 16, false) {
+
+			@Override
+			public void onButtonClick() {
+				window.setVisible(false); // Hides this window
+				onClose();
+			}
+
+		};
 		closeButton.setBackgroundColor(new Vec3(0.4f, 0.4f, 0.4f));
 		closeButton.setOpacity(0.2f);
 		add(closeButton);
+		onCreate();
+	}
 
-		for (int i = 0; i < 3; i++) {
-			((Button) add(new Button("Button " + i, x + 10, y + 40 + (i * 40),
-					80, 35))).setTooltip("Button " + i);
-		}
+	/**
+	 * Called when the x button is pressed
+	 */
+	public void onClose() {
 
-		add(new Label("Hello there, I am a label!", x + 100, y + 40));
-		add(new Label("Hello there, I am also a label!", x + 100, y + 55));
-		add(new Label("Together we make text!", x + 100, y + 70));
+	}
 
-		add(new Label("Checkbox 1", x + 100, y + 100));
-		add(new Checkbox(x + 100 + 80, y + 100, false));
+	/**
+	 * Called when the window is created
+	 */
+	public void onCreate() {
 
-		final Label label = (Label) add(new Label("Checkbox 2", x + 100,
-				y + 125));
-		final Checkbox checkbox = (Checkbox) add(new Checkbox(x + 100 + 80,
-				y + 125, true) {
-
-			@Override
-			public void onSelection() {
-				if (isSelected()) {
-					label.setText("Checked!");
-					setTooltip("Click me to uncheck!");
-				} else {
-					label.setText("Unchecked!");
-					setTooltip("Click me to check!");
-				}
-			}
-
-		});
-
-		final List list = new List(x + 120, y + 180, 150, 100);
-		list.addElement("List Item 0");
-		list.addElement("List Item 1");
-		list.addElement("List Item 2");
-		list.addElement("List Item 3");
-		list.addElement("List Item 4");
-		list.addElement("List Item 5");
-		list.addElement("List Item 6");
-		add(list);
 	}
 
 	/**
@@ -199,6 +184,12 @@ public class Window extends Component {
 			if (dragging) {
 				// This is being dragged now
 				dragging = false;
+				return true;
+			}
+			if (isInside(mouseX, mouseY)) {
+				return true;
+			} else {
+				return false;
 			}
 		}
 		return false;

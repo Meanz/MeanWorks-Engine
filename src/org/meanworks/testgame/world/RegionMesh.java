@@ -13,9 +13,9 @@ import org.meanworks.engine.render.geometry.Model;
 import org.meanworks.engine.render.geometry.mesh.MeshBuffer;
 import org.meanworks.engine.render.geometry.mesh.renderers.VAOMeshRenderer;
 import org.meanworks.engine.render.geometry.mesh.renderers.VAOMeshRenderer.BufferEntry;
-import org.meanworks.engine.render.opengl.VertexBuffer;
-import org.meanworks.engine.render.opengl.VertexBuffer.BufferType;
-import org.meanworks.engine.render.opengl.VertexBuffer.BufferUsage;
+import org.meanworks.engine.render.opengl.GLVertexBuffer;
+import org.meanworks.engine.render.opengl.GLVertexBuffer.BufferType;
+import org.meanworks.engine.render.opengl.GLVertexBuffer.BufferUsage;
 
 /**
  * Copyright (C) 2013 Steffen Evensen
@@ -477,7 +477,7 @@ public class RegionMesh {
 		 */
 		meshRenderer.addIndex(meshBuffer.getFlippedIntBuffer(),
 				meshBuffer.getNumIndices());
-		VertexBuffer vbData = new VertexBuffer(BufferType.ARRAY_BUFFER,
+		GLVertexBuffer vbData = new GLVertexBuffer(BufferType.ARRAY_BUFFER,
 				BufferUsage.STATIC_DRAW);
 		vbData.bind();
 		vbData.bufferData(meshBuffer.getFlippedFloatBuffer());

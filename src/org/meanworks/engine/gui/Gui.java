@@ -26,7 +26,7 @@ import org.meanworks.engine.scene.Scene;
 import org.meanworks.engine.util.NumberFormatter;
 
 /**
- * Copyright (C) 2013 Steffen Evensen
+ * Copyright (C) 2014 Steffen Evensen
  * 
  * This program is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
@@ -42,8 +42,11 @@ import org.meanworks.engine.util.NumberFormatter;
  * this program. If not, see <http://www.gnu.org/licenses/>.
  * 
  * @author Meanz
+ * 
+ *         Handles Gui related events
+ * 
  */
-public class GuiHandler implements KeyListener, MouseListener {
+public class Gui implements KeyListener, MouseListener {
 
 	/**
 	 * 
@@ -63,6 +66,11 @@ public class GuiHandler implements KeyListener, MouseListener {
 		}
 
 	}
+
+	/**
+	 * The gui singleton
+	 */
+	private static Gui singleton;
 
 	/*
 	 * Reference to the application controlling this gui handler
@@ -90,6 +98,21 @@ public class GuiHandler implements KeyListener, MouseListener {
 	 */
 	private boolean consumedInput = false;
 
+	/**
+	 * Wherher the key input was consumed or not
+	 */
+	private boolean consumedKeyInput = false;
+
+	/**
+	 * Whether or not key input is locked
+	 */
+	private boolean keyInputLock = false;
+
+	/**
+	 * The component that is locking the key input
+	 */
+	private Component keyInputLockComponent;
+
 	/*
 	 * The root component
 	 */
@@ -105,7 +128,12 @@ public class GuiHandler implements KeyListener, MouseListener {
 	 * 
 	 * @param application
 	 */
-	public GuiHandler(Application application) {
+	public Gui(Application application) {
+		if (singleton != null) {
+			throw new RuntimeException(
+					"Only one instance of the gui might be created at a given time.");
+		}
+		singleton = this;
 		this.application = application;
 		fontRenderer = new FontRenderer("./data/fonts/arial.ttf", 14);
 
@@ -128,7 +156,48 @@ public class GuiHandler implements KeyListener, MouseListener {
 		if (componentId == null) {
 			return;
 		}
-		deleteQueue.add(componentId);
+		singleton.deleteQueue.add(componentId);
+	}
+
+	/**
+	 * Lock key input
+	 * 
+	 * @param c
+	 * @return
+	 */
+	public static boolean lockKeyInput(Component c) {
+		if (isKeyInputLocked() && getKeyInputLockComponent() != c) {
+			return false;
+		}
+		singleton.keyInputLock = true;
+		singleton.keyInputLockComponent = c;
+		return true;
+	}
+
+	/**
+	 * Open the key input
+	 */
+	public static void openKeyInput() {
+		singleton.keyInputLock = false;
+		singleton.keyInputLockComponent = null;
+	}
+
+	/**
+	 * Get the key input lock component
+	 * 
+	 * @return
+	 */
+	public static Component getKeyInputLockComponent() {
+		return singleton.keyInputLockComponent;
+	}
+
+	/**
+	 * Check whether key input is blocked or not
+	 * 
+	 * @return
+	 */
+	public static boolean isKeyInputLocked() {
+		return singleton.keyInputLock;
 	}
 
 	/**
@@ -136,8 +205,17 @@ public class GuiHandler implements KeyListener, MouseListener {
 	 * 
 	 * @return
 	 */
-	public boolean didConsumeInput() {
-		return consumedInput;
+	public static boolean didConsumeInput() {
+		return singleton.consumedInput;
+	}
+
+	/**
+	 * Get whether the input was consumed or not
+	 * 
+	 * @return
+	 */
+	public static boolean didConsumeKeyInput() {
+		return singleton.consumedKeyInput;
 	}
 
 	/**
@@ -148,24 +226,32 @@ public class GuiHandler implements KeyListener, MouseListener {
 	}
 
 	/**
+	 * Flag clearing
+	 */
+	public void postUpdate() {
+		consumedInput = false;
+		consumedKeyInput = false;
+	}
+
+	/**
 	 * Add a component to the gui
 	 * 
 	 * @param component
 	 * @return
 	 */
-	public boolean addComponent(Component component) {
+	public static boolean addComponent(Component component) {
 		if (component == null) {
 			EngineLogger.warning("Tried to add null component.");
 			return false;
 		}
-		if (components.containsKey(component.getName())) {
+		if (singleton.components.containsKey(component.getName())) {
 			EngineLogger
 					.warning("Tried adding duplicate component ( or at least duplicate name ) : "
 							+ component.getName());
 			return false;
 		}
-		components.put(component.getName(), component);
-		rootComponent.add(component);
+		singleton.components.put(component.getName(), component);
+		singleton.rootComponent.add(component);
 		return true;
 	}
 
@@ -223,37 +309,40 @@ public class GuiHandler implements KeyListener, MouseListener {
 						}
 						guiStrings.clear();
 
-						fontRenderer.drawString("FractalEngine v "
-								+ EngineConfig.MW_VERSION + " Alpha [DEBUG]",
-								10, 10);
-						fontRenderer.drawString("FPS: " + application.getFps(),
-								10, 25);
-						fontRenderer.drawString("Cam("
-								+ Scene.getCamera().getPosition().x + ", "
-								+ Scene.getCamera().getPosition().y + ", "
-								+ Scene.getCamera().getPosition().z + ")", 10,
-								40);
+						if (EngineConfig.drawGuiDebug) {
+							fontRenderer.drawString("FractalEngine v "
+									+ EngineConfig.MW_VERSION
+									+ " Alpha [DEBUG]", 10, 10);
+							fontRenderer.drawString(
+									"FPS: " + application.getFps(), 10, 25);
+							fontRenderer.drawString("Cam("
+									+ Scene.getCamera().getPosition().x + ", "
+									+ Scene.getCamera().getPosition().y + ", "
+									+ Scene.getCamera().getPosition().z + ")",
+									10, 40);
 
-						fontRenderer
-								.drawString(
-										"Memory usage: "
-												+ ((Runtime.getRuntime()
-														.totalMemory() - Runtime
-														.getRuntime()
-														.freeMemory()) / 1000 / 1000)
-												+ "mb", 10, 55);
+							fontRenderer
+									.drawString(
+											"Memory usage: "
+													+ ((Runtime.getRuntime()
+															.totalMemory() - Runtime
+															.getRuntime()
+															.freeMemory()) / 1000 / 1000)
+													+ "mb", 10, 55);
 
-						fontRenderer
-								.drawString(
-										"Rendered Vertices: "
-												+ NumberFormatter
-														.formatNumber(RenderState
-																.getRenderedVertices()),
-										10, 70);
+							fontRenderer
+									.drawString(
+											"Rendered Vertices: "
+													+ NumberFormatter
+															.formatNumber(RenderState
+																	.getRenderedVertices()),
+											10, 70);
 
-						fontRenderer.drawString("Top Component: "
-								+ rootComponent.getComponents().getFirst()
-										.getName(), 10, 85);
+							fontRenderer.drawString("Top Component: "
+									+ rootComponent.getComponents().getFirst()
+											.getName(), 10, 85);
+
+						}
 
 						rootComponent.fireRender();
 					}
@@ -291,17 +380,9 @@ public class GuiHandler implements KeyListener, MouseListener {
 	 */
 	@Override
 	public void mousePressed(int key, int x, int y) {
-
-		rootComponent.fireMouseDown(key, x, y);
-
-		/*
-		 * if (mouseFocus != null) { if (mouseFocus.fireMouseDown(key, x, y)) {
-		 * return; } }
-		 * 
-		 * for (int i = components.values().size() - 1; i >= 0; i--) { if
-		 * (((Component) components.values().toArray()[i]).fireMouseDown( key,
-		 * x, y)) { return; } }
-		 */
+		if (rootComponent.fireMouseDown(key, x, y)) {
+			consumedInput = true; // If the gui consumed the input
+		}
 	}
 
 	/*
@@ -312,16 +393,9 @@ public class GuiHandler implements KeyListener, MouseListener {
 	 */
 	@Override
 	public void mouseReleased(int key, int x, int y) {
-
-		rootComponent.fireMouseUp(key, x, y);
-		/*
-		 * if (mouseFocus != null) { if (mouseFocus.fireMouseUp(key, x, y)) {
-		 * return; } }
-		 * 
-		 * for (int i = components.values().size() - 1; i >= 0; i--) { if
-		 * (((Component) components.values().toArray()[i]).fireMouseUp(key, x,
-		 * y)) { return; } }
-		 */
+		if (rootComponent.fireMouseUp(key, x, y)) {
+			consumedInput = true;
+		}
 	}
 
 	/*
@@ -331,22 +405,8 @@ public class GuiHandler implements KeyListener, MouseListener {
 	 */
 	@Override
 	public void mouseMoved(int dx, int dy) {
-
 		rootComponent.fireMouseMove(Component.getMouseX(),
 				Component.getMouseY(), dx, dy);
-
-		// TODO: Revise the method of getting mouse coordinates
-		// TODO: Revise this method, uses a lot of processing.
-
-		/*
-		 * if (mouseFocus != null) { if
-		 * (mouseFocus.fireMouseMove(Component.getMouseX(),
-		 * Component.getMouseY(), dx, dy)) { return; } }
-		 * 
-		 * for (int i = components.values().size() - 1; i >= 0; i--) { if
-		 * (((Component) components.values().toArray()[i]).fireMouseMove(
-		 * Component.getMouseX(), Component.getMouseY(), dx, dy)) { return; } }
-		 */
 	}
 
 	/*
@@ -356,15 +416,10 @@ public class GuiHandler implements KeyListener, MouseListener {
 	 */
 	@Override
 	public void keyPressed(int key) {
-
-		rootComponent.fireKeyDown(key);
-		/*
-		 * if (keyFocus != null) { if (keyFocus.fireKeyDown(key)) { return; } }
-		 * 
-		 * for (int i = components.values().size() - 1; i >= 0; i--) { if
-		 * (((Component) components.values().toArray()[i]).fireKeyDown(key)) {
-		 * return; } }
-		 */
+		System.err.println("KeyPressed");
+		if (rootComponent.fireKeyDown(key)) {
+			consumedKeyInput = true;
+		}
 	}
 
 	/*
@@ -374,11 +429,8 @@ public class GuiHandler implements KeyListener, MouseListener {
 	 */
 	@Override
 	public void keyReleased(int key) {
-		rootComponent.fireKeyUp(key);
-		/*
-		 * for (int i = components.values().size() - 1; i >= 0; i--) { if
-		 * (((Component) components.values().toArray()[i]).fireKeyUp(key)) {
-		 * return; } }
-		 */
+		if (rootComponent.fireKeyUp(key)) {
+			consumedKeyInput = true;
+		}
 	}
 }

@@ -11,7 +11,7 @@ import org.meanworks.engine.RenderState;
 import org.meanworks.engine.asset.AssetManager;
 import org.meanworks.engine.camera.Camera;
 import org.meanworks.engine.camera.FirstPersonCamera;
-import org.meanworks.engine.gui.GuiHandler;
+import org.meanworks.engine.gui.Gui;
 import org.meanworks.engine.gui.impl.Console;
 import org.meanworks.engine.gui.impl.PerformanceGraph;
 import org.meanworks.engine.render.material.Material;
@@ -66,7 +66,7 @@ public abstract class Application implements Runnable {
 	/*
 	 * The input handler for the application
 	 */
-	private InputHandler inputHandler = null;
+	private Input inputHandler = null;
 
 	/*
 	 * The asset manager for the application
@@ -81,7 +81,7 @@ public abstract class Application implements Runnable {
 	/*
 	 * The gui handler for this application
 	 */
-	private GuiHandler guiHandler;
+	private Gui guiHandler;
 
 	/*
 	 * The console for this application, it's an extension of the gui handler
@@ -91,7 +91,7 @@ public abstract class Application implements Runnable {
 	/*
 	 * Not used at the moment
 	 */
-	//private Timer timer;
+	// private Timer timer;
 
 	/*
 	 * The script handler for this application, used for external scripts like
@@ -144,7 +144,7 @@ public abstract class Application implements Runnable {
 	 * 
 	 * @return
 	 */
-	public GuiHandler getGui() {
+	public Gui getGui() {
 		return guiHandler;
 	}
 
@@ -180,7 +180,7 @@ public abstract class Application implements Runnable {
 	 * 
 	 * @return
 	 */
-	public InputHandler getInputHandler() {
+	public Input getInputHandler() {
 		return inputHandler;
 	}
 
@@ -293,18 +293,18 @@ public abstract class Application implements Runnable {
 		}
 
 		// Create the timer
-		//timer = new Timer();
+		// timer = new Timer();
 
 		/*
 		 * Create the input handler
 		 */
-		guiHandler = new GuiHandler(this);
+		guiHandler = new Gui(this);
 		/**
 		 * Add a console to the application
 		 */
 		getGui().addComponent((console = new Console()));
 
-		inputHandler = new InputHandler();
+		inputHandler = new Input();
 		assetManager = new AssetManager();
 		scene = new Scene();
 
@@ -327,8 +327,8 @@ public abstract class Application implements Runnable {
 		/*
 		 * Set camera details TODO: Cleanup here
 		 */
-		Scene.setCamera(new FirstPersonCamera(window.getWidth(), window
-				.getHeight(), 60, window.getAspect()));
+		Scene.setCamera(new FirstPersonCamera(Screen.getWidth(), Screen
+				.getHeight(), 60, Screen.getAspect()));
 
 		/*
 		 * Create our script handler
@@ -392,6 +392,9 @@ public abstract class Application implements Runnable {
 				// Parse updates in the application
 				update(); // Call the update function
 				scene.update();
+				
+				//Post update for the gui handler
+				guiHandler.postUpdate();
 
 				next_game_tick += SKIP_TICKS;
 

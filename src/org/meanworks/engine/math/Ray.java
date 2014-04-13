@@ -71,4 +71,13 @@ public class Ray {
 		return direction;
 	}
 
+	/**
+	 * String this
+	 */
+	public String toString() {
+		return ("Ray(Origin=" + (origin == null ? "null" : origin.toString())
+				+ " Direction="
+				+ (direction == null ? "null" : direction.toString()) + ")");
+	}
+
 }

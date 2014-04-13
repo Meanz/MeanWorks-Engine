@@ -3,7 +3,7 @@ package org.meanworks.terrain;
 import org.lwjgl.util.vector.Matrix4f;
 import org.meanworks.engine.RenderState;
 import org.meanworks.engine.core.Application;
-import org.meanworks.engine.gui.GuiHandler;
+import org.meanworks.engine.gui.Gui;
 import org.meanworks.engine.math.FrustumResult;
 import org.meanworks.engine.math.Transform;
 import org.meanworks.engine.math.Vec2i;
@@ -53,6 +53,11 @@ public class Terrain extends Node {
 	private int renderedChunks;
 
 	/**
+	 * 
+	 */
+	private int maxLod = 8;
+
+	/**
 	 * The chunk cache
 	 */
 	private TerrainChunk[] chunks;
@@ -72,7 +77,30 @@ public class Terrain extends Node {
 		chunks = new TerrainChunk[(int) Math.pow(viewDistance * 2, 2)]; // Diameter^2
 		chunkOrigo = new Vec2i(-viewDistance, -viewDistance);
 	}
-	
+
+	/**
+	 * Get the max lod level
+	 * 
+	 * @return
+	 */
+	public int getMaxLod() {
+		return maxLod;
+	}
+
+	/**
+	 * Set the max level of detail for this terrain
+	 * 
+	 * @param maxLod
+	 */
+	public void setMaxLod(int maxLod) {
+		this.maxLod = maxLod;
+	}
+
+	/**
+	 * Get the chunk origo
+	 * 
+	 * @return
+	 */
 	public Vec2i getChunkOrigo() {
 		return chunkOrigo;
 	}
@@ -198,12 +226,12 @@ public class Terrain extends Node {
 		RenderState.setProjectionViewMatrix(Scene.getCamera()
 				.getProjectionViewMatrix());
 
-		GuiHandler.drawString("ViewerPosition: " + viewerPosition.x + " / "
+		Gui.drawString("ViewerPosition: " + viewerPosition.x + " / "
 				+ viewerPosition.z, 10, 200);
 
-		GuiHandler.drawString("ChunkPos( " + chunkOrigo.x + " / "
+		Gui.drawString("ChunkPos( " + chunkOrigo.x + " / "
 				+ chunkOrigo.y + " )", 10, 250);
-		GuiHandler.drawString("View distance: " + viewDistance, 10, 275);
+		Gui.drawString("View distance: " + viewDistance, 10, 275);
 
 		int drawY = 275;
 
@@ -267,7 +295,7 @@ public class Terrain extends Node {
 							if (mesh.castRay().didHit()) {
 
 								//
-								GuiHandler.drawString("Hit Chunk: " + x + " / "
+								Gui.drawString("Hit Chunk: " + x + " / "
 										+ z, 10, (drawY += 25));
 
 								int lod = (int) getViewerPosition().dist2D(
@@ -276,8 +304,9 @@ public class Terrain extends Node {
 
 								int lodLevel = chunk.getLOD(lod, this);
 
-								GuiHandler.drawString("Chunk LOD: " + lodLevel, 10, (drawY += 25));
-								
+								Gui.drawString("Chunk LOD: " + lodLevel,
+										10, (drawY += 25));
+
 							}
 
 						}
@@ -288,7 +317,7 @@ public class Terrain extends Node {
 			}
 		}
 
-		GuiHandler.drawString("ChunksRendered: " + renderedChunks, 10, 225);
+		Gui.drawString("ChunksRendered: " + renderedChunks, 10, 225);
 
 	}
 }

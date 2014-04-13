@@ -8,8 +8,25 @@ import org.meanworks.engine.math.Vec3;
 import org.meanworks.engine.math.Vertex;
 
 /**
- * A class you can feed to a mesh and it will build a mesh out of the data
- * provided here
+ * Copyright (C) 2014 Steffen Evensen
+ * 
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ * 
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ * 
+ * @author Meanz
+ * 
+ *         A class you can feed to a mesh and it will build a mesh out of the
+ *         data provided here
  * 
  * @author meanz
  * 
@@ -187,17 +204,17 @@ public class MeshData {
 									normals[offset + 2]));
 					p2 = new Vertex(new Vec3(positions[offset + 3],
 							positions[offset + 4], positions[offset + 5]),
-							new Vec3(normals[offset + 3],
-									normals[offset + 4], normals[offset + 5]));
+							new Vec3(normals[offset + 3], normals[offset + 4],
+									normals[offset + 5]));
 					p3 = new Vertex(new Vec3(positions[offset + 6],
 							positions[offset + 7], positions[offset + 8]),
-							new Vec3(normals[offset + 6],
-									normals[offset + 7], normals[offset + 8]));
+							new Vec3(normals[offset + 6], normals[offset + 7],
+									normals[offset + 8]));
 				} else if (!hasNormals && hasTexCoords) {
-					p1 = new Vertex(new Vec3(positions[offset],
-							positions[offset + 1], positions[offset + 2]),
-							new Vec2(texCoords[toffset],
-									texCoords[toffset + 1]));
+					p1 = new Vertex(
+							new Vec3(positions[offset], positions[offset + 1],
+									positions[offset + 2]),
+							new Vec2(texCoords[toffset], texCoords[toffset + 1]));
 					p2 = new Vertex(new Vec3(positions[offset + 3],
 							positions[offset + 4], positions[offset + 5]),
 							new Vec2(texCoords[toffset + 2],
@@ -214,15 +231,15 @@ public class MeshData {
 									texCoords[toffset], texCoords[toffset + 1]));
 					p2 = new Vertex(new Vec3(positions[offset + 3],
 							positions[offset + 4], positions[offset + 5]),
-							new Vec3(normals[offset + 3],
-									normals[offset + 4], normals[offset + 5]),
-							new Vec2(texCoords[toffset + 2],
+							new Vec3(normals[offset + 3], normals[offset + 4],
+									normals[offset + 5]), new Vec2(
+									texCoords[toffset + 2],
 									texCoords[toffset + 3]));
 					p3 = new Vertex(new Vec3(positions[offset + 6],
 							positions[offset + 7], positions[offset + 8]),
-							new Vec3(normals[offset + 6],
-									normals[offset + 7], normals[offset + 8]),
-							new Vec2(texCoords[toffset + 4],
+							new Vec3(normals[offset + 6], normals[offset + 7],
+									normals[offset + 8]), new Vec2(
+									texCoords[toffset + 4],
 									texCoords[toffset + 5]));
 				} else if (!hasNormals && !hasTexCoords) {
 					p1 = new Vertex(new Vec3(positions[offset],

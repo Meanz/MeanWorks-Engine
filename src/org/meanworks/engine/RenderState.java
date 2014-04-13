@@ -1,5 +1,6 @@
 package org.meanworks.engine;
 
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.vector.Matrix4f;
 import org.meanworks.engine.render.opengl.shader.ShaderProgram;
 import org.meanworks.engine.render.texture.Texture;
@@ -179,5 +180,8 @@ public class RenderState {
 		for (int i = 0; i < boundTextures.length; i++) {
 			boundTextures[i] = null;
 		}
+		// Update parameters
+		GL11.glColor3f(1.0f, 1.0f, 1.0f);
+		
 	}
 }
